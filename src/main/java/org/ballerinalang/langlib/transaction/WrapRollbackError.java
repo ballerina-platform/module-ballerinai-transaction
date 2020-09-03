@@ -22,13 +22,13 @@ import org.ballerinalang.jvm.scheduling.Scheduler;
 import org.ballerinalang.jvm.transactions.TransactionLocalContext;
 
 /**
- * Extern function transaction:setRollbackOnly.
+ * Extern function transaction:wrapRollbackError.
  *
  * @since 2.0.0-preview1
  */
-public class SetRollbackOnly {
+public class WrapRollbackError {
 
-    public static void setRollbackOnly(Object error) {
+    public static void wrapRollbackError(Object error) {
         TransactionLocalContext transactionLocalContext = Scheduler.getStrand().currentTrxContext;
         transactionLocalContext.setRollbackOnlyError(error);
     }
