@@ -2,8 +2,6 @@ name: Publish release
 
 on:
   workflow_dispatch:
-  repository_dispatch:
-#    types: [ stdlib-release-pipeline ]
 
 jobs:
   publish-release:
