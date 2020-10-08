@@ -22,3 +22,5 @@ gradleEnterprise {
         termsOfServiceAgree = 'yes'
     }
 }
+include 'transaction-test-utils'
+

@@ -99,7 +99,7 @@ class LocalParticipant {
         self.participantProtocols = participantProtocols;
     }
 
-    function prepare(string protocol) returns [(PrepareResult|error)?, Participant] {
+    function prepare(string protocol) returns [(PrepareResult|error)?, LocalParticipant] {
         foreach var localProto in self.participantProtocols {
             if (localProto.name == protocol) {
                 return [self.prepareMe(self.participatedTxn.transactionId, self.participatedTxn.transactionBlockId),

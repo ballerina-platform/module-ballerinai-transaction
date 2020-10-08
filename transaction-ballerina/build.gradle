@@ -49,6 +49,17 @@ task unpackJballerinaTools(type: Copy) {
     }
 }
 
+task unpackStdLibs() {
+    doLast {
+        configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+            copy {
+                from project.zipTree(artifact.getFile())
+                into new File("${buildDir}/target/extracted-distributions", artifact.name + "-zip")
+            }
+        }
+    }
+}
+
 def moduleName = "transaction"
 def moduleOrg = "ballerinai"
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
@@ -62,10 +73,41 @@ def distributionPath =  project.projectDir.absolutePath + "/build/target/extract
 def distributionBinPath = distributionPath + "/bin"
 def originalConfig = ballerinaConfigFile.text
 
+task copyStdlibs(type: Copy) {
+    dependsOn(unpackStdLibs)
+
+    into distributionPath
+    /* Standard Libraries */
+    configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+        def artifactExtractedPath = "${buildDir}/target/extracted-distributions/" + artifact.name + "-zip"
+        into("bir-cache/") {
+            from "${artifactExtractedPath}/caches/bir"
+        }
+        into("bre/lib/") {
+            from "${artifactExtractedPath}/libs"
+        }
+        into("docs/") {
+            from "${artifactExtractedPath}/docs"
+        }
+        // pack to new cache
+        into("cache/bir/") {
+            from "${artifactExtractedPath}/caches/bir"
+        }
+        into("cache/balo/") {
+            from "${artifactExtractedPath}/caches/balo"
+        }
+        into("cache/jar/") {
+            from "${artifactExtractedPath}/caches/jar"
+        }
+    }
+}
+
 task updateTomlFile {
     doLast {
+        def stdlibDependentIoVersion = project.stdlibIoVersion.split("-")[0]
         def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
+        newConfig = newConfig.replace("@stdlib.io.version@", stdlibDependentIoVersion)
 
         ballerinaConfigFile.text = newConfig
     }
@@ -77,11 +119,47 @@ task revertTomlFile {
     }
 }
 
+task ballerinaTest {
+    dependsOn(":transaction-native:build")
+    dependsOn(unpackJballerinaTools)
+    dependsOn(unpackStdLibs)
+    dependsOn(copyStdlibs)
+    dependsOn(updateTomlFile)
+    finalizedBy(revertTomlFile)
+
+    def debugParams = ""
+    if (project.hasProperty("debug")) {
+        debugParams = "--debug ${project.findProperty("debug")}"
+    }
+
+    doLast {
+        exec {
+            workingDir project.projectDir
+            environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
+            environment "STDLIB_VERSION", tomlVersion
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                commandLine 'cmd', '/c',
+               "$distributionBinPath/ballerina.bat test --all ${debugParams} && exit %%ERRORLEVEL%%"
+            } else {
+                commandLine 'sh', '-c',
+                "$distributionBinPath/ballerina test --all ${debugParams}"
+            }
+        }
+    }
+}
+
+test {
+    dependsOn(ballerinaTest)
+}
+
 task ballerinaBuild {
     inputs.dir file(project.projectDir)
     dependsOn(":transaction-native:build")
     dependsOn(unpackJballerinaTools)
+    dependsOn(unpackStdLibs)
+    dependsOn(copyStdlibs)
     dependsOn(updateTomlFile)
+    dependsOn(test)
     finalizedBy(revertTomlFile)
 
     doLast {
