@@ -16,21 +16,19 @@
  * under the License.
  */
 
-package org.ballerinalang.io.transaction;
+package org.ballerinalang.stdlib.transaction;
 
+import org.ballerinalang.jvm.api.BStringUtils;
 import org.ballerinalang.jvm.api.values.BString;
-import org.ballerinalang.jvm.scheduling.Scheduler;
-import org.ballerinalang.jvm.transactions.TransactionResourceManager;
 
 /**
- * Extern function transaction:commitResourceManagers.
+ * Extern function transaction:uuid.
  *
  * @since Swan Lake
  */
-public class CommitResourceManagers {
+public class UUID {
 
-    public static boolean commitResourceManagers(BString transactionId, BString transactionBlockId) {
-        return TransactionResourceManager.getInstance().notifyCommit(Scheduler.getStrand(), transactionId.getValue(),
-                                                                     transactionBlockId.getValue());
+    public static BString uuid() {
+        return BStringUtils.fromString(java.util.UUID.randomUUID().toString());
     }
 }

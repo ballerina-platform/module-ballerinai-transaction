@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.ballerinalang.io.transaction;
+package org.ballerinalang.stdlib.transaction;
 
 import org.ballerinalang.jvm.api.BStringUtils;
 import org.ballerinalang.jvm.api.BValueCreator;

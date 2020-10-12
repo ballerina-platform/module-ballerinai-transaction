@@ -16,24 +16,21 @@
  * under the License.
  */
 
-package org.ballerinalang.io.transaction;
+package org.ballerinalang.stdlib.transaction;
 
 import org.ballerinalang.jvm.api.values.BString;
 import org.ballerinalang.jvm.scheduling.Scheduler;
-import org.ballerinalang.jvm.scheduling.Strand;
-import org.ballerinalang.jvm.transactions.TransactionLocalContext;
+import org.ballerinalang.jvm.transactions.TransactionResourceManager;
 
 /**
- * Extern function transaction:cleanupTransactionContext.
+ * Extern function transaction:commitResourceManagers.
  *
  * @since Swan Lake
  */
-public class CleanUpTransactionContext {
+public class CommitResourceManagers {
 
-    public static void cleanupTransactionContext(BString transactionBlockId) {
-        Strand strand = Scheduler.getStrand();
-        TransactionLocalContext transactionLocalContext = strand.currentTrxContext;
-        transactionLocalContext.removeTransactionInfo();
-        strand.removeCurrentTrxContext();
+    public static boolean commitResourceManagers(BString transactionId, BString transactionBlockId) {
+        return TransactionResourceManager.getInstance().notifyCommit(Scheduler.getStrand(), transactionId.getValue(),
+                                                                     transactionBlockId.getValue());
     }
 }

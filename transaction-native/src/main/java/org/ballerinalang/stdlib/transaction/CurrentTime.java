@@ -16,20 +16,18 @@
  * under the License.
  */
 
-package org.ballerinalang.io.transaction;
+package org.ballerinalang.stdlib.transaction;
 
-import org.ballerinalang.jvm.scheduling.Scheduler;
-import org.ballerinalang.jvm.transactions.TransactionLocalContext;
+import java.time.Instant;
 
 /**
- * Extern function transaction:getRollbackOnlyError.
+ * Extern function transaction:timeNow.
  *
  * @since Swan Lake
  */
-public class GetRollbackOnlyError {
+public class CurrentTime {
 
-    public static Object getRollbackOnlyError() {
-        TransactionLocalContext transactionLocalContext = Scheduler.getStrand().currentTrxContext;
-        return transactionLocalContext.getRollbackOnly();
+    public static long timeNow() {
+        return Instant.now().toEpochMilli();
     }
 }

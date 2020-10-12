@@ -572,7 +572,7 @@ function createTransactionContext(string coordinationType, string transactionBlo
 # + transactionBlockId - ID of the transaction block. Each transaction block in a process has a unique ID.
 # + return - true or false representing whether the commit is successful or not.
 function commitResourceManagers(string transactionId, string transactionBlockId) returns boolean = @java:Method {
-    'class: "org.ballerinalang.io.transaction.CommitResourceManagers",
+    'class: "org.ballerinalang.stdlib.transaction.CommitResourceManagers",
     name: "commitResourceManagers"
 } external;
 
@@ -582,7 +582,7 @@ function commitResourceManagers(string transactionId, string transactionBlockId)
 # + transactionBlockId - ID of the transaction block. Each transaction block in a process has a unique ID.
 # + return - true or false representing whether the resource manager preparation is successful or not.
 function prepareResourceManagers(string transactionId, string transactionBlockId) returns boolean = @java:Method {
-    'class: "org.ballerinalang.io.transaction.PrepareResourceManagers",
+    'class: "org.ballerinalang.stdlib.transaction.PrepareResourceManagers",
     name: "prepareResourceManagers"
 } external;
 
@@ -592,7 +592,7 @@ function prepareResourceManagers(string transactionId, string transactionBlockId
 # + transactionBlockId - ID of the transaction block. Each transaction block in a process has a unique ID.
 # + return - true or false representing whether the resource manager abortion is successful or not.
 function abortResourceManagers(string transactionId, string transactionBlockId) returns boolean = @java:Method {
-    'class: "org.ballerinalang.io.transaction.AbortResourceManagers",
+    'class: "org.ballerinalang.stdlib.transaction.AbortResourceManagers",
     name: "abortResourceManagers"
 } external;
 
@@ -601,7 +601,7 @@ function abortResourceManagers(string transactionId, string transactionBlockId) 
 # + transactionContext - Transaction context.
 # + prevAttempt - Information related to previous attempt.
 function setTransactionContext(TransactionContext transactionContext, lang_trx:Info? prevAttempt = ()) = @java:Method {
-    'class: "org.ballerinalang.io.transaction.SetTransactionContext",
+    'class: "org.ballerinalang.stdlib.transaction.SetTransactionContext",
     name: "setTransactionContext"
 } external;
 
@@ -610,7 +610,7 @@ function setTransactionContext(TransactionContext transactionContext, lang_trx:I
 # + transactionBlockId - ID of the transaction block.
 # + err - The cause of the rollback.
 function rollbackTransaction(string transactionBlockId, error? err = ()) = @java:Method {
-    'class: "org.ballerinalang.io.transaction.RollbackTransaction",
+    'class: "org.ballerinalang.stdlib.transaction.RollbackTransaction",
     name: "rollbackTransaction"
 } external;
 
@@ -618,7 +618,7 @@ function rollbackTransaction(string transactionBlockId, error? err = ()) = @java
 #
 # + return - is failed.
 function getAndClearFailure() returns boolean = @java:Method {
-    'class: "org.ballerinalang.io.transaction.GetAndClearFailure",
+    'class: "org.ballerinalang.stdlib.transaction.GetAndClearFailure",
     name: "getAndClearFailure"
 } external;
 
@@ -626,41 +626,41 @@ function getAndClearFailure() returns boolean = @java:Method {
 #
 # + transactionBlockId - ID of the transaction block.
 function cleanupTransactionContext(string transactionBlockId) = @java:Method {
-    'class: "org.ballerinalang.io.transaction.CleanUpTransactionContext",
+    'class: "org.ballerinalang.stdlib.transaction.CleanUpTransactionContext",
     name: "cleanupTransactionContext"
 } external;
 
 function isTransactional() returns boolean = @java:Method {
-    'class: "org.ballerinalang.io.transaction.IsTransactional",
+    'class: "org.ballerinalang.stdlib.transaction.IsTransactional",
     name: "isTransactional"
 } external;
 
 function getAvailablePort() returns int = @java:Method {
-    'class: "org.ballerinalang.io.transaction.GetAvailablePort",
+    'class: "org.ballerinalang.stdlib.transaction.GetAvailablePort",
     name: "getAvailablePort"
 } external;
 
 function getHostAddress() returns string = @java:Method {
-    'class: "org.ballerinalang.io.transaction.GetHostAddress",
+    'class: "org.ballerinalang.stdlib.transaction.GetHostAddress",
     name: "getHostAddress"
 } external;
 
 function uuid() returns string = @java:Method {
-    'class: "org.ballerinalang.io.transaction.UUID",
+    'class: "org.ballerinalang.stdlib.transaction.UUID",
     name: "uuid"
 } external;
 
 function timeNow() returns int = @java:Method {
-    'class: "org.ballerinalang.io.transaction.CurrentTime",
+    'class: "org.ballerinalang.stdlib.transaction.CurrentTime",
     name: "timeNow"
 } external;
 
 function getRollbackOnlyError() returns lang_trx:Error? = @java:Method {
-    'class: "org.ballerinalang.io.transaction.GetRollbackOnlyError",
+    'class: "org.ballerinalang.stdlib.transaction.GetRollbackOnlyError",
     name: "getRollbackOnlyError"
 } external;
 
 function setContextAsNonTransactional() = @java:Method {
-    'class: "org.ballerinalang.io.transaction.SetContextAsNonTransactional",
+    'class: "org.ballerinalang.stdlib.transaction.SetContextAsNonTransactional",
     name: "setContextAsNonTransactional"
 } external;

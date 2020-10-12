@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.ballerinalang.io.transaction.compiler;
+package org.ballerinalang.stdlib.transaction.compiler;
 
 import org.ballerinalang.compiler.plugins.AbstractCompilerPlugin;
 import org.ballerinalang.compiler.plugins.SupportedAnnotationPackages;

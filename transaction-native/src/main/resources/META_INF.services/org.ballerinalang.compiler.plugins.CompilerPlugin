@@ -16,4 +16,4 @@
 # under the License.
 #
 
-org.ballerinalang.io.transaction.compiler.TransactionCompilerPlugin
+org.ballerinalang.stdlib.transaction.compiler.TransactionCompilerPlugin

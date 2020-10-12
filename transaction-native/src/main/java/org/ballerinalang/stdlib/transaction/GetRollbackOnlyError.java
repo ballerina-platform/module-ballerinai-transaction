@@ -16,18 +16,20 @@
  * under the License.
  */
 
-package org.ballerinalang.io.transaction;
+package org.ballerinalang.stdlib.transaction;
 
 import org.ballerinalang.jvm.scheduling.Scheduler;
+import org.ballerinalang.jvm.transactions.TransactionLocalContext;
 
 /**
- * Extern function transaction:isTransactional.
+ * Extern function transaction:getRollbackOnlyError.
  *
  * @since Swan Lake
  */
-public class IsTransactional {
+public class GetRollbackOnlyError {
 
-    public static boolean isTransactional() {
-        return Scheduler.getStrand().isInTransaction();
+    public static Object getRollbackOnlyError() {
+        TransactionLocalContext transactionLocalContext = Scheduler.getStrand().currentTrxContext;
+        return transactionLocalContext.getRollbackOnly();
     }
 }

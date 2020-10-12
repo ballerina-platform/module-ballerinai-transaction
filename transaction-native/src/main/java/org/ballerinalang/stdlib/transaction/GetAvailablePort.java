@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.ballerinalang.io.transaction;
+package org.ballerinalang.stdlib.transaction;
 
 import java.io.IOException;
 import java.net.ServerSocket;

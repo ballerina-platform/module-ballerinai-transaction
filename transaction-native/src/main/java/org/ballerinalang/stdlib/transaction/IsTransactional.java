@@ -16,18 +16,18 @@
  * under the License.
  */
 
-package org.ballerinalang.io.transaction;
+package org.ballerinalang.stdlib.transaction;
 
-import java.time.Instant;
+import org.ballerinalang.jvm.scheduling.Scheduler;
 
 /**
- * Extern function transaction:timeNow.
+ * Extern function transaction:isTransactional.
  *
  * @since Swan Lake
  */
-public class CurrentTime {
+public class IsTransactional {
 
-    public static long timeNow() {
-        return Instant.now().toEpochMilli();
+    public static boolean isTransactional() {
+        return Scheduler.getStrand().isInTransaction();
     }
 }

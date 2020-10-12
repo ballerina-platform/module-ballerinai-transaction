@@ -16,19 +16,18 @@
  * under the License.
  */
 
-package org.ballerinalang.io.transaction;
+package org.ballerinalang.stdlib.transaction;
 
-import org.ballerinalang.jvm.api.BStringUtils;
-import org.ballerinalang.jvm.api.values.BString;
+import org.ballerinalang.jvm.scheduling.Scheduler;
 
 /**
- * Extern function transaction:uuid.
+ * Extern function transaction:getAndClearFailure.
  *
  * @since Swan Lake
  */
-public class UUID {
+public class GetAndClearFailure {
 
-    public static BString uuid() {
-        return BStringUtils.fromString(java.util.UUID.randomUUID().toString());
+    public static boolean getAndClearFailure() {
+        return Scheduler.getStrand().currentTrxContext.getAndClearFailure() != null;
     }
 }

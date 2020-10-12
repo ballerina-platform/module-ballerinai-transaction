@@ -16,20 +16,18 @@
  * under the License.
  */
 
-package org.ballerinalang.io.transaction;
+package org.ballerinalang.stdlib.transaction;
 
-import org.ballerinalang.jvm.api.values.BString;
-import org.ballerinalang.jvm.transactions.TransactionResourceManager;
+import org.ballerinalang.jvm.scheduling.Scheduler;
 
 /**
- * Extern function transaction:prepareResourceManagers.
+ * Extern function transaction:setContextAsNonTransactional.
  *
  * @since Swan Lake
  */
-public class PrepareResourceManagers {
+public class SetContextAsNonTransactional {
 
-    public static boolean prepareResourceManagers(BString transactionId, BString transactionBlockId) {
-        return TransactionResourceManager.getInstance().prepare(transactionId.getValue(),
-                transactionBlockId.getValue());
+    public static void setContextAsNonTransactional() {
+        Scheduler.getStrand().currentTrxContext.setTransactional(false);
     }
 }
