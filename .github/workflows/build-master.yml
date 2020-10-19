@@ -19,8 +19,8 @@ jobs:
         run: chmod +x gradlew
       - name: Build with Gradle
         env:
-          packageUser: mohanvive
-          packagePAT: 734318a34078701eb0d3f361641825da758b269a
+          packageUser: ${{ secrets.BALLERINA_BOT_USERNAME }}
+          packagePAT: ${{ secrets.BALLERINA_BOT_TOKEN }}
         run: |
           ./gradlew clean build
           ./gradlew clean publish --scan
