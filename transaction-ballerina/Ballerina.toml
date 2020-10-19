@@ -1,0 +1,13 @@
+[project]
+org-name = "ballerinai"
+version = "@toml.version@"
+
+[platform]
+target = "java11"
+
+    [[platform.libraries]]
+    artifactId = "transaction"
+    version = "@project.version@"
+    path = "../transaction-native/build/libs/transaction-native-@project.version@.jar"
+    groupId = "ballerina"
+    modules = ["transaction"]
