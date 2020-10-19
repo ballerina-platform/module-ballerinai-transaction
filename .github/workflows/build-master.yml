@@ -1,10 +1,9 @@
-name: Build
+name: Build master branch
 
 on:
   push:
     branches:
       - master
-  workflow_dispatch:
 
 jobs:
   build:
@@ -23,4 +22,5 @@ jobs:
           packageUser: ${{ secrets.BALLERINA_BOT_USERNAME }}
           packagePAT: ${{ secrets.BALLERINA_BOT_TOKEN }}
         run: |
-          ./gradlew publish
+          ./gradlew clean build
+          ./gradlew clean publish --scan
