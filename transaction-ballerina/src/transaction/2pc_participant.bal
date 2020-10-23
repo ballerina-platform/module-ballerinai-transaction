@@ -14,6 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/io;
 import ballerina/log;
 
 # This represents the protocol associated with the coordination type.
@@ -96,7 +97,7 @@ class RemoteParticipant {
         // to prepare a participant
         boolean successful = true;
 
-        log:printInfo("Preparing remote participant: " + self.participantId);
+        log:printDebug(() => io:sprintf("Preparing remote participant: %s", self.participantId));
         // If a participant voted NO or failed then abort
         var result = participantEP->prepare(self.transactionId);
         if (result is error) {
@@ -104,19 +105,21 @@ class RemoteParticipant {
             return result;
         } else {
             if (result == "aborted") {
-                log:printInfo("Remote participant: " + self.participantId + " aborted.");
-                return PREPARE_RESULT_ABORTED;
+                  log:printDebug(() => io:sprintf("Remote participant: %s aborted.", self.participantId));
+                  return PREPARE_RESULT_ABORTED;
             } else if (result == "committed") {
-                log:printInfo("Remote participant: " + self.participantId + " committed");
+                  log:printDebug(() => io:sprintf("Remote participant: %s committed", self.participantId));
                 return PREPARE_RESULT_COMMITTED;
             } else if (result == "read-only") {
-                log:printInfo("Remote participant: " + self.participantId + " read-only");
+                log:printDebug(() => io:sprintf("Remote participant: %s read-only", self.participantId));
                 return PREPARE_RESULT_READ_ONLY;
             } else if (result == "prepared") {
-                log:printInfo("Remote participant: " + self.participantId + " prepared");
+                log:printDebug(() => io:sprintf("Remote participant: %s prepared", self.participantId));
                 return PREPARE_RESULT_PREPARED;
             } else {
-                log:printInfo("Remote participant: " + self.participantId + ", outcome: " + result);
+                log:printDebug(function () returns string {
+                    return io:sprintf("Remote participant: %s, outcome: %s", self.participantId, result);
+                });
             }
         }
         panic TransactionError("Remote participant:" + self.participantId + " replied with invalid outcome");
@@ -125,7 +128,7 @@ class RemoteParticipant {
     function notifyMe(string protocolUrl, string action) returns @tainted NotifyResult|error {
         Participant2pcClientEP participantEP;
 
-        log:printInfo("Notify(" + action + ") remote participant: " + protocolUrl);
+        log:printDebug(() => io:sprintf("Notify(%s) remote participant: %s", action, protocolUrl));
         participantEP = getParticipant2pcClient(protocolUrl);
         var result = participantEP->notify(self.transactionId, action);
         if (result is error) {
@@ -133,10 +136,10 @@ class RemoteParticipant {
             return result;
         } else {
             if (result == NOTIFY_RESULT_ABORTED_STR) {
-                log:printInfo("Remote participant: " + self.participantId + " aborted");
+                log:printDebug(() => io:sprintf("Remote participant: %s aborted", self.participantId));
                 return NOTIFY_RESULT_ABORTED;
             } else if (result == NOTIFY_RESULT_COMMITTED_STR) {
-                log:printInfo("Remote participant: " + self.participantId + " committed");
+                log:printDebug(() => io:sprintf("Remote participant: %s committed", self.participantId));
                 return NOTIFY_RESULT_COMMITTED;
             }
         }
@@ -160,7 +163,7 @@ class LocalParticipant {
     function prepare(string protocol) returns [(PrepareResult|error)?, Participant] {
         foreach var localProto in self.participantProtocols {
             if (localProto.name == protocol) {
-                log:printInfo("Preparing local participant: " + self.participantId);
+                log:printDebug(() => io:sprintf("Preparing local participant: %s", self.participantId));
                 return [self.prepareMe(self.participatedTxn.transactionId, self.participatedTxn.transactionBlockId),
                 self];
             }
@@ -175,7 +178,7 @@ class LocalParticipant {
         }
         if (self.participatedTxn.state == TXN_STATE_ABORTED) {
             removeParticipatedTransaction(participatedTxnId);
-            log:printInfo("Local participant: " + self.participantId + " aborted");
+            log:printDebug(() => io:sprintf("Local participant: %s aborted", self.participantId));
             return PREPARE_RESULT_ABORTED;
         } else if (self.participatedTxn.state == TXN_STATE_COMMITTED) {
             removeParticipatedTransaction(participatedTxnId);
@@ -184,10 +187,10 @@ class LocalParticipant {
             boolean successful = prepareResourceManagers(transactionId, transactionBlockId);
             if (successful) {
                 self.participatedTxn.state = TXN_STATE_PREPARED;
-                log:printInfo("Local participant: " + self.participantId + " prepared");
+                log:printDebug(() => io:sprintf("Local participant: %s prepared", self.participantId));
                 return PREPARE_RESULT_PREPARED;
             } else {
-                log:printInfo("Local participant: " + self.participantId + " aborted");
+                log:printDebug(() => io:sprintf("Local participant: %s aborted", self.participantId));
                 return PREPARE_RESULT_ABORTED;
             }
         }
@@ -197,7 +200,7 @@ class LocalParticipant {
         if (protocolName is string) {
             foreach var localProto in self.participantProtocols {
                 if (protocolName == localProto.name) {
-                    log:printInfo("Notify(" + action + ") local participant: " + self.participantId);
+                    log:printDebug(() => io:sprintf("Notify(%s) local participant: %s", action, self.participantId));
                     return self.notifyMe(action, self.participatedTxn.transactionBlockId);
                 }
             }
