@@ -50,8 +50,8 @@ client class Participant2pcClientEP {
         PrepareRequest prepareReq = {transactionId:transactionId};
         json j = check prepareReq.cloneWithType(JsonTypedesc);
         req.setJsonPayload(j);
-        var result = httpClient->post("/prepare", req);
-        http:Response res = check result;
+        var result = check httpClient->post("/prepare", req);
+        http:Response res = <http:Response> result;
         int statusCode = res.statusCode;
         if (statusCode == http:STATUS_NOT_FOUND) {
             return TransactionError(TRANSACTION_UNKNOWN);
@@ -71,8 +71,8 @@ client class Participant2pcClientEP {
         NotifyRequest notifyReq = {transactionId:transactionId, message:message};
         json j = check notifyReq.cloneWithType(JsonTypedesc);
         req.setJsonPayload(j);
-        var result = httpClient->post("/notify", req);
-        http:Response res = check result;
+        var result = check httpClient->post("/notify", req);
+        http:Response res = <http:Response> result;
         json payload = check res.getJsonPayload();
         NotifyResponse notifyRes = check payload.cloneWithType(NotifyResponseTypedesc);
         string msg = notifyRes.message;

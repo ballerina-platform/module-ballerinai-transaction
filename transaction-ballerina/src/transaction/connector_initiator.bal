@@ -52,8 +52,8 @@ client class InitiatorClientEP {
         json reqPayload = check regReq.cloneWithType(JsonTypedesc);
         http:Request req = new;
         req.setJsonPayload(reqPayload);
-        var result = httpClient->post("", req);
-        http:Response res = check result;
+        var result = check httpClient->post("", req);
+        http:Response res = <http:Response> result;
         int statusCode = res.statusCode;
         if (statusCode != http:STATUS_OK) {
             return TransactionError("Registration for transaction: " + transactionId + " failed response code: "
