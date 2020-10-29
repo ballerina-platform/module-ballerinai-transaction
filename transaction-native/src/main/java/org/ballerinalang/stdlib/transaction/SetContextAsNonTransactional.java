@@ -18,7 +18,7 @@
 
 package org.ballerinalang.stdlib.transaction;
 
-import org.ballerinalang.jvm.scheduling.Scheduler;
+import io.ballerina.runtime.scheduling.Scheduler;
 
 /**
  * Extern function transaction:setContextAsNonTransactional.
