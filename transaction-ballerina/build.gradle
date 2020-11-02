@@ -230,16 +230,18 @@ task ballerinaNegativeUnitTests {
             into file(project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bre/lib")
         }
         copy {
-            from file("$project.projectDir/build/lib_parent/libs/ballerina-transaction-${tomlVersion}.jar")
+            from file("$project.projectDir/build/lib_parent/libs/ballerinai-transaction-${tomlVersion}.jar")
             into file(project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bre/lib")
         }
         copy {
-            from file("$project.projectDir/build/cache_parent/caches/bir/ballerina/transaction/${tomlVersion}/transaction.bir")
-            into file(project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bir-cache/ballerina/transaction/${tomlVersion}")
+            from file("$project.projectDir/build/cache_parent/caches/bir/ballerinai/transaction/${tomlVersion}/transaction.bir")
+            into file(project.projectDir.absolutePath +
+                    "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bir-cache/ballerinai/transaction/${tomlVersion}")
         }
         copy {
-            from file("$project.projectDir/build/cache_parent/caches/bir/ballerina/transaction/${tomlVersion}/Ballerina.toml")
-            into file(project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bir-cache/ballerina/transaction/${tomlVersion}")
+            from file("$project.projectDir/build/cache_parent/caches/bir/ballerinai/transaction/${tomlVersion}/Ballerina.toml")
+            into file(project.projectDir.absolutePath +
+                    "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bir-cache/ballerinai/transaction/${tomlVersion}")
         }
         exec {
             workingDir project.projectDir
