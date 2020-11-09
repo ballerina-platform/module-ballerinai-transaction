@@ -31,6 +31,13 @@ function startTransaction(string transactionBlockId, lang_trx:Info? prevAttempt 
     return transactionId;
 }
 
+ function checkIfTransactional() {
+
+     if(!transactional) {
+         panic TransactionError("invoking transactional function " +
+                                     "outside transactional scope is prohibited");
+     }
+}
 
 # Commit local resource managers.
 #
@@ -106,7 +113,7 @@ function getAvailablePort() returns int = @java:Method {
     name: "getAvailablePort"
 } external;
 
-function getHostAddress() returns string = @java:Method {
+public function getHostAddress() returns string = @java:Method {
     'class: "org.ballerinalang.stdlib.transaction.GetHostAddress",
     name: "getHostAddress"
 } external;

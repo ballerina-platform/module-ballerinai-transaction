@@ -39,7 +39,7 @@ class TwoPhaseCommitTransaction {
 
     // This function will be called by the initiator
     function twoPhaseCommit() returns string|lang_trx:Error {
-        log:printInfo(io:sprintf("Running 2-phase commit for transaction: %s:%s", self.transactionId,
+        log:printDebug(() => io:sprintf("Running 2-phase commit for transaction: %s:%s", self.transactionId,
                 self.transactionBlockId));
         string|lang_trx:Error ret = "";
 

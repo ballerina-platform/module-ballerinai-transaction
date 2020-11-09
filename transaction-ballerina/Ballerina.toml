@@ -1,13 +1,24 @@
 [project]
 org-name = "ballerinai"
-version = "@toml.version@"
+version = "1.0.0"
+
+[dependencies]
+"ballerina/io" = "0.5.2"
+"ballerina/log" = "1.0.2"
+"ballerina/config"="1.0.2"
+"ballerina/http" = "1.0.2"
+"ballerina/stringutils" = "0.5.2"
+"ballerina/cache" = "2.0.2"
+"ballerina/time" = "1.0.3"
+"ballerina/system" = "0.6.2"
+"ballerina/task" = "1.1.2"
 
 [platform]
 target = "java11"
 
     [[platform.libraries]]
     artifactId = "transaction"
-    version = "@project.version@"
-    path = "../transaction-native/build/libs/transaction-native-@project.version@.jar"
+    version = "1.0.0"
+    path = "../transaction-native/build/libs/transaction-native-1.0.0.jar"
     groupId = "ballerina"
     modules = ["transaction"]

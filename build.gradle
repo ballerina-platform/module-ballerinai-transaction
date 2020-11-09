@@ -37,7 +37,6 @@ ext.stdlibLogVersion = project.stdlibLogVersion
 ext.stdlibAuthVersion = project.stdlibAuthVersion
 ext.stdlibCacheVersion = project.stdlibCacheVersion
 ext.stdlibTimeVersion = project.stdlibTimeVersion
-ext.stdlibCryptoVersion = project.stdlibCryptoVersion
 ext.stdlibFileVersion = project.stdlibFileVersion
 ext.stdlibReflectVersion = project.stdlibReflectVersion
 ext.stdlibRuntimeVersion = project.stdlibRuntimeVersion

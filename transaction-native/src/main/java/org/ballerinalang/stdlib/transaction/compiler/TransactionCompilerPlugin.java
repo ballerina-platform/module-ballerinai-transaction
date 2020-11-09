@@ -18,35 +18,5 @@
 
 package org.ballerinalang.stdlib.transaction.compiler;
 
-import org.ballerinalang.compiler.plugins.AbstractCompilerPlugin;
-import org.ballerinalang.compiler.plugins.SupportedAnnotationPackages;
-import org.ballerinalang.model.tree.AnnotationAttachmentNode;
-import org.ballerinalang.model.tree.FunctionNode;
-import org.ballerinalang.util.diagnostic.Diagnostic;
-import org.ballerinalang.util.diagnostic.DiagnosticLog;
-
-import java.util.List;
-
-/**
- * Compiler plugin for processing transaction participant function annotations.
- *
- * @since Swan Lake
- */
-@SupportedAnnotationPackages(value = {"ballerinai/transaction"})
-
-public class TransactionCompilerPlugin extends AbstractCompilerPlugin {
-    private DiagnosticLog dlog = null;
-
-    @Override
-    public void init(DiagnosticLog diagnosticLog) {
-        this.dlog = diagnosticLog;
-    }
-
-    @Override
-    public void process(FunctionNode functionNode, List<AnnotationAttachmentNode> annotations) {
-        if (annotations.size() > 1) {
-            dlog.logDiagnostic(Diagnostic.Kind.ERROR, functionNode.getPosition(),
-                    "Transact-able function cannot have more than one transaction annotation");
-        }
-    }
+public class TransactionCompilerPlugin {
 }
