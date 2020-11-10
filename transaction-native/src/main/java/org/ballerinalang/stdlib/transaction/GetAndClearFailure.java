@@ -18,7 +18,7 @@
 
 package org.ballerinalang.stdlib.transaction;
 
-import io.ballerina.runtime.scheduling.Scheduler;
+import io.ballerina.runtime.transactions.TransactionResourceManager;
 
 /**
  * Extern function transaction:getAndClearFailure.
@@ -28,6 +28,6 @@ import io.ballerina.runtime.scheduling.Scheduler;
 public class GetAndClearFailure {
 
     public static boolean getAndClearFailure() {
-        return Scheduler.getStrand().currentTrxContext.getAndClearFailure() != null;
+        return TransactionResourceManager.getInstance().getAndClearFailure();
     }
 }

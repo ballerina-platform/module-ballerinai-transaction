@@ -18,7 +18,7 @@
 
 package org.ballerinalang.stdlib.transaction;
 
-import io.ballerina.runtime.scheduling.Scheduler;
+import io.ballerina.runtime.transactions.TransactionResourceManager;
 
 /**
  * Extern function transaction:setContextAsNonTransactional.
@@ -28,6 +28,6 @@ import io.ballerina.runtime.scheduling.Scheduler;
 public class SetContextAsNonTransactional {
 
     public static void setContextAsNonTransactional() {
-        Scheduler.getStrand().currentTrxContext.setTransactional(false);
+        TransactionResourceManager.getInstance().setContextNonTransactional();
     }
 }

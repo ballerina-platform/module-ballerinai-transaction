@@ -18,7 +18,8 @@
 
 package org.ballerinalang.stdlib.transaction;
 
-import io.ballerina.runtime.scheduling.Scheduler;
+
+import io.ballerina.runtime.transactions.TransactionResourceManager;
 
 /**
  * Extern function transaction:isTransactional.
@@ -28,6 +29,6 @@ import io.ballerina.runtime.scheduling.Scheduler;
 public class IsTransactional {
 
     public static boolean isTransactional() {
-        return Scheduler.getStrand().isInTransaction();
+        return TransactionResourceManager.getInstance().isInTransaction();
     }
 }

@@ -5,5 +5,4 @@ module io.ballerina.stdlib.transaction {
     requires org.slf4j;
 
     exports org.ballerinalang.stdlib.transaction;
-    exports org.ballerinalang.stdlib.transaction.compiler;
 }
