@@ -49,7 +49,7 @@ import static io.ballerina.runtime.transactions.TransactionConstants.TRANSACTION
  * @since 1.1.0
  * @deprecated use lang.transaction instead.
  */
-@Deprecated
+
 public class Utils {
     private static final String STRUCT_TYPE_TRANSACTION_CONTEXT = "TransactionContext";
     private static final String STRUCT_TYPE_TRANSACTION_INFO = "Info";
