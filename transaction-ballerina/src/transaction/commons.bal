@@ -49,7 +49,7 @@ service scheduleTimer on timer {
 function cleanupTransactions() returns error? {
     worker w1 {
         foreach var twopcTxn in participatedTransactions {
-            string participatedTxnId = getParticipatedTransactionId(twopcTxn.transactionId,
+            final string participatedTxnId = getParticipatedTransactionId(twopcTxn.transactionId,
                 twopcTxn.transactionBlockId);
             if (time:currentTime().time - twopcTxn.createdTime >= 120000) {
                 if (twopcTxn.state != TXN_STATE_ABORTED && twopcTxn.state != TXN_STATE_COMMITTED) {
@@ -92,10 +92,11 @@ function cleanupTransactions() returns error? {
                     // Commit the transaction since prepare hasn't been received
                     var result = twopcTxn.twoPhaseCommit();
                     if (result is string) {
-                        string trxId = twopcTxn.transactionId;
-                        log:printDebug(function () returns string {
+                        final string trxId = twopcTxn.transactionId;
+                        final string outcome = result;
+                        log:printDebug(isolated function () returns string {
                             return io:sprintf("Auto-committed initiated transaction: %s. Result: %s",
-                                    trxId, result);
+                                    trxId, outcome);
                         });
                         removeInitiatedTransaction(twopcTxn.transactionId);
                     } else {
@@ -230,7 +231,8 @@ function createTransactionContext(string coordinationType, string transactionBlo
 function registerLocalParticipantWithInitiator(string transactionId, string transactionBlockId, string registerAtURL)
     returns TransactionContext|error {
 
-    string participantId = getParticipantId(transactionBlockId);
+    final string trxId = transactionId;
+    final string participantId = getParticipantId(transactionBlockId);
     //TODO: Protocol name should be passed down from the transaction statement
     LocalProtocol participantProtocol = {name:PROTOCOL_DURABLE};
     var initiatedTxn = initiatedTransactions[transactionId];
@@ -238,7 +240,7 @@ function registerLocalParticipantWithInitiator(string transactionId, string tran
         return TransactionError("Transaction-Unknown. Invalid TID:" + transactionId);
     } else {
         if (isRegisteredParticipant(participantId, initiatedTxn.participants)) { // Already-Registered
-            log:printDebug(() => io:sprintf("Already-Registered. TID:%s,participant ID:%s", transactionId,
+            log:printDebug(() => io:sprintf("Already-Registered. TID:%s,participant ID:%s", trxId,
                     participantId));
             TransactionContext txnCtx = {
                 transactionId:transactionId, transactionBlockId:transactionBlockId,
@@ -262,7 +264,7 @@ function registerLocalParticipantWithInitiator(string transactionId, string tran
             TransactionContext txnCtx = {transactionId:transactionId, transactionBlockId:transactionBlockId,
             coordinationType:TWO_PHASE_COMMIT, registerAtURL:registerAtURL};
             log:printDebug(() => io:sprintf("Registered local participant: %s for transaction:%s",
-                    participantId, transactionId));
+                    participantId, trxId));
             return txnCtx;
         }
     }
@@ -296,8 +298,9 @@ function getInitiatorClient(string registerAtURL) returns InitiatorClientEP {
             });
             cache:Error? result = httpClientCache.put(registerAtURL, initiatorEP);
             if (result is cache:Error) {
-                log:printDebug(function() returns string {
-                    return io:sprintf("Failed to add http client with key: %s to the cache.", registerAtURL);
+                final string url = registerAtURL;
+                log:printDebug(isolated function() returns string {
+                    return io:sprintf("Failed to add http client with key: %s to the cache.", url);
                 });
             }
             return initiatorEP;
@@ -319,8 +322,9 @@ function getParticipant2pcClient(string participantURL) returns Participant2pcCl
             });
             cache:Error? result = httpClientCache.put(participantURL, participantEP);
             if (result is cache:Error) {
-                log:printDebug(function() returns string {
-                    return io:sprintf("Failed to add http client with key: %s to the cache.", participantURL);
+                final string url = participantURL;
+                log:printDebug(isolated function() returns string {
+                    return io:sprintf("Failed to add http client with key: %s to the cache.", url);
                 });
             }
             return participantEP;
@@ -340,7 +344,7 @@ function registerParticipantWithRemoteInitiator(string transactionId, string tra
     returns TransactionContext|error {
 
     InitiatorClientEP initiatorEP = getInitiatorClient(registerAtURL);
-    string participatedTxnId = getParticipatedTransactionId(transactionId, transactionBlockId);
+    final string participatedTxnId = getParticipatedTransactionId(transactionId, transactionBlockId);
 
     // Register with the coordinator only if the participant has not already done so
     if (participatedTransactions.hasKey(participatedTxnId)) {
@@ -351,8 +355,9 @@ function registerParticipantWithRemoteInitiator(string transactionId, string tra
         };
         return txnCtx;
     }
+    final string url = registerAtURL;
     log:printDebug(() => io:sprintf("Registering for transaction: %s with coordinator: %s",
-            participatedTxnId, registerAtURL));
+            participatedTxnId, url));
 
     var result = initiatorEP->register(transactionId, transactionBlockId, participantProtocols);
     if (result is error) {
@@ -370,7 +375,8 @@ function registerParticipantWithRemoteInitiator(string transactionId, string tra
             transactionId:transactionId, transactionBlockId:transactionBlockId,
             coordinationType:TWO_PHASE_COMMIT, registerAtURL:registerAtURL
         };
-        log:printDebug(() => io:sprintf("Registered with coordinator for transaction: %s", transactionId));
+        final string trxId = transactionId;
+        log:printDebug(() => io:sprintf("Registered with coordinator for transaction: %s", trxId));
         return txnCtx;
     }
 }

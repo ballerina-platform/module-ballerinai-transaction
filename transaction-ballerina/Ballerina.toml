@@ -2,6 +2,17 @@
 org-name = "ballerinai"
 version = "@toml.version@"
 
+[dependencies]
+"ballerina/io" = "@stdlib.io.version@"
+"ballerina/log" = "@stdlib.log.version@"
+"ballerina/config"="@stdlib.config.version@"
+"ballerina/http" = "@stdlib.http.version@"
+"ballerina/stringutils" = "@stdlib.stringutils.version@"
+"ballerina/cache" = "@stdlib.cache.version@"
+"ballerina/time" = "@stdlib.time.version@"
+"ballerina/system" = "@stdlib.system.version@"
+"ballerina/task" = "@stdlib.task.version@"
+
 [platform]
 target = "java11"
 

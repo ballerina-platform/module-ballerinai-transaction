@@ -39,8 +39,10 @@ class TwoPhaseCommitTransaction {
 
     // This function will be called by the initiator
     function twoPhaseCommit() returns string|lang_trx:Error {
-        log:printInfo(io:sprintf("Running 2-phase commit for transaction: %s:%s", self.transactionId,
-                self.transactionBlockId));
+        final string transactionId = self.transactionId;
+        final string transactionBlockId = self.transactionBlockId;
+        log:printDebug(() => io:sprintf("Running 2-phase commit for transaction: %s:%s", transactionId,
+                transactionBlockId));
         string|lang_trx:Error ret = "";
 
         // Prepare local resource managers
@@ -135,7 +137,7 @@ class TwoPhaseCommitTransaction {
             log:printInfo("Marked initiated transaction for abortion");
         } else { // participant
             boolean successful = abortResourceManagers(self.transactionId, self.transactionBlockId);
-            string participatedTxnId = getParticipatedTransactionId(self.transactionId, self.transactionBlockId);
+            final string participatedTxnId = getParticipatedTransactionId(self.transactionId, self.transactionBlockId);
             if (successful) {
                 self.state = TXN_STATE_ABORTED;
                 log:printDebug(() => io:sprintf("Marked participated transaction for abort. Transaction: %s",
@@ -263,7 +265,7 @@ class TwoPhaseCommitTransaction {
     function abortLocalParticipantTransaction() returns string|error {
         string|error ret = "";
         boolean successful = abortResourceManagers(self.transactionId, self.transactionBlockId);
-        string participatedTxnId = getParticipatedTransactionId(self.transactionId, self.transactionBlockId);
+        final string participatedTxnId = getParticipatedTransactionId(self.transactionId, self.transactionBlockId);
         if (successful) {
             self.state = TXN_STATE_ABORTED;
             log:printDebug(() => io:sprintf("Local participant aborted transaction: %s", participatedTxnId));

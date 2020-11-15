@@ -18,14 +18,13 @@
 
 package org.ballerinalang.stdlib.transaction;
 
-import io.ballerina.runtime.api.StringUtils;
-import io.ballerina.runtime.api.ValueCreator;
+import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;
-import io.ballerina.runtime.scheduling.Scheduler;
 import io.ballerina.runtime.transactions.TransactionConstants;
 import io.ballerina.runtime.transactions.TransactionLocalContext;
-import io.ballerina.runtime.values.MapValue;
+import io.ballerina.runtime.transactions.TransactionResourceManager;
 
 import java.nio.charset.Charset;
 import java.util.Map;
@@ -39,7 +38,7 @@ import static io.ballerina.runtime.transactions.TransactionConstants.TRANSACTION
  */
 public class SetTransactionContext {
 
-    public static void setTransactionContext(MapValue txDataStruct, Object prevAttemptInfo) {
+    public static void setTransactionContext(BMap txDataStruct, Object prevAttemptInfo) {
         String globalTransactionId = txDataStruct.get(TransactionConstants.TRANSACTION_ID).toString();
         String transactionBlockId = txDataStruct.get(TransactionConstants.TRANSACTION_BLOCK_ID).toString();
         String url = txDataStruct.get(TransactionConstants.REGISTER_AT_URL).toString();
@@ -55,7 +54,7 @@ public class SetTransactionContext {
         TransactionLocalContext trxCtx = TransactionLocalContext
                 .createTransactionParticipantLocalCtx(globalTransactionId, url, protocol, infoRecord);
         trxCtx.beginTransactionBlock(transactionBlockId);
-        Scheduler.getStrand().setCurrentTransactionContext(trxCtx);
+        TransactionResourceManager.getInstance().setCurrentTransactionContext(trxCtx);
     }
 
     private static long getRetryNumber(Object prevAttemptInfo) {
