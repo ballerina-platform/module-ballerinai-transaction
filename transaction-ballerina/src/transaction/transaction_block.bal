@@ -156,7 +156,7 @@ function beginLocalParticipant(string transactionBlockId, function () returns an
             notifyLocalParticipantOnFailure();
             panic returnContext;
         } else {
-            var trxId = returnContext.transactionId;
+            final string trxId = returnContext.transactionId;
             log:printDebug(() => io:sprintf("participant registered: %s", trxId));
         }
         var result = trap transactionParticipantWrapper(trxFunc);
@@ -192,7 +192,7 @@ function beginRemoteParticipant(string transactionBlockId, function () returns a
             notifyRemoteParticipantOnFailure();
             panic returnContext;
         } else {
-            var trxId = returnContext.transactionId;
+            final string trxId = returnContext.transactionId;
             log:printDebug(() => io:sprintf("participant registered: %s", trxId));
         }
         var result = trap transactionParticipantWrapper(trxFunc);

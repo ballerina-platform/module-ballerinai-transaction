@@ -40,8 +40,8 @@ service Participant2pcService on coordinatorListener {
     }
     resource function prepare(http:Caller conn, http:Request req, string transactionBlockId, PrepareRequest prepareReq) {
         http:Response res = new;
-        string transactionId = prepareReq.transactionId;
-        string participatedTxnId = getParticipatedTransactionId(transactionId, transactionBlockId);
+        final string transactionId = prepareReq.transactionId;
+        final string participatedTxnId = getParticipatedTransactionId(transactionId, transactionBlockId);
         log:printDebug(() => io:sprintf("Prepare received for transaction: %s", participatedTxnId));
         PrepareResponse prepareRes = {};
 
@@ -100,9 +100,9 @@ service Participant2pcService on coordinatorListener {
     }
     resource function notify(http:Caller conn, http:Request req, string transactionBlockId, NotifyRequest notifyReq) {
         http:Response res = new;
-        string transactionId = notifyReq.transactionId;
-        string participatedTxnId = getParticipatedTransactionId(transactionId, transactionBlockId);
-        var message = notifyReq.message;
+        final string transactionId = notifyReq.transactionId;
+        final string participatedTxnId = getParticipatedTransactionId(transactionId, transactionBlockId);
+        final string message = notifyReq.message;
         log:printDebug(() => io:sprintf("Notify(%s) received for transaction: %s", message, participatedTxnId));
         NotifyResponse notifyRes = {};
         var txn = participatedTransactions[participatedTxnId];

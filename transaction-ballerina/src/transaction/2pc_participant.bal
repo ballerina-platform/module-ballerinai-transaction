@@ -96,8 +96,8 @@ class RemoteParticipant {
         // Let's set this to true and change it to false only if a participant aborted or an error occurred while trying
         // to prepare a participant
         boolean successful = true;
-
-        log:printDebug(() => io:sprintf("Preparing remote participant: %s", self.participantId));
+        final string participantId = self.participantId;
+        log:printDebug(() => io:sprintf("Preparing remote participant: %s", participantId));
         // If a participant voted NO or failed then abort
         var result = participantEP->prepare(self.transactionId);
         if (result is error) {
@@ -105,20 +105,21 @@ class RemoteParticipant {
             return result;
         } else {
             if (result == "aborted") {
-                  log:printDebug(() => io:sprintf("Remote participant: %s aborted.", self.participantId));
+                  log:printDebug(() => io:sprintf("Remote participant: %s aborted.", participantId));
                   return PREPARE_RESULT_ABORTED;
             } else if (result == "committed") {
-                  log:printDebug(() => io:sprintf("Remote participant: %s committed", self.participantId));
+                  log:printDebug(() => io:sprintf("Remote participant: %s committed", participantId));
                 return PREPARE_RESULT_COMMITTED;
             } else if (result == "read-only") {
-                log:printDebug(() => io:sprintf("Remote participant: %s read-only", self.participantId));
+                log:printDebug(() => io:sprintf("Remote participant: %s read-only", participantId));
                 return PREPARE_RESULT_READ_ONLY;
             } else if (result == "prepared") {
-                log:printDebug(() => io:sprintf("Remote participant: %s prepared", self.participantId));
+                log:printDebug(() => io:sprintf("Remote participant: %s prepared", participantId));
                 return PREPARE_RESULT_PREPARED;
             } else {
-                log:printDebug(function () returns string {
-                    return io:sprintf("Remote participant: %s, outcome: %s", self.participantId, result);
+                final string outcome = <string>result;
+                log:printDebug(isolated function () returns string {
+                    return io:sprintf("Remote participant: %s, outcome: %s", participantId, outcome);
                 });
             }
         }
@@ -128,7 +129,10 @@ class RemoteParticipant {
     function notifyMe(string protocolUrl, string action) returns @tainted NotifyResult|error {
         Participant2pcClientEP participantEP;
 
-        log:printDebug(() => io:sprintf("Notify(%s) remote participant: %s", action, protocolUrl));
+        final string prtclUrl = protocolUrl;
+        final string act = action;
+        final string participantId = self.participantId;
+        log:printDebug(() => io:sprintf("Notify(%s) remote participant: %s", act, prtclUrl));
         participantEP = getParticipant2pcClient(protocolUrl);
         var result = participantEP->notify(self.transactionId, action);
         if (result is error) {
@@ -136,10 +140,10 @@ class RemoteParticipant {
             return result;
         } else {
             if (result == NOTIFY_RESULT_ABORTED_STR) {
-                log:printDebug(() => io:sprintf("Remote participant: %s aborted", self.participantId));
+                log:printDebug(() => io:sprintf("Remote participant: %s aborted", participantId));
                 return NOTIFY_RESULT_ABORTED;
             } else if (result == NOTIFY_RESULT_COMMITTED_STR) {
-                log:printDebug(() => io:sprintf("Remote participant: %s committed", self.participantId));
+                log:printDebug(() => io:sprintf("Remote participant: %s committed", participantId));
                 return NOTIFY_RESULT_COMMITTED;
             }
         }
@@ -161,9 +165,10 @@ class LocalParticipant {
     }
 
     function prepare(string protocol) returns [(PrepareResult|error)?, Participant] {
+        final string participantId = self.participantId;
         foreach var localProto in self.participantProtocols {
             if (localProto.name == protocol) {
-                log:printDebug(() => io:sprintf("Preparing local participant: %s", self.participantId));
+                log:printDebug(() => io:sprintf("Preparing local participant: %s", participantId));
                 return [self.prepareMe(self.participatedTxn.transactionId, self.participatedTxn.transactionBlockId),
                 self];
             }
@@ -172,13 +177,14 @@ class LocalParticipant {
     }
 
     function prepareMe(string transactionId, string transactionBlockId) returns PrepareResult|error {
+        final string participantId = self.participantId;
         string participatedTxnId = getParticipatedTransactionId(transactionId, transactionBlockId);
         if (!participatedTransactions.hasKey(participatedTxnId)) {
             return TransactionError(TRANSACTION_UNKNOWN);
         }
         if (self.participatedTxn.state == TXN_STATE_ABORTED) {
             removeParticipatedTransaction(participatedTxnId);
-            log:printDebug(() => io:sprintf("Local participant: %s aborted", self.participantId));
+            log:printDebug(() => io:sprintf("Local participant: %s aborted", participantId));
             return PREPARE_RESULT_ABORTED;
         } else if (self.participatedTxn.state == TXN_STATE_COMMITTED) {
             removeParticipatedTransaction(participatedTxnId);
@@ -187,20 +193,22 @@ class LocalParticipant {
             boolean successful = prepareResourceManagers(transactionId, transactionBlockId);
             if (successful) {
                 self.participatedTxn.state = TXN_STATE_PREPARED;
-                log:printDebug(() => io:sprintf("Local participant: %s prepared", self.participantId));
+                log:printDebug(() => io:sprintf("Local participant: %s prepared", participantId));
                 return PREPARE_RESULT_PREPARED;
             } else {
-                log:printDebug(() => io:sprintf("Local participant: %s aborted", self.participantId));
+                log:printDebug(() => io:sprintf("Local participant: %s aborted", participantId));
                 return PREPARE_RESULT_ABORTED;
             }
         }
     }
 
     function notify(string action, string? protocolName) returns (NotifyResult|error)? {
+        final string participantId = self.participantId;
+        final string act = action;
         if (protocolName is string) {
             foreach var localProto in self.participantProtocols {
                 if (protocolName == localProto.name) {
-                    log:printDebug(() => io:sprintf("Notify(%s) local participant: %s", action, self.participantId));
+                    log:printDebug(() => io:sprintf("Notify(%s) local participant: %s", act, participantId));
                     return self.notifyMe(action, self.participatedTxn.transactionBlockId);
                 }
             }

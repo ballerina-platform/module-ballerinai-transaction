@@ -75,8 +75,8 @@ service InitiatorService on coordinatorListener {
     }
     resource function register(http:Caller conn, http:Request req, string transactionBlockId,
                     RegistrationRequest regReq) {
-        string participantId = regReq.participantId;
-        string txnId = regReq.transactionId;
+        final string participantId = regReq.participantId;
+        final string txnId = regReq.transactionId;
         var initiatedTxn = initiatedTransactions[txnId];
         if (initiatedTxn is ()) {
             respondToBadRequest(conn, "Transaction-Unknown. Invalid TID:" + txnId);
