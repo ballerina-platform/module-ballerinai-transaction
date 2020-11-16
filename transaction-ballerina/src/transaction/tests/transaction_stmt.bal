@@ -444,3 +444,71 @@ function testAsyncReturn() {
 transactional function getInt() returns int {
     return 10;
 }
+
+transactional function (string) returns string anonFunc1 = transactional function (string str) returns string {
+    return str + " -> within transactional anon func1";
+};
+
+@test:Config {
+}
+function testTransactionalAnonFunc1() {
+    string ss = "";
+    transaction {
+        ss = "trxStarted";
+        ss = anonFunc1(ss);
+        var commitRes = commit;
+        ss += " -> trxEnded.";
+    }
+    test:assertEquals(ss, "trxStarted -> within transactional anon func1 -> trxEnded.");
+}
+
+var anonFunc2 = transactional function (string str) returns string {
+    return str + " -> within transactional anon func2";
+};
+
+@test:Config {
+}
+function testTransactionalAnonFunc2() {
+    var ss = "";
+    transaction {
+        ss = "trxStarted";
+        ss = anonFunc2(ss);
+        var commitRes = commit;
+        ss += " -> trxEnded.";
+    }
+    test:assertEquals(ss, "trxStarted -> within transactional anon func2 -> trxEnded.");
+}
+
+isolated transactional function isolatedFunc (string str) returns string {
+    return str + " -> within isolated transactional func";
+}
+
+@test:Config {
+}
+function testIsolatedTransactionalFunc() {
+    string ss = "";
+    transaction {
+        ss = "trxStarted";
+        ss = isolatedFunc(ss);
+        var commitRes = commit;
+        ss += " -> trxEnded.";
+    }
+    test:assertEquals(ss, "trxStarted -> within isolated transactional func -> trxEnded.");
+}
+
+var isolatedFunc2 = isolated transactional function (string str) returns string {
+    return str + " -> within isolated transactional anon func";
+};
+
+@test:Config {
+}
+function testIsolatedTransactionalAnonFunc() {
+    var ss = "";
+    transaction {
+        ss = "trxStarted";
+        ss = isolatedFunc2(ss);
+        var commitRes = commit;
+        ss += " -> trxEnded.";
+    }
+    test:assertEquals(ss, "trxStarted -> within isolated transactional anon func -> trxEnded.");
+}
