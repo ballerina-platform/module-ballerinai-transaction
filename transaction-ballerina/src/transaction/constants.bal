@@ -1,4 +1,4 @@
-// Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2020 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -14,8 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-//import ballerina/config;
-//import ballerina/http;
+import ballerina/config;
+import ballerina/http;
 
 const string basePath = "/balcoordinator";
 final string initiatorCoordinatorBasePath = basePath + "/initiator";
@@ -23,6 +23,9 @@ final string initiator2pcCoordinatorBasePath = basePath + "/initiator/2pc";
 final string participant2pcCoordinatorBasePath = basePath + "/participant/2pc";
 final string registrationPath = "/register";
 final string registrationPathPattern = "/{transactionBlockId}" + registrationPath;
+
+final string coordinatorHost = config:getAsString("b7a.transactions.coordinator.host", getHostAddress());
+final int coordinatorPort = config:getAsInt("b7a.transactions.coordinator.port", getAvailablePort());
 
 const string TRANSACTION_CONTEXT_VERSION = "1.0";
 
@@ -42,9 +45,11 @@ const string NOTIFY_RESULT_FAILED_EOT_STR = "failed-eot";
 const string NOTIFY_RESULT_COMMITTED_STR = "committed";
 const string NOTIFY_RESULT_ABORTED_STR = "aborted";
 
-const string OUTCOME_COMMITTED = "committed";
+public const string OUTCOME_COMMITTED = "committed";
 const string OUTCOME_ABORTED = "aborted";
 const string OUTCOME_MIXED = "mixed";
 const string OUTCOME_HAZARD = "hazard";
 
 const string TRANSACTION_UNKNOWN = "Transaction-Unknown";
+
+listener http:Listener coordinatorListener = new(coordinatorPort, { host: coordinatorHost });

@@ -18,8 +18,7 @@
 
 package org.ballerinalang.stdlib.transaction;
 
-import org.ballerinalang.jvm.scheduling.Scheduler;
-import org.ballerinalang.jvm.transactions.TransactionLocalContext;
+import io.ballerina.runtime.transactions.TransactionResourceManager;
 
 /**
  * Extern function transaction:getRollbackOnlyError.
@@ -29,7 +28,6 @@ import org.ballerinalang.jvm.transactions.TransactionLocalContext;
 public class GetRollbackOnlyError {
 
     public static Object getRollbackOnlyError() {
-        TransactionLocalContext transactionLocalContext = Scheduler.getStrand().currentTrxContext;
-        return transactionLocalContext.getRollbackOnly();
+        return TransactionResourceManager.getInstance().getRollBackOnlyError();
     }
 }

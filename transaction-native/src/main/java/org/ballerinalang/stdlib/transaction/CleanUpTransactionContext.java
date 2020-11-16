@@ -18,10 +18,8 @@
 
 package org.ballerinalang.stdlib.transaction;
 
-import org.ballerinalang.jvm.api.values.BString;
-import org.ballerinalang.jvm.scheduling.Scheduler;
-import org.ballerinalang.jvm.scheduling.Strand;
-import org.ballerinalang.jvm.transactions.TransactionLocalContext;
+import io.ballerina.runtime.api.values.BString;
+import io.ballerina.runtime.transactions.TransactionResourceManager;
 
 /**
  * Extern function transaction:cleanupTransactionContext.
@@ -31,9 +29,6 @@ import org.ballerinalang.jvm.transactions.TransactionLocalContext;
 public class CleanUpTransactionContext {
 
     public static void cleanupTransactionContext(BString transactionBlockId) {
-        Strand strand = Scheduler.getStrand();
-        TransactionLocalContext transactionLocalContext = strand.currentTrxContext;
-        transactionLocalContext.removeTransactionInfo();
-        strand.removeCurrentTrxContext();
+        TransactionResourceManager.getInstance().cleanupTransactionContext();
     }
 }
