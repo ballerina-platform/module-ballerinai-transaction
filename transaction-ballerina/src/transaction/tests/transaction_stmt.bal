@@ -512,3 +512,56 @@ function testIsolatedTransactionalAnonFunc() {
     }
     test:assertEquals(ss, "trxStarted -> within isolated transactional anon func -> trxEnded.");
 }
+
+@test:Config {
+}
+function testRollbackInElseStatement() returns error? {
+    string ss = "";
+    transaction {
+        ss = "trxStarted";
+        var x = commit;
+        if (x == ()) {
+            ss += " -> trxCommitted.";
+        } else {
+            ss += " -> trxRolledback.";
+            rollback;
+        }
+    }
+    test:assertEquals("trxStarted -> trxCommitted.", ss);
+}
+
+@test:Config {
+}
+function testRollbackInElseStatement2() returns error? {
+    string str = "";
+    int i = 0;
+
+    var onCommitFunc = function(transactions:Info? info) {
+        str = str + " -> commit triggered";
+    };
+
+    var onRollbackFunc = function (transactions:Info info, error? cause, boolean willRetry) {
+        str += "-> rollback triggered ";
+    };
+
+    while (i < 4) {
+        transaction {
+            str += "-> trx started";
+            i = i + 1;
+            io:println(i);
+            transactions:onRollback(onRollbackFunc);
+            transactions:onCommit(onCommitFunc);
+            if (i == 1) {
+                var x = commit;
+            } else if (i == 2) {
+                rollback;
+            } else {
+                str += "-> do nothing ";
+            }
+        }
+        str += "-> trx ended.";
+        io:println(str);
+    }
+    test:assertEquals("-> trx started -> commit triggered-> trx ended.-> trx started-> rollback triggered " +
+    "-> trx ended.-> trx started-> do nothing -> trx ended.-> trx started-> do nothing -> trx ended.", str);
+}
