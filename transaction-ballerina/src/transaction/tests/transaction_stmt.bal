@@ -548,7 +548,6 @@ function testRollbackInElseStatement2() returns error? {
         transaction {
             str += "-> trx started";
             i = i + 1;
-            io:println(i);
             transactions:onRollback(onRollbackFunc);
             transactions:onCommit(onCommitFunc);
             if (i == 1) {
@@ -560,7 +559,6 @@ function testRollbackInElseStatement2() returns error? {
             }
         }
         str += "-> trx ended.";
-        io:println(str);
     }
     test:assertEquals("-> trx started -> commit triggered-> trx ended.-> trx started-> rollback triggered " +
     "-> trx ended.-> trx started-> do nothing -> trx ended.-> trx started-> do nothing -> trx ended.", str);
