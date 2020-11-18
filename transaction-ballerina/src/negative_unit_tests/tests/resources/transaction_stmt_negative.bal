@@ -317,3 +317,34 @@ function testInvokeRemoteTransactionalMethodInNonTransactionalScope() returns Ba
     Bank bank = new;
     return bank;
 }
+
+function testRollbackOutsideTransactionalScope() {
+    string str = "";
+    transaction {
+        str = "trxStarted";
+        var x = commit;
+        if (x == ()) {
+            str += " -> trxCommitted";
+        } else {
+            rollback;
+            str += " -> trxRolledback.";
+        }
+    }
+    str += "-> trxEnded.";
+}
+
+function testRollbackOutsideTransactionalScope2() {
+    string str = "";
+    int i = 0;
+    transaction {
+        str = "trxStarted";
+        if (i == 0) {
+            str += " -> do nothing";
+        } else {
+            var x = commit;
+            rollback;
+            str += " -> trxRolledback.";
+        }
+    }
+    str += "-> trxEnded.";
+}

@@ -515,24 +515,26 @@ function testIsolatedTransactionalAnonFunc() {
 
 @test:Config {
 }
-function testRollbackInElseStatement() returns error? {
-    string ss = "";
+function testRollbackInElseStatement() {
+    string str = "";
+    int i = 0;
     transaction {
-        ss = "trxStarted";
-        var x = commit;
-        if (x == ()) {
-            ss += " -> trxCommitted.";
+        str = "trxStarted";
+        if (i == 0) {
+            var x = commit;
+            str += " -> trxCommitted";
         } else {
-            ss += " -> trxRolledback.";
             rollback;
+            str += " -> trxRolledback.";
         }
     }
-    test:assertEquals("trxStarted -> trxCommitted.", ss);
+    str += "-> trxEnded.";
+    test:assertEquals("trxStarted -> trxCommitted-> trxEnded.", str);
 }
 
 @test:Config {
 }
-function testRollbackInElseStatement2() returns error? {
+function testRollbackInElseStatement2() {
     string str = "";
     int i = 0;
 
@@ -562,4 +564,34 @@ function testRollbackInElseStatement2() returns error? {
     }
     test:assertEquals("-> trx started -> commit triggered-> trx ended.-> trx started-> rollback triggered " +
     "-> trx ended.-> trx started-> do nothing -> trx ended.-> trx started-> do nothing -> trx ended.", str);
+}
+
+@test:Config {
+}
+function testRollbackInLoop() {
+    string str = "";
+    string[] arr = ["1", "2", "invalid"];
+    transaction {
+        str += "trx started";
+        foreach var i in arr {
+            var result = parse(i);
+            if (result is error) {
+                rollback;
+                str += " -> trx rollback";
+            } else {
+                str += " -> parsing successful";
+            }
+        }
+        var commitResult = commit;
+        if (commitResult is ()) {
+            str += " -> trx committed";
+        }
+        str += " -> trx ended.";
+    }
+    test:assertEquals("trx started -> parsing successful -> parsing successful -> trx rollback -> " +
+    "trx committed -> trx ended.", str);
+}
+
+function parse(string num) returns int|error {
+    return 'int:fromString(num);
 }
