@@ -224,16 +224,16 @@ task ballerinaNegativeUnitTests {
             workingDir project.projectDir
             environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat test ${testModuleName} --bal_exec_path=${distributionBinPath}/ballerina"
+                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat test --bal_exec_path=${distributionBinPath}/ballerina"
             } else {
-                commandLine 'sh', '-c', "$distributionBinPath/ballerina test ${testModuleName} --bal_exec_path=${distributionBinPath}/ballerina"
+                commandLine 'sh', '-c', "$distributionBinPath/ballerina test --bal_exec_path=${distributionBinPath}/ballerina"
             }
         }
     }
 }
 
 test {
- //   dependsOn(ballerinaTest)
+    dependsOn(ballerinaTest)
 //    dependsOn(ballerinaNegativeUnitTests)
 }
 
