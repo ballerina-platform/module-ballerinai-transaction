@@ -121,11 +121,13 @@ task revertTomlFile {
 }
 
 task ballerinaBuild {
+    dependsOn(":transaction-native:build")
+    dependsOn(unpackJballerinaTools)
+    dependsOn(updateTomlVerions)
+    finalizedBy(revertTomlFile)
+    dependsOn(test)
     inputs.dir file(project.projectDir)
     doLast {
-        def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
-        newConfig = newConfig.replace("@toml.version@", tomlVersion)
-        ballerinaConfigFile.text = newConfig
 
         def distributionBinPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bin"
 
