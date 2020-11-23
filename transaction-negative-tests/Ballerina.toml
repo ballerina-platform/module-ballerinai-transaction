@@ -1,0 +1,30 @@
+[package]
+org = "ballerinai"
+name = "transaction_negative_tests"
+version = "@toml.version@"
+
+[[dependency]]
+org = "ballerina"
+name = "io"
+version = "@stdlib.io.version@"
+
+[[dependency]]
+org = "ballerina"
+name = "stringutils"
+version = "@stdlib.stringutils.version@"
+
+[[dependency]]
+org = "ballerina"
+name = "config"
+version = "@stdlib.config.version@"
+
+[[dependency]]
+org = "ballerina"
+name = "system"
+version = "@stdlib.system.version@"
+
+[[platform.java11.dependency]]
+path = "../transaction-native/build/libs/transaction-native-@project.version@.jar"
+groupId = "ballerina"
+artifactId = "transaction"
+version = "@project.version@"

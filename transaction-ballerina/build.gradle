@@ -43,7 +43,6 @@ jar {
 }
 
 def packageName = "transaction"
-def testPackageName = "negative_unit_tests"
 def packageOrg = "ballerinai"
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
 def artifactCacheParent = file("$project.projectDir/build/cache_parent/")
@@ -186,57 +185,8 @@ task ballerinaTest {
     }
 }
 
-task ballerinaNegativeUnitTests {
-    inputs.dir file(project.projectDir)
-    dependsOn(ballerinaBuild)
-    finalizedBy(revertTomlFile)
-    doLast {
-        def stdlibDependentIoVersion = project.stdlibIoVersion.split("-")[0]
-        def stdlibDependentStringutilsVersion = project.stdlibStringUtilsVersion.split("-")[0]
-        def stdlibDependentConfigVersion = project.stdlibConfigVersion.split("-")[0]
-        def stdlibDependentSystemVersion = project.stdlibSystemVersion.split("-")[0]
-        def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
-        newConfig = newConfig.replace("@toml.version@", tomlVersion)
-        newConfig = newConfig.replace("@stdlib.io.version@", stdlibDependentIoVersion)
-        newConfig = newConfig.replace("@stdlib.stringutils.version@", stdlibDependentStringutilsVersion)
-        newConfig = newConfig.replace("@stdlib.config.version@", stdlibDependentConfigVersion)
-        newConfig = newConfig.replace("@stdlib.system.version@", stdlibDependentSystemVersion)
-        ballerinaConfigFile.text = newConfig
-
-        def distributionBinPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bin"
-        copy {
-            from file("$project.projectDir/build/lib_parent/libs/transaction-native-${project.version}.jar")
-            into file(project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bre/lib")
-        }
-        copy {
-            from file("$project.projectDir/build/lib_parent/libs/ballerinai-transaction-${tomlVersion}.jar")
-            into file(project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bre/lib")
-        }
-        copy {
-            from file("$project.projectDir/build/cache_parent/caches/bir/ballerinai/transaction/${tomlVersion}/transaction.bir")
-            into file(project.projectDir.absolutePath +
-                    "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bir-cache/ballerinai/transaction/${tomlVersion}")
-        }
-        copy {
-            from file("$project.projectDir/build/cache_parent/caches/bir/ballerinai/transaction/${tomlVersion}/Ballerina.toml")
-            into file(project.projectDir.absolutePath +
-                    "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bir-cache/ballerinai/transaction/${tomlVersion}")
-        }
-        exec {
-            workingDir project.projectDir
-            environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
-            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat test --bal_exec_path=${distributionBinPath}/ballerina"
-            } else {
-                commandLine 'sh', '-c', "$distributionBinPath/ballerina test --bal_exec_path=${distributionBinPath}/ballerina"
-            }
-        }
-    }
-}
-
 test {
     dependsOn(ballerinaTest)
-//    dependsOn(ballerinaNegativeUnitTests)
 }
 
 task createArtifactZip(type: Zip) {
