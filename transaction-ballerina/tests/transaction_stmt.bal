@@ -512,3 +512,122 @@ function testIsolatedTransactionalAnonFunc() {
     }
     test:assertEquals(ss, "trxStarted -> within isolated transactional anon func -> trxEnded.");
 }
+
+@test:Config {
+}
+function testCommitRollbackInIfElse() {
+    string str = "";
+    int i = 0;
+    transaction {
+        str = "trxStarted";
+        if (i == 0) {
+            var x = commit;
+            str += " -> trxCommitted";
+        } else {
+            rollback;
+            str += " -> trxRolledback.";
+        }
+    }
+    str += "-> trxEnded.";
+    test:assertEquals("trxStarted -> trxCommitted-> trxEnded.", str);
+}
+
+@test:Config {
+}
+function testCommitRollbackInIfElse2() {
+    string str = "";
+    int i = 0;
+
+    var onCommitFunc = function(transactions:Info? info) {
+        str = str + " -> commit triggered";
+    };
+
+    var onRollbackFunc = function (transactions:Info info, error? cause, boolean willRetry) {
+        str += "-> rollback triggered ";
+    };
+
+    while (i < 4) {
+        transaction {
+            str += "-> trx started";
+            i = i + 1;
+            transactions:onRollback(onRollbackFunc);
+            transactions:onCommit(onCommitFunc);
+            if (i == 1) {
+                var x = commit;
+            } else if (i == 2) {
+                rollback;
+            } else {
+                str += "-> do nothing ";
+            }
+        }
+        str += "-> trx ended.";
+    }
+    test:assertEquals("-> trx started -> commit triggered-> trx ended.-> trx started-> rollback triggered " +
+    "-> trx ended.-> trx started-> do nothing -> trx ended.-> trx started-> do nothing -> trx ended.", str);
+}
+
+@test:Config {
+}
+function testCommitRollbackInIfElse3() {
+    string str = "";
+    string[] arr = ["1", "2", "invalid"];
+    transaction {
+        str += "trx started";
+        foreach var i in arr {
+            var result = parse(i);
+            if (result is error) {
+                rollback;
+                str += " -> trx rollback";
+            } else {
+                str += " -> parsing successful";
+            }
+        }
+        var commitResult = commit;
+        if (commitResult is ()) {
+            str += " -> trx committed";
+        }
+        str += " -> trx ended.";
+    }
+    test:assertEquals("trx started -> parsing successful -> parsing successful -> trx rollback -> " +
+    "trx committed -> trx ended.", str);
+}
+
+@test:Config {
+}
+function testCommitRollbackInIfElse4() {
+    string str = "";
+    int i = 5;
+    transaction {
+        str = "trxStarted";
+        if (i == 0) {
+            var x = commit;
+        } else if (i == 1) {
+            rollback;
+        }
+        var res = testTransactionalInvo("");
+        str += res;
+    }
+    str += " -> trxEnded.";
+    test:assertEquals("trxStarted -> transactional call -> trxEnded.", str);
+}
+
+@test:Config {
+}
+function testCommitInIf() {
+    string str = "";
+    int i = 1;
+    transaction {
+        str = "trxStarted";
+        if (i == 0) {
+            var x = commit;
+        }
+        var res = testTransactionalInvo("");
+        str += res;
+    }
+    str += " -> trxEnded.";
+    test:assertEquals("trxStarted -> transactional call -> trxEnded.", str);
+}
+
+function parse(string num) returns int|error {
+    return 'int:fromString(num);
+}
