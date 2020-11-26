@@ -12,55 +12,70 @@ public function testTransactionStatement() {
     system:Process|error execResult = system:exec(config:getAsString(BAL_EXEC_PATH), {}, (), "run",
     "tests/resources/transaction_stmt_negative.bal");
     string[] logLines = getLogLinesFromExecResult(execResult);
-    test:assertEquals(logLines.length(), 32);
+    test:assertEquals(logLines.length(), 40);
     validateLog(logLines[3], "ERROR", "transaction_stmt_negative.bal:(21:5,29:6)", "invalid transaction commit count");
-    validateLog(logLines[4], "ERROR", "transaction_stmt_negative.bal:(27:9,27:18)", "rollback not allowed here");
-    validateLog(logLines[5], "ERROR", "transaction_stmt_negative.bal:(36:5,44:6)", "transaction statement cannot " +
+    validateLog(logLines[4], "ERROR", "transaction_stmt_negative.bal:(36:5,44:6)", "transaction statement cannot " +
     "be used within a transactional scope");
-    validateLog(logLines[6], "ERROR", "transaction_stmt_negative.bal:(45:13,45:30)", "usage of start within a " +
+    validateLog(logLines[5], "ERROR", "transaction_stmt_negative.bal:(45:13,45:30)", "usage of start within a " +
     "transactional scope is prohibited");
-    validateLog(logLines[7], "ERROR", "transaction_stmt_negative.bal:(54:15,54:32)", "usage of start within a " +
+    validateLog(logLines[6], "ERROR", "transaction_stmt_negative.bal:(54:15,54:32)", "usage of start within a " +
     "transactional scope is prohibited");
-    validateLog(logLines[8], "ERROR", "transaction_stmt_negative.bal:(56:15,56:39)", "invoking transactional function " +
-    "outside transactional scope is prohibited");
-    validateLog(logLines[9], "ERROR", "transaction_stmt_negative.bal:(75:17,75:23)", "commit not allowed here");
-    validateLog(logLines[10], "ERROR", "transaction_stmt_negative.bal:(86:21,86:45)", "invoking transactional function " +
-    "outside transactional scope is prohibited");
-    validateLog(logLines[11], "ERROR", "transaction_stmt_negative.bal:(89:17,89:23)", "commit not allowed here");
-    validateLog(logLines[12], "ERROR", "transaction_stmt_negative.bal:(112:17,112:26)", "rollback not allowed here");
-    validateLog(logLines[13], "ERROR", "transaction_stmt_negative.bal:(116:9,116:18)", "rollback not allowed here");
-    validateLog(logLines[14], "ERROR", "transaction_stmt_negative.bal:(118:17,118:23)", "commit not allowed here");
-    validateLog(logLines[15], "ERROR", "transaction_stmt_negative.bal:(132:9,136:10)", "invalid transaction commit count");
-    validateLog(logLines[16], "ERROR", "transaction_stmt_negative.bal:(134:17,134:23)", "break statement cannot be " +
+    validateLog(logLines[7], "ERROR", "transaction_stmt_negative.bal:(56:15,56:39)", "invoking transactional " +
+    "function outside transactional scope is prohibited");
+    validateLog(logLines[8], "ERROR", "transaction_stmt_negative.bal:(75:17,75:23)", "commit not allowed here");
+    validateLog(logLines[9], "ERROR", "transaction_stmt_negative.bal:(118:17,118:23)", "commit not allowed here");
+    validateLog(logLines[10], "ERROR", "transaction_stmt_negative.bal:(132:9,136:10)", "invalid transaction " +
+    "commit count");
+    validateLog(logLines[11], "ERROR", "transaction_stmt_negative.bal:(134:17,134:23)", "break statement cannot be " +
     "used to exit from a transaction without a commit or a rollback statement");
-    validateLog(logLines[17], "ERROR", "transaction_stmt_negative.bal:(138:13,138:19)", "commit cannot be used outside a " +
-    "transaction statement");
-    validateLog(logLines[18], "ERROR", "transaction_stmt_negative.bal:(148:17,148:26)", "continue statement cannot be " +
-    "used to exit from a transaction without a commit or a rollback statement");
-    validateLog(logLines[19], "ERROR", "transaction_stmt_negative.bal:(163:17,163:29)", "return statement cannot be used " +
-    "to exit from a transaction without a commit or a rollback statement");
-    validateLog(logLines[20], "ERROR", "transaction_stmt_negative.bal:(180:13,180:20)", "return statement cannot be used " +
-    "to exit from a transaction without a commit or a rollback statement");
-    validateLog(logLines[21], "ERROR", "transaction_stmt_negative.bal:(200:21,200:33)", "return statement cannot be used " +
-    "to exit from a transaction without a commit or a rollback statement");
-    validateLog(logLines[22], "ERROR", "transaction_stmt_negative.bal:(204:21,204:33)", "return statement cannot be used " +
-    "to exit from a transaction without a commit or a rollback statement");
-    validateLog(logLines[23], "ERROR", "transaction_stmt_negative.bal:(223:16,223:42)", "invoking transactional function " +
-    "outside transactional scope is prohibited");
-    validateLog(logLines[24], "ERROR", "transaction_stmt_negative.bal:(252:9,252:48)", "invoking transactional function " +
-    "outside transactional scope is prohibited");
-    validateLog(logLines[25], "ERROR", "transaction_stmt_negative.bal:(253:9,253:44)", "invoking transactional function " +
-    "outside transactional scope is prohibited");
-    validateLog(logLines[26], "ERROR", "transaction_stmt_negative.bal:(254:34,254:64)", "invoking transactional function " +
-    "outside transactional scope is prohibited");
-    validateLog(logLines[27], "ERROR", "transaction_stmt_negative.bal:(256:17,256:36)", "invoking transactional function " +
-    "outside transactional scope is prohibited");
-    validateLog(logLines[28], "ERROR", "transaction_stmt_negative.bal:(289:17,289:27)", "invoking transactional function " +
-    "outside transactional scope is prohibited");
-    validateLog(logLines[29], "ERROR", "transaction_stmt_negative.bal:(306:27,306:44)", "invoking transactional function " +
-    "outside transactional scope is prohibited");
-    validateLog(logLines[30], "ERROR", "transaction_stmt_negative.bal:(307:26,307:44)", "invoking transactional function " +
-    "outside transactional scope is prohibited");
+    validateLog(logLines[12], "ERROR", "transaction_stmt_negative.bal:(138:13,138:19)", "commit cannot be used " +
+    "outside a transaction statement");
+    validateLog(logLines[13], "ERROR", "transaction_stmt_negative.bal:(148:17,148:26)", "continue statement " +
+    "cannot be used to exit from a transaction without a commit or a rollback statement");
+    validateLog(logLines[14], "ERROR", "transaction_stmt_negative.bal:(163:17,163:29)", "return statement cannot " +
+    "be used to exit from a transaction without a commit or a rollback statement");
+    validateLog(logLines[15], "ERROR", "transaction_stmt_negative.bal:(180:13,180:20)", "return statement cannot " +
+    "be used to exit from a transaction without a commit or a rollback statement");
+    validateLog(logLines[16], "ERROR", "transaction_stmt_negative.bal:(200:21,200:33)", "return statement cannot " +
+    "be used to exit from a transaction without a commit or a rollback statement");
+    validateLog(logLines[17], "ERROR", "transaction_stmt_negative.bal:(204:21,204:33)", "return statement cannot " +
+    "be used to exit from a transaction without a commit or a rollback statement");
+    validateLog(logLines[18], "ERROR", "transaction_stmt_negative.bal:(223:16,223:42)", "invoking transactional " +
+    "function outside transactional scope is prohibited");
+    validateLog(logLines[19], "ERROR", "transaction_stmt_negative.bal:(252:9,252:48)", "invoking transactional " +
+    "function outside transactional scope is prohibited");
+    validateLog(logLines[20], "ERROR", "transaction_stmt_negative.bal:(253:9,253:44)", "invoking transactional " +
+    "function outside transactional scope is prohibited");
+    validateLog(logLines[21], "ERROR", "transaction_stmt_negative.bal:(254:34,254:64)", "invoking transactional " +
+    "function outside transactional scope is prohibited");
+    validateLog(logLines[22], "ERROR", "transaction_stmt_negative.bal:(256:17,256:36)", "invoking transactional " +
+    "function outside transactional scope is prohibited");
+    validateLog(logLines[23], "ERROR", "transaction_stmt_negative.bal:(289:17,289:27)", "invoking transactional " +
+    "function outside transactional scope is prohibited");
+    validateLog(logLines[24], "ERROR", "transaction_stmt_negative.bal:(306:27,306:44)", "invoking transactional " +
+    "function outside transactional scope is prohibited");
+    validateLog(logLines[25], "ERROR", "transaction_stmt_negative.bal:(307:26,307:44)", "invoking transactional " +
+    "function outside transactional scope is prohibited");
+    validateLog(logLines[26], "ERROR", "transaction_stmt_negative.bal:(329:13,329:22)", "rollback not allowed here");
+    validateLog(logLines[27], "ERROR", "transaction_stmt_negative.bal:(346:13,346:22)", "rollback not allowed here");
+    validateLog(logLines[28], "ERROR", "transaction_stmt_negative.bal:(357:13,357:19)", "commit cannot be used " +
+    "outside a transaction statement");
+    validateLog(logLines[29], "ERROR", "transaction_stmt_negative.bal:(367:19,367:44)", "invoking transactional " +
+    "function outside transactional scope is prohibited");
+    validateLog(logLines[30], "ERROR", "transaction_stmt_negative.bal:(376:5,376:14)", "rollback cannot be used " +
+    "outside of a transaction block");
+    validateLog(logLines[31], "ERROR", "transaction_stmt_negative.bal:(386:17,386:42)", "invoking transactional " +
+    "function outside transactional scope is prohibited");
+    validateLog(logLines[32], "ERROR", "transaction_stmt_negative.bal:(398:21,398:27)", "commit not allowed here");
+    validateLog(logLines[33], "ERROR", "transaction_stmt_negative.bal:(402:13,402:22)", "rollback not allowed here");
+    validateLog(logLines[34], "ERROR", "transaction_stmt_negative.bal:(404:17,404:42)", "invoking transactional " +
+    "function outside transactional scope is prohibited");
+    validateLog(logLines[35], "ERROR", "transaction_stmt_negative.bal:(416:21,416:27)", "commit not allowed here");
+    validateLog(logLines[36], "ERROR", "transaction_stmt_negative.bal:(420:13,420:22)", "rollback not allowed here");
+    validateLog(logLines[37], "ERROR", "transaction_stmt_negative.bal:(422:17,422:42)", "invoking transactional " +
+    "function outside transactional scope is prohibited");
+    validateLog(logLines[38], "ERROR", "transaction_stmt_negative.bal:(440:17,440:42)", "invoking transactional " +
+    "function outside transactional scope is prohibited");
 }
 
 @test:Config {}
