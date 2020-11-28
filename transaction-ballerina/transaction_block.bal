@@ -19,7 +19,6 @@ import ballerina/log;
 import ballerina/java;
 import ballerina/lang.'transaction as lang_trx;
 
-//Info record
 public type Info record {|
    // unique identifier
    byte[] xid;
