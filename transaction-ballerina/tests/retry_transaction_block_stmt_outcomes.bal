@@ -198,14 +198,14 @@ function testRollbackWithSuccessOutcome() returns error? {
     test:assertEquals(str, "trx started -> trx started -> rollback -> end of trx block -> exit transaction block.");
 }
 
-@test:Config {
-}
-function testRollbackWithFailOutcome() {
-    string|error x =  rollbackWithFailOutcome();
-    if (x is error) {
-       test:assertEquals(x.message().toString(), "Invalid number");
-    }
-}
+//@test:Config {
+//}
+//function testRollbackWithFailOutcome() {
+//    string|error x =  rollbackWithFailOutcome();
+//    if (x is error) {
+//       test:assertEquals(x.message().toString(), "Invalid number");
+//    }
+//}
 
 function rollbackWithFailOutcome() returns string|error {
     string str = "";
@@ -240,14 +240,14 @@ function rollbackWithFailOutcome() returns string|error {
     return str;
 }
 
-@test:Config {
-}
-function testRollbackWithPanicOutcome() {
-    string|error x =  trap rollbackWithPanicOutcome();
-    if (x is error) {
-       test:assertEquals(x.message().toString(), "Invalid number");
-    }
-}
+//@test:Config {
+//}
+//function testRollbackWithPanicOutcome() {
+//    string|error x =  trap rollbackWithPanicOutcome();
+//    if (x is error) {
+//       test:assertEquals(x.message().toString(), "Invalid number");
+//    }
+//}
 
 function rollbackWithPanicOutcome() returns string|error {
     string str = "";
@@ -336,14 +336,14 @@ function testPanicFromCommitWithUnusualSuccessOutcome() returns error? {
     str);
 }
 
-@test:Config {
-}
-function testPanicFromRollbackWithUnusualFailOutcome() {
-    string|error x =  panicFromRollbackWithUnusualFailOutcome();
-    if (x is error) {
-       test:assertEquals(x.message().toString(), "Invalid number");
-    }
-}
+//@test:Config {
+//}
+//function testPanicFromRollbackWithUnusualFailOutcome() {
+//    string|error x =  panicFromRollbackWithUnusualFailOutcome();
+//    if (x is error) {
+//       test:assertEquals(x.message().toString(), "Invalid number");
+//    }
+//}
 
 function panicFromRollbackWithUnusualFailOutcome() returns string|error {
     string str = "";
@@ -634,32 +634,32 @@ function nestedRetryFunc(boolean needPanic, boolean failCommit) returns string|e
     return str;
 }
 
-@test:Config {
-}
-function testRollbackWithFailOutcomeInFirstNestedRetryStmt() returns error? {
-    var result = nestedRetryFuncWithRollback(true, false, false, false, false);
-    if (result is error) {
-        test:assertEquals("Rollback due to error in trx 1", result.message());
-    }
-}
+//@test:Config {
+//}
+//function testRollbackWithFailOutcomeInFirstNestedRetryStmt() returns error? {
+//    var result = nestedRetryFuncWithRollback(true, false, false, false, false);
+//    if (result is error) {
+//        test:assertEquals("Rollback due to error in trx 1", result.message());
+//    }
+//}
 
-@test:Config {
-}
-function testRollbackWithFailOutcomeInSecondNestedRetryStmt() returns error? {
-    var result = nestedRetryFuncWithRollback(true, false, false, false, true);
-    if (result is error) {
-        test:assertEquals(result.message(), "Rollback due to error in trx 2");
-    }
-}
+//@test:Config {
+//}
+//function testRollbackWithFailOutcomeInSecondNestedRetryStmt() returns error? {
+//    var result = nestedRetryFuncWithRollback(true, false, false, false, true);
+//    if (result is error) {
+//        test:assertEquals(result.message(), "Rollback due to error in trx 2");
+//    }
+//}
 
-@test:Config {
-}
-function testRollbackWithPanicOutcomeInFirstNestedRetryStmt() {
-    var result = trap nestedRetryFuncWithRollback(true, false, true, false, false);
-    if (result is error) {
-        test:assertEquals(result.message(), "Panic in nested retry 1");
-    }
-}
+//@test:Config {
+//}
+//function testRollbackWithPanicOutcomeInFirstNestedRetryStmt() {
+//    var result = trap nestedRetryFuncWithRollback(true, false, true, false, false);
+//    if (result is error) {
+//        test:assertEquals(result.message(), "Panic in nested retry 1");
+//    }
+//}
 
 @test:Config {
 }

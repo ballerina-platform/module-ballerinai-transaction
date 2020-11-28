@@ -349,7 +349,16 @@ transactional function func2(string str) returns string {
 
 @test:Config {
 }
-function testRollbackWithBlockFailure() returns error? {
+function testRollbackWithBlockFailure() {
+    error? rollbackWithBlockFailureRes = rollbackWithBlockFailure();
+    if (rollbackWithBlockFailureRes is error) {
+        test:assertEquals("Custom Error", rollbackWithBlockFailureRes.message());
+    } else {
+        panic error("Expected an error");
+    }
+}
+
+function rollbackWithBlockFailure() returns error? {
     string str = "";
     var onCommitFunc = function(transactions:Info? info) {
         str = str + " -> commit triggered";
@@ -357,6 +366,7 @@ function testRollbackWithBlockFailure() returns error? {
 
     var onRollbackFunc = function(transactions:Info? info, error? cause, boolean willTry) {
             str = str + " -> rollback triggered";
+            test:assertEquals(str, "trx started -> rollback triggered");
     };
 
     transaction {
@@ -367,8 +377,6 @@ function testRollbackWithBlockFailure() returns error? {
         var o = commit;
         str += " -> trx end";
     }
-
-    test:assertEquals(str, "trx started -> rollback triggered");
 }
 
 function getError(boolean err) returns error? {
@@ -380,7 +388,15 @@ function getError(boolean err) returns error? {
 
 @test:Config {
 }
-function testRollbackWithCommitFailure() returns error? {
+function testRollbackWithCommitFailure () {
+    error? rollbackWithCommitFailureRes = rollbackWithCommitFailure();
+    if(rollbackWithCommitFailureRes is error) {
+        test:assertEquals(rollbackWithCommitFailureRes.message(), "rollback only is set, hence commit failed !");
+    } else {
+        panic error("Expercted an error");
+    }
+}
+function rollbackWithCommitFailure() returns error? {
     string str = "";
     var onCommitFunc = function(transactions:Info? info) {
         str = str + " -> commit triggered";

@@ -14,6 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 import ballerina/test;
+import ballerina/io;
 import ballerina/lang.'transaction as transactions;
 
 @test:Config {
@@ -84,7 +85,7 @@ function runActualCode(int failureCutOff, boolean requestRollback, boolean doPan
             }
             a = a + " -> trx2 end.";
         }
-
+        io:println("trx1 end statement");
     }
     a = (a + " -> all trx ended.");
     return a;
