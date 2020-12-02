@@ -97,7 +97,12 @@ service InitiatorService on coordinatorListener {
                 }
                 RemoteProtocol[] coordinatorProtocols = [];
                 int i = 0;
-                foreach var participantProtocol in participantProtocols {
+                int j = 0;
+                while (j < participantProtocols.length()) {
+                    var participantProtocol = participantProtocols[j];
+                    j += 1;
+                //TODO:commenting due to a caching issue
+                //foreach var participantProtocol in participantProtocols {
                     RemoteProtocol coordinatorProtocol = {
                         name:participantProtocol.name,
                         url:getCoordinatorProtocolAt(participantProtocol.name, transactionBlockId)

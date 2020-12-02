@@ -156,12 +156,24 @@ class TwoPhaseCommitTransaction {
     function prepareParticipants(string protocol) returns PrepareDecision {
         PrepareDecision prepareDecision = PREPARE_DECISION_COMMIT;
         future<[(PrepareResult|error)?, Participant]>?[] results = [];
-        foreach var participant in self.participants {
+        int i = 0;
+        var participantArr = self.participants.toArray();
+        while (i < participantArr.length()) {
+            var participant = participantArr[i];
+            i += 1;
+        //TODO: commenting due to a caching issue
+        //foreach var participant in self.participants {
             string participantId = participant.participantId;
             future<[(PrepareResult|error)?, Participant]> f = @strand{thread:"any"} start participant.prepare(protocol);
             results[results.length()] = f;
         }
-        foreach var res in results {
+
+        i = 0;
+        while ( i < results.length()) {
+            var res = results[i];
+            i += 1;
+            //TODO: commenting due to a caching issue
+            //foreach var res in results {
             future<[(PrepareResult|error)?, Participant]> f;
             if (res is future<[(PrepareResult|error)?, Participant]>) {
                 f = res;
@@ -212,12 +224,22 @@ class TwoPhaseCommitTransaction {
     function notifyParticipants(string action, string? protocolName) returns NotifyResult|error {
         NotifyResult|error notifyResult = (action == COMMAND_COMMIT) ? NOTIFY_RESULT_COMMITTED : NOTIFY_RESULT_ABORTED;
         future<(NotifyResult|error)?>?[] results = [];
-        foreach var participant in self.participants {
+
+        int i = 0;
+        var participantArr = self.participants.toArray();
+        while (i < participantArr.length()) {
+            var participant = participantArr[i];
+        //TODO: commenting due to a caching issue
+        //foreach var participant in self.participants {
             future<(NotifyResult|error)?> f = @strand{thread:"any"} start participant.notify(action, protocolName);
             results[results.length()] = f;
-
         }
-        foreach var r in results {
+        int j = 0;
+        while (j < results.length()) {
+            var r = results[j];
+            j += 1;
+        //TODO: commenting due to a caching issue
+        //foreach var r in results {
             future<(NotifyResult|error)?> f;
             if (r is future<(NotifyResult|error)?>) {
                 f = r;
