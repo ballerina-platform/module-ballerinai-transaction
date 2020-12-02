@@ -152,8 +152,8 @@ function testJumpingMultiLevelToOnFail() {
           transaction {
               transactions:onRollback(onRollbackFunc3);
               str += " -> Before error 2 is thrown";
-              var resCommit3 = commit;
               int res3 =  check getErrorForOnFail();
+              var resCommit3 = commit;
           } on fail var e {
                str += " -> Error caught in inner onfail";
                fail e;

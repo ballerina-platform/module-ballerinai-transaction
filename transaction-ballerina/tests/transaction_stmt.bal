@@ -562,8 +562,8 @@ function jumpMultiLevelsAndReturn() returns error? {
           transaction {
               transactions:onRollback(onRollbackFunc3);
               output += " -> Before error 2 is thrown";
-              var resCommit3 = commit;
               int res3 = check getErrorOrInt();
+              var resCommit3 = commit;
           }
           output += "-> Should not reach here!";
           var resCommit2 = commit;
