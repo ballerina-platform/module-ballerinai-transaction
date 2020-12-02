@@ -35,7 +35,12 @@ type RegistrationResponse record {
 
 function toProtocolArray(RemoteProtocol[] remoteProtocols) returns UProtocol?[] {
     UProtocol?[] protocols = [];
-    foreach var remoteProtocol in remoteProtocols {
+    int i = 0;
+    while (i < remoteProtocols.length()) {
+        var remoteProtocol = remoteProtocols[i];
+        i += 1;
+    //TODO: commenting due to a caching issue
+    //foreach var remoteProtocol in remoteProtocols {
         LocalProtocol proto = {name:remoteProtocol.name};
         protocols[protocols.length()] = proto;
     }

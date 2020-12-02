@@ -58,7 +58,12 @@ class RemoteParticipant {
     }
 
     function prepare(string protocol) returns @tainted [(PrepareResult|error)?, Participant] {
-        foreach var remoteProto in self.participantProtocols {
+        int i = 0;
+        while ( i < self.participantProtocols.length()) {
+            var remoteProto = self.participantProtocols[i];
+            i += 1;
+        //TODO: commenting due to a caching issue
+        //foreach var remoteProto in self.participantProtocols {
             if (remoteProto.name == protocol) {
                 // We are assuming a participant will have only one instance of a protocol
                 return [self.prepareMe(remoteProto.url), self];
@@ -69,21 +74,26 @@ class RemoteParticipant {
 
     function notify(string action, string? protocolName) returns @tainted NotifyResult|error? {
         if (protocolName is string) {
-            foreach var remoteProtocol in self.participantProtocols {
+            int i = 0;
+            while (i < self.participantProtocols.length()) {
+                var remoteProtocol = self.participantProtocols[i];
                 if (protocolName == remoteProtocol.name) {
                     // We are assuming a participant will have only one instance of a protocol
                     return self.notifyMe(remoteProtocol.url, action);
                 }
+                i += 1;
             }
         } else {
             NotifyResult|error notifyResult = (action == COMMAND_COMMIT) ? NOTIFY_RESULT_COMMITTED
                                                                          : NOTIFY_RESULT_ABORTED;
-            foreach var remoteProtocol in self.participantProtocols {
+            int i = 0;
+            while (i < self.participantProtocols.length()) {
+                var remoteProtocol = self.participantProtocols[i];
                 var result = self.notifyMe(remoteProtocol.url, action);
                 if (result is error) {
                     notifyResult = result;
                 }
-                // Else, nothing to do since we have set the notifyResult already
+                i += 1;
             }
             return notifyResult;
         }
@@ -166,7 +176,12 @@ class LocalParticipant {
 
     function prepare(string protocol) returns [(PrepareResult|error)?, Participant] {
         final string participantId = self.participantId;
-        foreach var localProto in self.participantProtocols {
+        int i = 0;
+        while ( i < self.participantProtocols.length()) {
+            var localProto = self.participantProtocols[i];
+            i += 1;
+        //TODO: commenting due to a caching issue
+        //foreach var localProto in self.participantProtocols {
             if (localProto.name == protocol) {
                 log:printDebug(() => io:sprintf("Preparing local participant: %s", participantId));
                 return [self.prepareMe(self.participatedTxn.transactionId, self.participatedTxn.transactionBlockId),
@@ -206,7 +221,12 @@ class LocalParticipant {
         final string participantId = self.participantId;
         final string act = action;
         if (protocolName is string) {
-            foreach var localProto in self.participantProtocols {
+            int i = 0;
+            while ( i < self.participantProtocols.length()) {
+                var localProto = self.participantProtocols[i];
+                i += 1;
+            //TODO: commenting due to caching issue;
+            //foreach var localProto in self.participantProtocols {
                 if (protocolName == localProto.name) {
                     log:printDebug(() => io:sprintf("Notify(%s) local participant: %s", act, participantId));
                     return self.notifyMe(action, self.participatedTxn.transactionBlockId);
@@ -215,7 +235,12 @@ class LocalParticipant {
         } else {
             NotifyResult|error notifyResult = (action == COMMAND_COMMIT) ? NOTIFY_RESULT_COMMITTED
                                                                          : NOTIFY_RESULT_ABORTED;
-            foreach var localProto in self.participantProtocols {
+            int i = 0;
+            while (i < self.participantProtocols.length()) {
+                var localProto = self.participantProtocols[i];
+                i += 1;
+            //TODO: commenting due to caching issue
+            //foreach var localProto in self.participantProtocols {
                 var result = self.notifyMe(action, self.participatedTxn.transactionBlockId);
                 if (result is error) {
                     notifyResult = result;
