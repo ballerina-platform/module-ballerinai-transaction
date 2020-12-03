@@ -48,7 +48,13 @@ service scheduleTimer on timer {
 
 function cleanupTransactions() returns error? {
     worker w1 {
-        foreach var twopcTxn in participatedTransactions {
+        int i = 0;
+        var participatedTransactionsArr = participatedTransactions.toArray();
+        while (i < participatedTransactionsArr.length()) {
+            var twopcTxn = participatedTransactionsArr[i];
+            i += 1;
+        //TODO: commenting due to a caching issue
+        //foreach var twopcTxn in participatedTransactions {
             final string participatedTxnId = getParticipatedTransactionId(twopcTxn.transactionId,
                 twopcTxn.transactionBlockId);
             if (time:currentTime().time - twopcTxn.createdTime >= 120000) {
@@ -86,7 +92,13 @@ function cleanupTransactions() returns error? {
         }
     }
     worker w2 returns () {
-        foreach var twopcTxn in initiatedTransactions {
+        TwoPhaseCommitTransaction[] initiatedTransactionsArr = initiatedTransactions.toArray();
+        int i = 0;
+        while(i < initiatedTransactionsArr.length()) {
+            var twopcTxn = initiatedTransactionsArr[i];
+            i += 1;
+       //TODO:commenting due to a caching issue
+       //foreach var twopcTxn in initiatedTransactions {
             if (time:currentTime().time - twopcTxn.createdTime >= 120000) {
                 if (twopcTxn.state != TXN_STATE_ABORTED) {
                     // Commit the transaction since prepare hasn't been received
@@ -122,7 +134,12 @@ function isRegisteredParticipant(string participantId, map<Participant> particip
 }
 
 function isValidCoordinationType(string coordinationType) returns boolean {
-    foreach var coordType in coordinationTypes {
+    int i = 0;
+    while (i < coordinationTypes.length()) {
+        var coordType = coordinationTypes[i];
+        i += 1;
+    //TODO:commenting due to caching issue;
+    //foreach var coordType in coordinationTypes {
         if (coordinationType == coordType) {
             return true;
         }
@@ -141,10 +158,20 @@ function protoName(UProtocol p) returns string {
 function protocolCompatible(string coordinationType, UProtocol?[] participantProtocols) returns boolean {
     boolean participantProtocolIsValid = false;
     string[] validProtocols = coordinationTypeToProtocolsMap[coordinationType] ?: [];
-    foreach var p in participantProtocols {
+    int i = 0;
+    while ( i < participantProtocols.length()) {
+        var p = participantProtocols[i];
+        i += 1;
+    //TODO: commenting due to a caching issue
+    //foreach var p in participantProtocols {
         if (p is UProtocol) {
             UProtocol participantProtocol = p;
-            foreach var validProtocol in validProtocols {
+            int j = 0;
+            while (j < validProtocols.length()) {
+                var validProtocol = validProtocols[j];
+                j += 1;
+            //TODO: commenting due to a caching issue
+            //foreach var validProtocol in validProtocols {
                 if (protoName(participantProtocol) == validProtocol) {
                     participantProtocolIsValid = true;
                     break;
