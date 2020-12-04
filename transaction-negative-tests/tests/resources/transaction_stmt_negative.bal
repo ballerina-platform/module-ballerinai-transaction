@@ -441,3 +441,20 @@ function testTransactionsWithIfElse7() {
     }
     str += "-> trxEnded.";
 }
+
+function testTransactionsWithIfElse8() {
+    string str = "";
+    int i = 0;
+    transaction {
+        str = "trxStarted";
+        if (i == 0) {
+            str += " -> do nothing";
+        } else if (i == 1) {
+            rollback;
+        } else {
+            var x = commit;
+        }
+        var o = testTransactionalInvo("");
+    }
+    str += "-> trxEnded.";
+}

@@ -12,7 +12,7 @@ public function testTransactionStatement() {
     system:Process|error execResult = system:exec(config:getAsString(BAL_EXEC_PATH), {}, (), "run",
     "tests/resources/transaction_stmt_negative.bal");
     string[] logLines = getLogLinesFromExecResult(execResult);
-    test:assertEquals(logLines.length(), 40);
+    test:assertEquals(logLines.length(), 41);
     validateLog(logLines[3], "ERROR", "transaction_stmt_negative.bal:(21:5,29:6)", "invalid transaction commit count");
     validateLog(logLines[4], "ERROR", "transaction_stmt_negative.bal:(36:5,44:6)", "transaction statement cannot " +
     "be used within a transactional scope");
@@ -75,6 +75,8 @@ public function testTransactionStatement() {
     validateLog(logLines[37], "ERROR", "transaction_stmt_negative.bal:(422:17,422:42)", "invoking transactional " +
     "function outside transactional scope is prohibited");
     validateLog(logLines[38], "ERROR", "transaction_stmt_negative.bal:(440:17,440:42)", "invoking transactional " +
+    "function outside transactional scope is prohibited");
+    validateLog(logLines[39], "ERROR", "transaction_stmt_negative.bal:(457:17,457:42)", "invoking transactional " +
     "function outside transactional scope is prohibited");
 }
 

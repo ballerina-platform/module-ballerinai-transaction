@@ -613,6 +613,25 @@ function testCommitRollbackInIfElse4() {
 
 @test:Config {
 }
+function testCommitRollbackInIfElse5() {
+    string str = "";
+    int i = 0;
+    transaction {
+        str = "trxStarted";
+        if (i == 0) {
+            str += " -> do bothing";
+        } else if (i == 1) {
+            var x = commit;
+        }
+        var res = testTransactionalInvo("");
+        str += res;
+    }
+    str += " -> trxEnded.";
+    test:assertEquals("trxStarted -> do bothing -> transactional call -> trxEnded.", str);
+}
+
+@test:Config {
+}
 function testCommitInIf() {
     string str = "";
     int i = 1;
