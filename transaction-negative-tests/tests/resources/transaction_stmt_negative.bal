@@ -320,15 +320,16 @@ function testInvokeRemoteTransactionalMethodInNonTransactionalScope() returns Ba
 
 function testTransactionsWithIfElse() {
     string str = "";
+    int i = 0;
     transaction {
         str = "trxStarted";
-        var x = commit;
-        if (x == ()) {
-            str += " -> trxCommitted";
+        if (i == 0) {
+            var x = commit;
         } else {
             rollback;
-            str += " -> trxRolledback.";
         }
+        var res = testTransactionalInvo("");
+        str += res;
     }
     str += "-> trxEnded.";
 }
@@ -373,9 +374,9 @@ function testTransactionsWithIfElse3() {
 function testTransactionsWithIfElse4() {
     string str = "";
     int i = 0;
-    rollback;
     transaction {
         str = "trxStarted";
+        var m = commit;
         if (i == 0) {
             var x = commit;
         } else if (i == 1) {
@@ -393,66 +394,12 @@ function testTransactionsWithIfElse5() {
     int i = 0;
     transaction {
         str = "trxStarted";
-        var m = commit;
         if (i == 0) {
             var x = commit;
         } else if (i == 1) {
-            str += " -> do nothing";
-        } else {
-            rollback;
-        }
-        var o = testTransactionalInvo("");
-    }
-    str += "-> trxEnded.";
-}
-
-function testTransactionsWithIfElse6() {
-    string str = "";
-    int i = 0;
-    transaction {
-        str = "trxStarted";
-        rollback;
-        if (i == 0) {
-            var x = commit;
-        } else if (i == 1) {
-            str += " -> do nothing";
-        } else {
-            rollback;
-        }
-        var o = testTransactionalInvo("");
-    }
-    str += "-> trxEnded.";
-}
-
-
-function testTransactionsWithIfElse7() {
-    string str = "";
-    int i = 0;
-    transaction {
-        str = "trxStarted";
-        if (i == 0) {
-            rollback;
-        } else if (i == 1) {
-            str += " -> do nothing";
-        } else {
-            var x = commit;
-        }
-        var o = testTransactionalInvo("");
-    }
-    str += "-> trxEnded.";
-}
-
-function testTransactionsWithIfElse8() {
-    string str = "";
-    int i = 0;
-    transaction {
-        str = "trxStarted";
-        if (i == 0) {
-            str += " -> do nothing";
-        } else if (i == 1) {
             rollback;
         } else {
-            var x = commit;
+            rollback;
         }
         var o = testTransactionalInvo("");
     }
