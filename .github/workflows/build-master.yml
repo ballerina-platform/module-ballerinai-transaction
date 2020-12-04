@@ -1,6 +1,8 @@
-name: Build master branch
+name: Build
 
 on:
+  repository_dispatch:
+    types: [stdlib-publish-snapshot]
   workflow_dispatch:
   push:
     branches:
@@ -8,8 +10,8 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 11
@@ -23,5 +25,18 @@ jobs:
           packageUser: ${{ secrets.BALLERINA_BOT_USERNAME }}
           packagePAT: ${{ secrets.BALLERINA_BOT_TOKEN }}
         run: |
-          ./gradlew clean build
-          ./gradlew clean publish --scan
+          ./gradlew publish
+      - name: Dispatch Dependent Module Builds
+        if: github.event.action != 'stdlib-publish-snapshot'
+        run: |
+          echo "Triggering dependent module builds..." && \
+          curl -u ${{ secrets.BALLERINA_BOT_USERNAME }} -X POST \
+          https://api.github.com/repos/ballerina-platform/ballerina-standard-library/dispatches \
+          -H 'Accept: application/vnd.github.v3+json' \
+          -H 'Authorization: token ${{ secrets.BALLERINA_BOT_TOKEN }}' \
+          --data '{
+            "event_type": "stdlib-module-push",
+            "client_payload": {
+              "module": "${{ github.repository }}"
+            }
+          }'
