@@ -34,11 +34,11 @@ function getCoordinationTypeToProtocolsMap() returns map<string[]> {
 }
 
 @http:ServiceConfig {
-    basePath:"/balcoordinator/initiator"
+
 }
 //# Service on the initiator which is independent from the coordination type and handles registration of remote
 //# participants.
-service InitiatorService on coordinatorListener {
+service /balcoordinator/initiator on coordinatorListener {
 
     # register(in: Micro-Transaction-Registration,
     # out: Micro-Transaction-Coordination?,
@@ -68,13 +68,12 @@ service InitiatorService on coordinatorListener {
     #
     # Micro-Transaction-Unknown
     @http:ResourceConfig {
-        methods:["POST"],
-        path:"/{transactionBlockId}/register",
         body:"regReq",
         consumes:["application/json"]
     }
-    resource function register(http:Caller conn, http:Request req, string transactionBlockId,
-                    RegistrationRequest regReq) {
+    resource function post [string transactionBlockId]/register(http:Caller conn, http:Request req) {
+        json jsonPayload = <json>req.getJsonPayload();
+        RegistrationRequest regReq = <RegistrationRequest>jsonPayload.fromJsonWithType(RegistrationRequest);
         final string participantId = regReq.participantId;
         final string txnId = regReq.transactionId;
         var initiatedTxn = initiatedTransactions[txnId];

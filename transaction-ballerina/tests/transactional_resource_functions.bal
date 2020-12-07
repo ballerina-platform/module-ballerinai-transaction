@@ -15,46 +15,42 @@
 // under the License.
 
 import ballerina/test;
-import ballerina/lang.'object;
 
 listener ABC ep = new;
 
-int startCount = 0;
-int attachCount = -2;
-
 service on ep {
+    transactional resource function get foo(string b) {
 
-    transactional resource function foo(string b) {
     }
 }
 
 public class ABC {
 
-    *'object:Listener;
+    public int startCount;
+    public int attachCount;
 
-    public function __start() returns error? {
-        startCount += 1;
+    public isolated function 'start() returns error? {
+        self.startCount += 1;
+    }
+    public isolated function gracefulStop() returns error? {
+    }
+    public isolated function immediateStop() returns error? {
+    }
+    public isolated function detach(service object {} s) returns error? {
+    }
+    public isolated function attach(service object {} s, string[]|string? name = ()) returns error? {
+        self.attachCount += 1;
     }
 
-    public function __gracefulStop() returns error? {
-        return ();
-    }
-
-    public function __immediateStop() returns error? {
-        return ();
-    }
-
-    public function __attach(service s, string? name = ()) returns error? {
-        attachCount += 1;
-    }
-
-    public function __detach(service s) returns error? {
+    public function init() {
+        self.startCount = 0;
+        self.attachCount = -2;
     }
 }
 
 @test:Config {
 }
 function test () {
-    test:assertEquals(startCount, 1);
-    test:assertEquals(attachCount, -1);
+    test:assertEquals(ep.startCount, 1);
+    test:assertEquals(ep.attachCount, -1);
 }

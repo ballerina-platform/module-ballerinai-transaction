@@ -40,8 +40,8 @@ listener task:Listener timer = new({
     initialDelayInMillis: 1000
 });
 
-service scheduleTimer on timer {
-    resource function onTrigger() {
+service on timer {
+    remote function onTrigger() {
         checkpanic cleanupTransactions();
     }
 }
