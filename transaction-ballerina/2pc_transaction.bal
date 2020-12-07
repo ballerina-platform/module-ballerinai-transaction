@@ -229,6 +229,7 @@ class TwoPhaseCommitTransaction {
         var participantArr = self.participants.toArray();
         while (i < participantArr.length()) {
             var participant = participantArr[i];
+            i += 1;
         //TODO: commenting due to a caching issue
         //foreach var participant in self.participants {
             future<(NotifyResult|error)?> f = @strand{thread:"any"} start participant.notify(action, protocolName);

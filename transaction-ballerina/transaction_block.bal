@@ -172,18 +172,12 @@ function beginLocalParticipant(string transactionBlockId, function () returns an
 # Transaction remote participant function will be desugared to following method.
 #
 # + transactionBlockId - ID of the transaction block.
-# + trxFunc - Participant logic.
-# + committedFunc - Committed function.
-# + abortedFunc - Abort function.
-# + return - Return value of the participant.
 # # Deprecated
 @deprecated
-function beginRemoteParticipant(string transactionBlockId, function () returns any|error trxFunc,
-                                function (string trxId) committedFunc, function (string trxId) abortedFunc) returns
-                                any|error|() {
-    TransactionContext? txnContext = registerRemoteParticipant(transactionBlockId, committedFunc, abortedFunc);
+function beginRemoteParticipant(string transactionBlockId) {
+    TransactionContext? txnContext = registerRemoteParticipant(transactionBlockId);
     if (txnContext is ()) {
-        return trxFunc();
+
     } else {
         TransactionContext|error returnContext = beginTransaction(txnContext.transactionId, transactionBlockId,
             txnContext.registerAtURL, txnContext.coordinationType);
@@ -194,13 +188,13 @@ function beginRemoteParticipant(string transactionBlockId, function () returns a
             final string trxId = returnContext.transactionId;
             log:printDebug(() => io:sprintf("participant registered: %s", trxId));
         }
-        var result = trap transactionParticipantWrapper(trxFunc);
-        if (result is error) {
-            notifyRemoteParticipantOnFailure();
-            panic result;
-        } else {
-            return result.data;
-        }
+        //var result = trap transactionParticipantWrapper(trxFunc);
+        //if (result is error) {
+        //    notifyRemoteParticipantOnFailure();
+        //    panic result;
+        //} else {
+        //    return result.data;
+        //}
     }
 }
 
@@ -384,13 +378,10 @@ function registerLocalParticipant(string transactionBlockId, function (string tr
 # Register remote participant. Functions with participant annotations will be desugered to below functions.
 #
 # + transactionBlockId - ID of the transaction block. Each transaction block in a process has a unique ID.
-# + committedFunc - Function pointer for commit function for participant.
-# + abortedFunc -  Function pointer for abort function for participant.
 # + return - Transaction context.
 # # Deprecated
 @deprecated
-function registerRemoteParticipant(string transactionBlockId, function (string trxId) committedFunc,
-                                   function (string trxId) abortedFunc) returns  TransactionContext? = @java:Method {
+function registerRemoteParticipant(string transactionBlockId) returns  TransactionContext? = @java:Method {
     'class: "org.ballerinalang.stdlib.transaction.Utils",
     name: "registerRemoteParticipant"
 } external;

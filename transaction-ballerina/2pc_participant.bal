@@ -29,7 +29,7 @@ type LocalProtocol record {
 # + name - protocol name
 # + url - protocol URL. This URL will have a value only if the participant is remote. If the participant is local,
 #         the `protocolFn` will be called
-type RemoteProtocol record {
+public type RemoteProtocol record {
     string name = "";
     string url = "";
 };
