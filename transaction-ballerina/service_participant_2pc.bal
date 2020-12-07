@@ -20,10 +20,9 @@ import ballerina/io;
 import ballerina/log;
 
 @http:ServiceConfig {
-    basePath:"/balcoordinator/participant/2pc"
 }
 // # Service on the participant which handles protocol messages related to the 2-phase commit (2PC) coordination type.
-service Participant2pcService on coordinatorListener {
+service /balcoordinator/participant/'2pc on coordinatorListener {
 
     # When the initiator sends "prepare" this resource on the participant will get called.
     # This participant will in turn call prepare on all its resource managers registered with the respective
@@ -33,12 +32,12 @@ service Participant2pcService on coordinatorListener {
     #                        participant as part of the participant protocol endpoint. The initiator isn't aware
     #                        of this `transactionBlockId` and will simply send it back as part of the URL it calls.
     @http:ResourceConfig {
-        methods:["POST"],
-        path:"{transactionBlockId}/prepare",
         body:"prepareReq",
         consumes:["application/json"]
     }
-    resource function prepare(http:Caller conn, http:Request req, string transactionBlockId, PrepareRequest prepareReq) {
+    resource function post [string transactionBlockId]/prepare(http:Caller conn, http:Request req) {
+        json jsonPayload = <json>req.getJsonPayload();
+        PrepareRequest prepareReq = <PrepareRequest>jsonPayload.fromJsonWithType(PrepareRequest);
         http:Response res = new;
         final string transactionId = prepareReq.transactionId;
         final string participatedTxnId = getParticipatedTransactionId(transactionId, transactionBlockId);
@@ -93,13 +92,13 @@ service Participant2pcService on coordinatorListener {
     #                        participant as part of the participant protocol endpoint. The initiator isn't aware
     #                        of this `transactionBlockId` and will simply send it back as part of the URL it calls.
     @http:ResourceConfig {
-        methods:["POST"],
-        path:"{transactionBlockId}/notify",
         body:"notifyReq",
         consumes:["application/json"]
     }
-    resource function notify(http:Caller conn, http:Request req, string transactionBlockId, NotifyRequest notifyReq) {
+    resource function post [string transactionBlockId]/notify(http:Caller conn, http:Request req) {
         http:Response res = new;
+        json jsonPayload = <json>req.getJsonPayload();
+        NotifyRequest notifyReq = <NotifyRequest>jsonPayload.fromJsonWithType(NotifyRequest);
         final string transactionId = notifyReq.transactionId;
         final string participatedTxnId = getParticipatedTransactionId(transactionId, transactionBlockId);
         final string message = notifyReq.message;

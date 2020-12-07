@@ -20,6 +20,7 @@
 package org.ballerinalang.stdlib.transaction;
 
 import io.ballerina.runtime.api.Environment;
+import io.ballerina.runtime.api.Module;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.creators.ValueCreator;
@@ -41,6 +42,7 @@ import java.util.Map;
 
 import static io.ballerina.runtime.api.constants.RuntimeConstants.GLOBAL_TRANSACTION_ID;
 import static io.ballerina.runtime.api.constants.RuntimeConstants.TRANSACTION_URL;
+import static io.ballerina.runtime.transactions.TransactionConstants.DEFAULT_COORDINATION_TYPE;
 import static io.ballerina.runtime.transactions.TransactionConstants.TRANSACTION_PACKAGE_ID;
 
 /**
@@ -53,6 +55,7 @@ import static io.ballerina.runtime.transactions.TransactionConstants.TRANSACTION
 public class Utils {
     private static final String STRUCT_TYPE_TRANSACTION_CONTEXT = "TransactionContext";
     private static final String STRUCT_TYPE_TRANSACTION_INFO = "Info";
+    private static final Module TRANSACTION_INTERNAL_MODULE = new Module("ballerinai", "transaction", "1.0.2");
 
     public static void notifyResourceManagerOnAbort(BString transactionBlockId) {
         TransactionLocalContext transactionLocalContext =
@@ -92,25 +95,24 @@ public class Utils {
         transactionLocalContext.notifyLocalParticipantFailure();
     }
 
-    public static Object registerRemoteParticipant(Environment env, BString transactionBlockId,
-                                                   BFunctionPointer fpCommitted, BFunctionPointer fpAborted) {
+    public static Object registerRemoteParticipant(Environment env, BString transactionBlockId) {
         String gTransactionId = (String) env.getStrandLocal(GLOBAL_TRANSACTION_ID);
         if (gTransactionId == null) {
             // No transaction available to participate,
             // We have no business here. This is a no-op.
-            return null;
+            throw ErrorCreator.createError(StringUtils.fromString("No transaction is available to participate"));
         }
 
         // Create transaction context and store in the strand.
         TransactionLocalContext transactionLocalContext = TransactionLocalContext
-                .create(gTransactionId, env.getStrandLocal(TRANSACTION_URL).toString(), "2pc");
+                .create(gTransactionId, env.getStrandLocal(TRANSACTION_URL).toString(), DEFAULT_COORDINATION_TYPE);
         TransactionResourceManager.getInstance().setCurrentTransactionContext(transactionLocalContext);
 
         // Register committed and aborted function handler if exists.
         TransactionResourceManager transactionResourceManager = TransactionResourceManager.getInstance();
         transactionResourceManager.registerParticipation(transactionLocalContext.getGlobalTransactionId(),
-                transactionBlockId.getValue(), fpCommitted, fpAborted);
-        BMap<BString, Object> trxContext = ValueCreator.createRecordValue(TRANSACTION_PACKAGE_ID,
+                transactionBlockId.getValue());
+        BMap<BString, Object> trxContext = ValueCreator.createRecordValue(env.getCurrentModule(),
                                                                            STRUCT_TYPE_TRANSACTION_CONTEXT);
         Object[] trxContextData = new Object[] {
                 TransactionConstants.DEFAULT_CONTEXT_VERSION, transactionLocalContext.getGlobalTransactionId(),
@@ -132,8 +134,8 @@ public class Utils {
 
         // Register committed and aborted function handler if exists.
         transactionResourceManager.registerParticipation(transactionLocalContext.getGlobalTransactionId(),
-                transactionBlockId.getValue(), fpCommitted, fpAborted);
-        BMap<BString, Object> trxContext = ValueCreator.createRecordValue(TRANSACTION_PACKAGE_ID,
+                transactionBlockId.getValue());
+        BMap<BString, Object> trxContext = ValueCreator.createRecordValue(TRANSACTION_INTERNAL_MODULE,
                                                                                    STRUCT_TYPE_TRANSACTION_CONTEXT);
         Object[] trxContextData = new Object[] {
                 TransactionConstants.DEFAULT_CONTEXT_VERSION, transactionLocalContext.getGlobalTransactionId(),
