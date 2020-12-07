@@ -512,3 +512,35 @@ function testIsolatedTransactionalAnonFunc() {
     }
     test:assertEquals(ss, "trxStarted -> within isolated transactional anon func -> trxEnded.");
 }
+
+@test:Config {
+}
+function testMultipleRollbackInvocation()  {
+    error? invokeMultipleRollbackRes = trap invokeMultipleRollback();
+    if(invokeMultipleRollbackRes is error) {
+        test:assertEquals(invokeMultipleRollbackRes.message(),
+        "cannot call rollback if the strand is not in transaction mode");
+    } else {
+        panic error("Expected an error");
+    }
+}
+
+function invokeMultipleRollback() {
+   string str = "start";
+   var onRollbackFunc = function(transactions:Info? info, error? cause, boolean willTry) {
+       str += " -> trx rollback";
+   };
+
+   transaction {
+      transactions:onRollback(onRollbackFunc);
+      if(3 == 3) {
+         rollback;
+      }
+
+      if (5 == 5) {
+         rollback;
+      } else {
+          var resCommit = commit;
+      }
+   }
+}

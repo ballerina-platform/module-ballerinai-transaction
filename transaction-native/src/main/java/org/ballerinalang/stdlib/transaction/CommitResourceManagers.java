@@ -18,6 +18,8 @@
 
 package org.ballerinalang.stdlib.transaction;
 
+import io.ballerina.runtime.api.creators.ErrorCreator;
+import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.transactions.TransactionResourceManager;
 
@@ -29,7 +31,13 @@ import io.ballerina.runtime.transactions.TransactionResourceManager;
 public class CommitResourceManagers {
 
     public static boolean commitResourceManagers(BString transactionId, BString transactionBlockId) {
-        return TransactionResourceManager.getInstance().notifyCommit(transactionId.getValue(),
-                                                                     transactionBlockId.getValue());
+
+        TransactionResourceManager trxResourceMng = TransactionResourceManager.getInstance();
+        if (trxResourceMng.isInTransaction()) {
+            return trxResourceMng.notifyCommit(transactionId.getValue(), transactionBlockId.getValue());
+        } else {
+            throw ErrorCreator.createError(StringUtils
+                    .fromString("cannot call commit if the strand is not in transaction mode"));
+        }
     }
 }

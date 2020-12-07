@@ -18,6 +18,8 @@
 
 package org.ballerinalang.stdlib.transaction;
 
+//import io.ballerina.runtime.api.creators.ErrorCreator;
+//import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.transactions.TransactionResourceManager;
 
@@ -29,6 +31,12 @@ import io.ballerina.runtime.transactions.TransactionResourceManager;
 public class RollbackTransaction {
 
     public static void rollbackTransaction(BString transactionBlockId, Object err) {
-        TransactionResourceManager.getInstance().rollbackTransaction(transactionBlockId.getValue(), err);
+        TransactionResourceManager trxResourceMng = TransactionResourceManager.getInstance();
+        if (trxResourceMng.isInTransaction()) {
+            trxResourceMng.rollbackTransaction(transactionBlockId.getValue(), err);
+        } else {
+            throw ErrorCreator.createError(StringUtils
+                    .fromString("cannot call rollback if the strand is not in transaction mode"));
+        }
     }
 }
