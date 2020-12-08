@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 import ballerina/test;
-import ballerina/io;
+//import ballerina/io;
 import ballerina/lang.'transaction as transactions;
 
 @test:Config {
@@ -85,7 +85,7 @@ function runActualCode(int failureCutOff, boolean requestRollback, boolean doPan
             }
             a = a + " -> trx2 end.";
         }
-        io:println("trx1 end statement");
+        //io:println("trx1 end statement");
     }
     a = (a + " -> all trx ended.");
     return a;
@@ -428,5 +428,23 @@ function testNestedMiddleReturn() returns string {
                 return str;
             }
         }
+    }
+}
+
+@test:Config {
+}
+public function testUsingFuncParameter() {
+    createUpdateDeleteTransaction(error("theError"));
+}
+
+function createUpdateDeleteTransaction(error? dbOperation) {
+    transaction {
+        error? queryResult = dbOperation;
+        if(dbOperation is error) {
+            test:assertEquals(dbOperation.message(), "theError");
+        } else {
+            panic error("Expected an error");
+        }
+        var ign = commit;
     }
 }
