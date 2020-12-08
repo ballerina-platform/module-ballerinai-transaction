@@ -16,10 +16,18 @@
 import ballerina/test;
 import ballerina/lang.'transaction as trx;
 
-//TODO: fix
-//@test:Config {
-//}
-function testSetRollbackOnly() returns error? {
+@test:Config {
+}
+function testSetRollbackOnly() {
+    error? setRollbackOnlyRes = setRollbackOnly();
+    if (setRollbackOnlyRes is error) {
+        test:assertEquals("setRollbackOnly", setRollbackOnlyRes.message());
+    } else {
+        panic error("Expected an error");
+    }
+}
+
+function setRollbackOnly() returns error? {
     string str = "";
     var rollbackFunc = function (trx:Info info, error? cause, boolean willRetry) {
         if (cause is error) {

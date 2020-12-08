@@ -14,6 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 import ballerina/test;
+import ballerina/lang.'transaction as transactions;
 
 @test:Config {
 }
@@ -105,4 +106,69 @@ function testAppendOnFailError() returns string {
    }
    str += " -> Execution continues...";
    return str;
+}
+
+@test:Config {
+}
+function testJumpingToOnFail() {
+   string str = "";
+   transaction {
+      str += "-> Before error 1 is thrown";
+      transaction {
+          str += " -> Before error 2 is thrown";
+          var resCommit2 = commit;
+          int res2 =  check getErrorForOnFail();
+      }
+      str += "-> Should not reach here!";
+      var resCommit1 = commit;
+   }
+   on fail error e1 {
+       str += " -> Error caught! ";
+   }
+   str += "-> Execution continues...";
+
+   test:assertEquals("-> Before error 1 is thrown -> Before error 2 is thrown -> Error caught!" +
+   " -> Execution continues...", str);
+}
+
+@test:Config {
+}
+function testJumpingMultiLevelToOnFail() {
+   string str = "";
+   var onRollbackFunc1 = function(transactions:Info? info, error? cause, boolean willTry) {
+           str += " -> trx 1 rollback";
+   };
+   var onRollbackFunc2 = function(transactions:Info? info, error? cause, boolean willTry) {
+          str += " -> trx 2 rollback";
+   };
+   var onRollbackFunc3 = function(transactions:Info? info, error? cause, boolean willTry) {
+         str += " -> trx 3 rollback";
+   };
+   transaction {
+      str += "-> Before error 1 is thrown";
+      transactions:onRollback(onRollbackFunc1);
+      transaction {
+          transactions:onRollback(onRollbackFunc2);
+          transaction {
+              transactions:onRollback(onRollbackFunc3);
+              str += " -> Before error 2 is thrown";
+              int res3 =  check getErrorForOnFail();
+              var resCommit3 = commit;
+          } on fail var e {
+               str += " -> Error caught in inner onfail";
+               fail e;
+          }
+          str += "-> Should not reach here!";
+          var resCommit2 = commit;
+      }
+      str += "-> Should not reach here!";
+      var resCommit1 = commit;
+   }
+   on fail error e1 {
+       str += " -> Error caught in outter onfail";
+   }
+   str += " -> Execution continues...";
+
+   test:assertEquals("-> Before error 1 is thrown -> Before error 2 is thrown -> trx 3 rollback -> Error caught in" +
+   " inner onfail -> trx 2 rollback -> trx 1 rollback -> Error caught in outter onfail -> Execution continues...", str);
 }
