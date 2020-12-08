@@ -13,7 +13,6 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-import ballerina/io;
 import ballerina/test;
 import ballerina/lang.'transaction as transactions;
 
@@ -195,11 +194,9 @@ function multipleTrxSequenceWithRetry(boolean abort1, boolean abort2, boolean fa
 public class MyRetryTrxManager {
    private int count;
    public function init(int count = 2) {
-       io:println("Count: ", count);
        self.count = count;
    }
    public function shouldRetry(error? e) returns boolean {
-     io:println("Count: ", self.count);
      if e is error && self.count >  0 {
         self.count -= 1;
         return true;
@@ -213,9 +210,11 @@ public class MyRetryTrxManager {
 }
 function testCustomRetryTrxManager() {
     string|error result = customRetryTrxManager();
-    if (result is error) {
+    if (result is string) {
         test:assertEquals(result, "start attempt 1:error, attempt 2:error, attempt 3:result " +
                                                "returned end.");
+    } else {
+        panic error("Expected a string");
     }
 
 }
@@ -232,6 +231,37 @@ function customRetryTrxManager() returns string|error {
             str += (" attempt "+ count.toString() + ":result returned end.");
             var commitRes = commit;
             return str;
+        }
+    }
+    return str;
+}
+
+@test:Config {
+}
+function testGettingtPrevInfo () {
+    string|error result = gettPrevInfo();
+    if (result is string) {
+        test:assertEquals(result, "start retry count:0 attempt 1:error, retry count:1 attempt 2:error, " +
+        "retry count:2 attempt 3:result returned end.");
+    }
+
+}
+
+function gettPrevInfo() returns string|error {
+    string str = "start";
+    int count = 0;
+    transactions:Info transInfo;
+    retry<MyRetryTrxManager> (3) transaction {
+        transInfo = transactions:info();
+        int retryValRWC = transInfo.retryNumber;
+        str += " retry count:" + retryValRWC.toString();
+        count = count+1;
+        if(count < 3) {
+            str += (" attempt " + count.toString() + ":error,");
+            int bV = check trxErrorInRetry();
+        } else {
+            str += (" attempt "+ count.toString() + ":result returned end.");
+            var commitRes = commit;
         }
     }
     return str;
