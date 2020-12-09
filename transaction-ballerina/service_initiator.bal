@@ -33,12 +33,9 @@ function getCoordinationTypeToProtocolsMap() returns map<string[]> {
     return m;
 }
 
-@http:ServiceConfig {
-
-}
 //# Service on the initiator which is independent from the coordination type and handles registration of remote
 //# participants.
-service /balcoordinator/initiator on coordinatorListener {
+service object {} initiatorService = service object {
 
     # register(in: Micro-Transaction-Registration,
     # out: Micro-Transaction-Coordination?,
@@ -130,4 +127,4 @@ service /balcoordinator/initiator on coordinatorListener {
         }
         //TODO: Need to handle the  Cannot-Register error case
     }
-}
+};

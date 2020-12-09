@@ -16,6 +16,7 @@
 
 import ballerina/lang.'transaction as lang_trx;
 import ballerina/java;
+import ballerina/http;
 
 function startTransaction(string transactionBlockId, lang_trx:Info? prevAttempt = ()) returns string {
     string transactionId = "";
@@ -37,6 +38,16 @@ function startTransaction(string transactionBlockId, lang_trx:Info? prevAttempt 
          panic TransactionError("invoking transactional function " +
                                      "outside transactional scope is prohibited");
      }
+}
+
+function startTransactionCoordinator() {
+    http:Listener coordinatorListener = new http:Listener(coordinatorPort, { host: coordinatorHost });
+    //attach initiatorService to listener
+    error? attachInitiatorService = coordinatorListener.attach(initiatorService, "/balcoordinator/initiator");
+    // attach participant2pcService to listener
+    error? attachParticipant2pcService = coordinatorListener.attach(participant2pcService, "/balcoordinator/participant/'2pc");
+    //start registered services
+    error? startParticipant2pcService = coordinatorListener.'start();
 }
 
 # Commit local resource managers.
