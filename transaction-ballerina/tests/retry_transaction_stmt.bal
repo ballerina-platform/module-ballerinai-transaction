@@ -239,15 +239,24 @@ function customRetryTrxManager() returns string|error {
 @test:Config {
 }
 function testGettingtPrevInfo () {
-    string|error result = gettPrevInfo();
+    string|error result = getPrevInfo();
     if (result is string) {
         test:assertEquals(result, "start retry count:0 attempt 1:error, retry count:1 attempt 2:error, " +
         "retry count:2 attempt 3:result returned end.");
+    } else {
+        panic error("Expected a string");
     }
 
+    string|error nestedResult = getPrevInfoInNested();
+    if (nestedResult is string) {
+        test:assertEquals(nestedResult, "start retry1 count:0 retry2 count:0 attempt 1:error, " +
+        "retry2 count:1 attempt 2:error, retry2 count:2 attempt 3:result returned end.");
+    } else {
+        panic error("Expected a string");
+    }
 }
 
-function gettPrevInfo() returns string|error {
+function getPrevInfo() returns string|error {
     string str = "start";
     int count = 0;
     transactions:Info transInfo;
@@ -263,6 +272,33 @@ function gettPrevInfo() returns string|error {
             str += (" attempt "+ count.toString() + ":result returned end.");
             var commitRes = commit;
         }
+    }
+    return str;
+}
+
+function getPrevInfoInNested() returns string|error {
+    string str = "start";
+    int count = 0;
+    transactions:Info transInfo1;
+    retry<MyRetryTrxManager> (3) transaction {
+        transInfo1 = transactions:info();
+        int retryValRWC1 = transInfo1.retryNumber;
+        str += " retry1 count:" + retryValRWC1.toString();
+        transactions:Info transInfo2;
+        retry<MyRetryTrxManager> (3) transaction {
+                transInfo2 = transactions:info();
+                int retryValRWC2 = transInfo2.retryNumber;
+                str += " retry2 count:" + retryValRWC2.toString();
+                count = count+1;
+                if(count < 3) {
+                    str += (" attempt " + count.toString() + ":error,");
+                    int bV = check trxErrorInRetry();
+                } else {
+                    str += (" attempt "+ count.toString() + ":result returned end.");
+                    var commitRes = commit;
+                }
+        }
+        var ign = commit;
     }
     return str;
 }
