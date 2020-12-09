@@ -57,7 +57,7 @@ function startTransactionCoordinator() {
     //attach initiatorService to listener
     error? attachInitiatorService = coordinatorListener.attach(initiatorService, "/balcoordinator/initiator");
     // attach participant2pcService to listener
-    error? attachParticipant2pcService = coordinatorListener.attach(participant2pcService, "/balcoordinator/participant/'2pc");
+    error? attachParticipant2pcService = coordinatorListener.attach(participant2pcService, "/balcoordinator/participant/2pc");
     //start registered services
     error? startParticipant2pcService = coordinatorListener.'start();
 }
