@@ -317,3 +317,37 @@ function testInvokeRemoteTransactionalMethodInNonTransactionalScope() returns Ba
     Bank bank = new;
     return bank;
 }
+
+function testCommitWithinLoop() {
+    int[] intArr = [1, 2, 3];
+    transaction {
+        foreach int i in intArr {
+            var commitRes = commit;
+        }
+    }
+}
+
+function testRollbackWithinLoop() {
+    int[] intArr = [1, 2, 3];
+    transaction {
+        foreach int i in intArr {
+            if(i == 1) {
+                rollback;
+            }
+        }
+        var commitRes = commit;
+    }
+}
+
+function testReturnBeforeCommitInIf() returns int {
+    int[] intArr = [1, 2, 3];
+    transaction {
+        foreach int i in intArr {
+            if(i == 1) {
+                return 0;
+            }
+        }
+        var commitRes = commit;
+    }
+    return 1;
+}
