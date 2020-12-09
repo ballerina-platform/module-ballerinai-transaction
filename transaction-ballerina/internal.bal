@@ -17,6 +17,18 @@
 import ballerina/lang.'transaction as lang_trx;
 import ballerina/java;
 
+class TimestampImpl  {
+    *lang_trx:Timestamp;
+
+    public function toMillisecondsInt() returns int {
+        return externToMillisecondsInt(self);
+    }
+
+    public function toString() returns string {
+        return externToString(self);
+    }
+}
+
 function startTransaction(string transactionBlockId, lang_trx:Info? prevAttempt = ()) returns string {
     string transactionId = "";
   //  TransactionContext|error txnContext = createTransactionContext(TWO_PHASE_COMMIT, transactionBlockId);
@@ -136,4 +148,15 @@ function getRollbackOnlyError() returns lang_trx:Error? = @java:Method {
 function setContextAsNonTransactional() = @java:Method {
     'class: "org.ballerinalang.stdlib.transaction.SetContextAsNonTransactional",
     name: "setContextAsNonTransactional"
+} external;
+
+function externToMillisecondsInt(TimestampImpl timestamp) returns int = @java:Method {
+    'class: "org.ballerinalang.stdlib.transaction.ToMillisecondsInt",
+    name: "toMillisecondsInt"
+} external;
+
+function externToString(TimestampImpl timestamp) returns string = @java:Method {
+    'class: "org.ballerinalang.stdlib.transaction.ToString",
+    name: "toString",
+    paramTypes: ["io.ballerina.runtime.api.values.BObject"]
 } external;
