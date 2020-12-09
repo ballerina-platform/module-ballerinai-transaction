@@ -19,10 +19,8 @@ import ballerina/http;
 import ballerina/io;
 import ballerina/log;
 
-@http:ServiceConfig {
-}
 // # Service on the participant which handles protocol messages related to the 2-phase commit (2PC) coordination type.
-service /balcoordinator/participant/'2pc on coordinatorListener {
+service object {} participant2pcService = service object {
 
     # When the initiator sends "prepare" this resource on the participant will get called.
     # This participant will in turn call prepare on all its resource managers registered with the respective
@@ -154,4 +152,4 @@ service /balcoordinator/participant/'2pc on coordinatorListener {
             panic jsonResponse;
         }
     }
-}
+};

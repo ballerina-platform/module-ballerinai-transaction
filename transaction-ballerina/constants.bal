@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/config;
-import ballerina/http;
 
 const string basePath = "/balcoordinator";
 final string initiatorCoordinatorBasePath = basePath + "/initiator";
@@ -51,5 +50,3 @@ const string OUTCOME_MIXED = "mixed";
 const string OUTCOME_HAZARD = "hazard";
 
 const string TRANSACTION_UNKNOWN = "Transaction-Unknown";
-
-listener http:Listener coordinatorListener = new(coordinatorPort, { host: coordinatorHost });
