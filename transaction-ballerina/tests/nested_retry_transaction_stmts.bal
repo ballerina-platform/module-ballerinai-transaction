@@ -15,6 +15,7 @@
 // under the License.
 import ballerina/test;
 import ballerina/lang.'transaction as transactions;
+import ballerina/lang.'error as errors;
 
 @test:Config {
 }
