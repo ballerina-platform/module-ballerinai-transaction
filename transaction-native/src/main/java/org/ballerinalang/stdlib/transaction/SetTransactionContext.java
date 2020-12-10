@@ -18,9 +18,11 @@
 
 package org.ballerinalang.stdlib.transaction;
 
+import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.values.BMap;
+import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.transactions.TransactionConstants;
 import io.ballerina.runtime.transactions.TransactionLocalContext;
@@ -38,7 +40,7 @@ import static io.ballerina.runtime.transactions.TransactionConstants.TRANSACTION
  */
 public class SetTransactionContext {
 
-    public static void setTransactionContext(BMap txDataStruct, Object prevAttemptInfo) {
+    public static void setTransactionContext(Environment env, BMap txDataStruct, Object prevAttemptInfo) {
         String globalTransactionId = txDataStruct.get(TransactionConstants.TRANSACTION_ID).toString();
         String transactionBlockId = txDataStruct.get(TransactionConstants.TRANSACTION_BLOCK_ID).toString();
         String url = txDataStruct.get(TransactionConstants.REGISTER_AT_URL).toString();
@@ -46,9 +48,13 @@ public class SetTransactionContext {
         long retryNmbr = getRetryNumber(prevAttemptInfo);
         BMap<BString, Object> trxContext = ValueCreator.createRecordValue(TRANSACTION_PACKAGE_ID,
                                                                            "Info");
+        BObject startTimeObj = ValueCreator.createObjectValue(env.getCurrentModule(),
+                "TimestampImpl");
+        startTimeObj.addNativeData("timeValue", System.currentTimeMillis());
+
         Object[] trxContextData = new Object[]{
                 ValueCreator.createArrayValue(globalTransactionId.getBytes(Charset.defaultCharset())), retryNmbr,
-                System.currentTimeMillis(), prevAttemptInfo
+                startTimeObj, prevAttemptInfo
         };
         BMap<BString, Object> infoRecord = ValueCreator.createRecordValue(trxContext, trxContextData);
         TransactionLocalContext trxCtx = TransactionLocalContext
