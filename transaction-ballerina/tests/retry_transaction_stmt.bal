@@ -15,6 +15,7 @@
 // under the License.
 import ballerina/test;
 import ballerina/lang.'transaction as transactions;
+import ballerina/lang.'error as errors;
 
 @test:Config {
 }
@@ -67,7 +68,7 @@ function actualRetryTrxCode(int failureCutOff, boolean requestRollback, boolean 
 
 function trxErrorInRetry()  returns int|error {
     if (5 == 5) {
-        return error("TransactionError");
+        return errors:Retriable("TransactionError");
     }
     return 5;
 }
@@ -89,7 +90,7 @@ function transactionFailedHelperWithRetry() returns string|error {
 }
 
 function getErrorInRetry() returns error? {
-    return error("Generic Error", message = "Failed");
+    return errors:Retriable("Generic Error", message = "Failed");
 }
 
 @test:Config {
@@ -154,7 +155,7 @@ function multipleTrxSequenceWithRetry(boolean abort1, boolean abort2, boolean fa
             }
             if(fail1 && !failed1) {
               failed1 = true;
-              error err = error("TransactionError");
+              error err = errors:Retriable("TransactionError");
               panic err;
             }
         } else {
@@ -180,7 +181,7 @@ function multipleTrxSequenceWithRetry(boolean abort1, boolean abort2, boolean fa
            }
            if(fail2 && !failed2) {
              failed2 = true;
-             error err = error("TransactionError");
+             error err = errors:Retriable("TransactionError");
              panic err;
            }
         } else {

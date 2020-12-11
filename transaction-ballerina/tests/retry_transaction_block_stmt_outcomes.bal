@@ -16,6 +16,7 @@
 import ballerina/io;
 import ballerina/test;
 import ballerina/lang.'transaction as transactions;
+import ballerina/lang.'error as errors;
 
 @test:Config {
 }
@@ -673,7 +674,7 @@ boolean doPanicAfterRollback2, boolean errInSecond) returns string|error {
                 var e = commit;
             }
             if (errInRollback1 && !doPanicAfterRollback1 && !errInSecond) {
-                fail error("Rollback due to error in trx 1");
+                fail errors:Retriable("Rollback due to error in trx 1");
             }
             if (doPanicAfterRollback1) {
                 panic error("Panic in nested retry 1");
@@ -714,7 +715,7 @@ boolean doPanicAfterRollback2, boolean errInSecond) returns string|error {
                 var e = commit;
             }
             if (errInRollback2 && !doPanicAfterRollback2 && errInSecond) {
-                fail error("Rollback due to error in trx 2");
+                fail errors:Retriable("Rollback due to error in trx 2");
             }
             if (doPanicAfterRollback2) {
                 panic error("Panic in nested retry 2");
@@ -728,7 +729,7 @@ boolean doPanicAfterRollback2, boolean errInSecond) returns string|error {
 
 function incrementCount(int i) returns int|error {
     if (i == 2) {
-        error err = error("Error in increment count");
+        error err = errors:Retriable("Error in increment count");
         return err;
     } else {
         int x = i + 2;

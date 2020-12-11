@@ -15,6 +15,7 @@
 // under the License.
 import ballerina/test;
 import ballerina/lang.'transaction as transactions;
+import ballerina/lang.'error as errors;
 
 @test:Config {
 }
@@ -91,7 +92,7 @@ function runActualCode(int failureCutOff, boolean requestRollback, boolean doPan
 
 function trxError()  returns int|error {
     if (5 == 5) {
-        return error("TransactionError");
+        return errors:Retriable("TransactionError");
     }
     return 5;
 }
@@ -120,7 +121,7 @@ function transactionFailedHelper() returns string|error {
 }
 
 function getGenericError() returns error? {
-    return error("Generic Error", message = "Failed");
+    return errors:Retriable("Generic Error", message = "Failed");
 }
 
 @test:Config {
