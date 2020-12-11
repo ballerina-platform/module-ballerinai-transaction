@@ -29,8 +29,7 @@ public client class FooClient {
 
 }
 
-//@test:Config {}
-//todo https://github.com/ballerina-platform/module-ballerinai-transaction/issues/35
+@test:Config {}
 function testTransactionalServices() {
     transaction {
         var response = stClient->foo();
