@@ -48,6 +48,16 @@ org = "ballerina"
 name = "task"
 version = "@stdlib.task.version@"
 
+[[dependency]]
+org = "ballerina"
+name = "sql"
+version = "@stdlib.sql.version@"
+
+[[dependency]]
+org = "ballerina"
+name = "jdbc"
+version = "@stdlib.jdbc.version@"
+
 [[platform.java11.dependency]]
 artifactId = "transaction"
 version = "@project.version@"
