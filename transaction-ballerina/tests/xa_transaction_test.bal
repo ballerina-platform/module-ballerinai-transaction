@@ -57,7 +57,11 @@ function testXATransaction() {
         var e2 = checkpanic dbClient2->execute("insert into Salary (id, value ) values (1, 1000)");
         var result = commit;
 
-        test:assertEquals(str, "trx started -> commit triggered");
+        if (result is ()) {
+            str += " -> commit successful";
+        }
+
+        test:assertEquals(str, "trx started -> commit triggered -> commit successful");
     }
 
     checkpanic dbClient1.close();
