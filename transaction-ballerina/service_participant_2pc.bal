@@ -16,7 +16,6 @@
 
 
 import ballerina/http;
-import ballerina/io;
 import ballerina/log;
 
 // # Service on the participant which handles protocol messages related to the 2-phase commit (2PC) coordination type.
@@ -30,7 +29,6 @@ service object {} participant2pcService = service object {
     #                        participant as part of the participant protocol endpoint. The initiator isn't aware
     #                        of this `transactionBlockId` and will simply send it back as part of the URL it calls.
     @http:ResourceConfig {
-        body:"prepareReq",
         consumes:["application/json"]
     }
     resource function post [string transactionBlockId]/prepare(http:Caller conn, http:Request req) {
@@ -39,7 +37,7 @@ service object {} participant2pcService = service object {
         http:Response res = new;
         final string transactionId = prepareReq.transactionId;
         final string participatedTxnId = getParticipatedTransactionId(transactionId, transactionBlockId);
-        log:printDebug(() => io:sprintf("Prepare received for transaction: %s", participatedTxnId));
+        //log:printDebug(() => io:sprintf("Prepare received for transaction: %s", participatedTxnId));
         PrepareResponse prepareRes = {};
 
         var participatedTxn = participatedTransactions[participatedTxnId];
@@ -58,13 +56,13 @@ service object {} participant2pcService = service object {
                     res.statusCode = http:STATUS_OK;
                     participatedTxn.state = TXN_STATE_PREPARED;
                     prepareRes.message = PREPARE_RESULT_PREPARED_STR;
-                    log:printDebug(() => io:sprintf("Prepared transaction: %s", transactionId));
+                    //log:printDebug(() => io:sprintf("Prepared transaction: %s", transactionId));
                 } else {
                     res.statusCode = http:STATUS_OK;
                     prepareRes.message = PREPARE_RESULT_ABORTED_STR;
                     participatedTxn.state = TXN_STATE_ABORTED;
                     removeParticipatedTransaction(participatedTxnId);
-                    log:printDebug(() => io:sprintf("Aborted transaction: %s", transactionId));
+                    //log:printDebug(() => io:sprintf("Aborted transaction: %s", transactionId));
                 }
             }
         }
@@ -75,7 +73,7 @@ service object {} participant2pcService = service object {
             var resResult = conn->respond(res);
             if (resResult is error) {
                 log:printError("Sending response for prepare request for transaction " +
-                transactionId + " failed", resResult);
+                transactionId + " failed", err = resResult);
             }
         } else {
             panic jsonResponse;
@@ -90,7 +88,6 @@ service object {} participant2pcService = service object {
     #                        participant as part of the participant protocol endpoint. The initiator isn't aware
     #                        of this `transactionBlockId` and will simply send it back as part of the URL it calls.
     @http:ResourceConfig {
-        body:"notifyReq",
         consumes:["application/json"]
     }
     resource function post [string transactionBlockId]/notify(http:Caller conn, http:Request req) {
@@ -100,7 +97,7 @@ service object {} participant2pcService = service object {
         final string transactionId = notifyReq.transactionId;
         final string participatedTxnId = getParticipatedTransactionId(transactionId, transactionBlockId);
         final string message = notifyReq.message;
-        log:printDebug(() => io:sprintf("Notify(%s) received for transaction: %s", message, participatedTxnId));
+        //log:printDebug(() => io:sprintf("Notify(%s) received for transaction: %s", message, participatedTxnId));
         NotifyResponse notifyRes = {};
         var txn = participatedTransactions[participatedTxnId];
         if (txn is ()) {
@@ -146,7 +143,7 @@ service object {} participant2pcService = service object {
             var resResult = conn->respond(res);
             if (resResult is http:ListenerError) {
                 log:printError("Sending response for notify request for transaction " + transactionId +
-                        " failed", resResult);
+                        " failed", err = resResult);
             }
         } else {
             panic jsonResponse;

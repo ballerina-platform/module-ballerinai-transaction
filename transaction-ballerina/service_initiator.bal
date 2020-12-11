@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/http;
-import ballerina/io;
 import ballerina/log;
 
 public const string TWO_PHASE_COMMIT = "2pc";
@@ -65,7 +64,6 @@ service object {} initiatorService = service object {
     #
     # Micro-Transaction-Unknown
     @http:ResourceConfig {
-        body:"regReq",
         consumes:["application/json"]
     }
     resource function post [string transactionBlockId]/register(http:Caller conn, http:Request req) {
@@ -84,8 +82,8 @@ service object {} initiatorService = service object {
             } else {
                 RemoteProtocol[] participantProtocols = regReq.participantProtocols;
                 if (isRegisteredParticipant(participantId, initiatedTxn.participants)) {
-                    log:printDebug(() => io:sprintf("Already-Registered. TID:%s,participant ID:%s", txnId,
-                            participantId));
+                    //log:printDebug(() => io:sprintf("Already-Registered. TID:%s,participant ID:%s", txnId,
+                    //        participantId));
                 } else {
                     RemoteParticipant participant = new(participantId, initiatedTxn.transactionId,
                                                         participantProtocols);
@@ -115,10 +113,10 @@ service object {} initiatorService = service object {
                     var resResult = conn->respond(res);
                     if (resResult is http:ListenerError) {
                         log:printError("Sending response for register request for transaction " + txnId +
-                                " failed", resResult);
+                                " failed", err = resResult);
                     } else {
-                        log:printDebug(() => io:sprintf("Registered remote participant: %s for transaction: %s",
-                                participantId, txnId));
+                        //log:printDebug(() => io:sprintf("Registered remote participant: %s for transaction: %s",
+                        //        participantId, txnId));
                     }
                 } else {
                     panic resPayload;
