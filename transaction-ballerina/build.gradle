@@ -42,6 +42,11 @@ jar {
     }
 }
 
+task copyToLib(type: Copy) {
+    into "$project.projectDir/lib"
+    from configurations.externalJars
+}
+
 def packageName = "transaction"
 def packageOrg = "ballerinai"
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
@@ -53,6 +58,7 @@ def tomlVersion = project.version.split("-")[0]
 def originalConfig = ballerinaConfigFile.text
 
 task unpackJballerinaTools(type: Copy) {
+    dependsOn(copyToLib)
     configurations.jbalTools.resolvedConfiguration.resolvedArtifacts.each { artifact ->
         from zipTree(artifact.getFile())
         into new File("${buildDir}/target/extracted-distributions", "jballerina-tools-zip")
