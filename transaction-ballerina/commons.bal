@@ -239,7 +239,7 @@ function createTransactionContext(string coordinationType, string transactionBlo
             transactionId:txnId,
             transactionBlockId:transactionBlockId,
             coordinationType:coordinationType,
-            registerAtURL:"http://" + value:toString(getHostAddress()) + ":" + value:toString(getAvailablePort()) +
+            registerAtURL:"http://" + value:toString(coordinatorHost) + ":" + value:toString(coordinatorPort) +
                 initiatorCoordinatorBasePath + "/" + transactionBlockId + registrationPath
         };
         return txnContext;
