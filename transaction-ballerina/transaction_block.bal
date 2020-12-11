@@ -14,8 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/io;
-import ballerina/log;
 import ballerina/java;
 import ballerina/lang.'transaction as lang_trx;
 
@@ -97,18 +95,18 @@ transactional function beginTransactionInitiator(string transactionBlockId, int 
                 break;
             }
         } else {
-            log:printDebug(trxResult.message());
+            //log:printDebug(trxResult.message());
         }
         rCnt = rCnt + 1;
         // retry
         if (rCnt <= rMax) {
             rollbackResult = trap rollbackTransaction(transactionBlockId);
             if (rollbackResult is error) {
-                log:printDebug(rollbackResult.message());
+                //log:printDebug(rollbackResult.message());
             }
             retryResult = trap retryFunc();
             if (retryResult is error) {
-                log:printDebug(retryResult.message());
+                //log:printDebug(retryResult.message());
             }
         } else {
             break;
@@ -117,12 +115,12 @@ transactional function beginTransactionInitiator(string transactionBlockId, int 
     if (isTrxSuccess) {
         committedResult = trap committedFunc();
         if (committedResult is error) {
-            log:printDebug(committedResult.message());
+            //log:printDebug(committedResult.message());
         }
     } else {
         abortResult = trap handleAbortTransaction(transactionId, transactionBlockId, abortedFunc);
         if (abortResult is error) {
-            log:printDebug(abortResult.message());
+            //log:printDebug(abortResult.message());
         }
     }
     cleanupTransactionContext(transactionBlockId);
@@ -156,7 +154,7 @@ function beginLocalParticipant(string transactionBlockId, function () returns an
             panic returnContext;
         } else {
             final string trxId = returnContext.transactionId;
-            log:printDebug(() => io:sprintf("participant registered: %s", trxId));
+            //log:printDebug(() => io:sprintf("participant registered: %s", trxId));
         }
         var result = trap transactionParticipantWrapper(trxFunc);
         if (result is error) {
@@ -186,7 +184,7 @@ function beginRemoteParticipant(string transactionBlockId) {
             panic returnContext;
         } else {
             final string trxId = returnContext.transactionId;
-            log:printDebug(() => io:sprintf("participant registered: %s", trxId));
+            //log:printDebug(() => io:sprintf("participant registered: %s", trxId));
         }
         //var result = trap transactionParticipantWrapper(trxFunc);
         //if (result is error) {
