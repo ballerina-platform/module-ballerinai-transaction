@@ -42,6 +42,11 @@ jar {
     }
 }
 
+task copyToLib(type: Copy) {
+    into "$project.projectDir/lib"
+    from configurations.externalJars
+}
+
 def packageName = "transaction"
 def packageOrg = "ballerinai"
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
@@ -53,6 +58,7 @@ def tomlVersion = project.version.split("-")[0]
 def originalConfig = ballerinaConfigFile.text
 
 task unpackJballerinaTools(type: Copy) {
+    dependsOn(copyToLib)
     configurations.jbalTools.resolvedConfiguration.resolvedArtifacts.each { artifact ->
         from zipTree(artifact.getFile())
         into new File("${buildDir}/target/extracted-distributions", "jballerina-tools-zip")
@@ -97,6 +103,8 @@ task updateTomlVerions {
         def stdlibDependentTimeVersion = project.stdlibTimeVersion.split("-")[0]
         def stdlibDependentHttpVersion = project.stdlibHttpVersion.split("-")[0]
         def stdlibDependentLogVersion = project.stdlibLogVersion.split("-")[0]
+        def stdlibDependentSqlVersion = project.stdlibSqlVersion.split("-")[0]
+        def stdlibDependentJdbcVersion = project.stdlibJdbcVersion.split("-")[0]
 
         def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
@@ -109,6 +117,8 @@ task updateTomlVerions {
         newConfig = newConfig.replace("@stdlib.http.version@", stdlibDependentHttpVersion)
         newConfig = newConfig.replace("@stdlib.log.version@", stdlibDependentLogVersion)
         newConfig = newConfig.replace("@stdlib.system.version@", stdlibDependentSystemVersion)
+        newConfig = newConfig.replace("@stdlib.sql.version@", stdlibDependentSqlVersion)
+        newConfig = newConfig.replace("@stdlib.jdbc.version@", stdlibDependentJdbcVersion)
         ballerinaConfigFile.text = newConfig
     }
 }
