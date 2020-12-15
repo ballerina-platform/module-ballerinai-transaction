@@ -52,7 +52,7 @@ function startTransaction(string transactionBlockId, lang_trx:Info? prevAttempt 
      }
 }
 
- function startTransactionCoordinator() returns error? {
+function startTransactionCoordinator() returns error? {
     http:Listener coordinatorListener = new http:Listener(coordinatorPort, { host: coordinatorHost });
     //attach initiatorService to listener
     error? attachInitiatorService = coordinatorListener.attach(initiatorService, "/balcoordinator/initiator");
