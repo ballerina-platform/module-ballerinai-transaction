@@ -31,8 +31,6 @@ ext.stdlibStringUtilsVersion = project.stdlibStringUtilsVersion
 ext.stdlibConfigVersion = project.stdlibConfigVersion
 ext.stdlibSystemVersion = project.stdlibSystemVersion
 ext.stdlibHttpVersion = project.stdlibHttpVersion
-ext.stdlibJdbcVersion = project.stdlibJdbcVersion
-ext.stdlibSqlVersion = project.stdlibSqlVersion
 
 ext.stdlibMimeVersion = project.stdlibMimeVersion
 ext.stdlibLogVersion = project.stdlibLogVersion
@@ -177,22 +175,6 @@ allprojects {
                 password System.getenv("packagePAT")
             }
         }
-
-        maven {
-            url "https://maven.pkg.github.com/ballerina-platform/module-ballerina-java.jdbc"
-            credentials {
-                username System.getenv("packageUser")
-                password System.getenv("packagePAT")
-            }
-        }
-
-        maven {
-            url "https://maven.pkg.github.com/ballerina-platform/module-ballerina-sql"
-            credentials {
-                username System.getenv("packageUser")
-                password System.getenv("packagePAT")
-            }
-        }
     }
 }
 
@@ -200,7 +182,6 @@ subprojects {
     apply plugin: 'java'
     configurations {
         ballerinaStdLibs
-        externalJars
     }
     dependencies {
         /* Standard libraries */
@@ -208,8 +189,6 @@ subprojects {
         ballerinaStdLibs "org.ballerinalang:stringutils-ballerina:${stdlibStringUtilsVersion}"
         ballerinaStdLibs "org.ballerinalang:config-ballerina:${stdlibConfigVersion}"
         ballerinaStdLibs "org.ballerinalang:system-ballerina:${stdlibSystemVersion}"
-        ballerinaStdLibs "org.ballerinalang:java.jdbc-ballerina:${stdlibJdbcVersion}"
-        ballerinaStdLibs "org.ballerinalang:sql-ballerina:${stdlibSqlVersion}"
 
         ballerinaStdLibs "org.ballerinalang:http-ballerina:${stdlibHttpVersion}"
         ballerinaStdLibs "org.ballerinalang:cache-ballerina:${stdlibCacheVersion}"
@@ -224,10 +203,6 @@ subprojects {
         ballerinaStdLibs "org.ballerinalang:crypto-ballerina:${stdlibCryptoVersion}"
         ballerinaStdLibs "org.ballerinalang:auth-ballerina:${stdlibAuthVersion}"
         ballerinaStdLibs "org.ballerinalang:mime-ballerina:${stdlibMimeVersion}"
-
-        externalJars (group: 'com.h2database', name: 'h2', version: "1.4.200") {
-            transitive = false
-        }
     }
 }
 
