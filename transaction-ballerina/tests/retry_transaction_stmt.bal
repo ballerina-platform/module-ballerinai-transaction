@@ -35,6 +35,17 @@ function testPanicInRetryStmt() {
     }
 }
 
+@test:Config {
+}
+function testRollbackInRetryStmt() {
+    string|error x = actualRetryTrxCode(0, true, false);
+    if (x is string) {
+        test:assertEquals(x, "start fc-0 inTrx Rollback endTrx end");
+    } else {
+        panic error("Expected a string");
+    }
+}
+
 function actualRetryTrxCode(int failureCutOff, boolean requestRollback, boolean doPanic) returns (string|error) {
     string a = "";
     a = a + "start";
