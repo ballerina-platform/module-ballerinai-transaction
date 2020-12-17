@@ -17,21 +17,6 @@
 import ballerina/java;
 import ballerina/lang.'transaction as lang_trx;
 
-public type Info record {|
-   // unique identifier
-   byte[] xid;
-   // non-zero means this transaction was a retry of
-   // a previous one
-   int retryNumber;
-   // probably useful for timeouts and logs
-   int startTime;
-   // maybe useful
-   Info? prevAttempt;
-|};
-
-public type CommitHandler function(Info info);
-public type RollbackHandler function(Info info, error? cause, boolean willRetry);
-
 # Handles the transaction initiator block.
 # Transaction initiator block will be desugared to following method.
 #
@@ -184,6 +169,7 @@ function beginRemoteParticipant(string transactionBlockId) {
             panic returnContext;
         } else {
             final string trxId = returnContext.transactionId;
+            setTransactionContext(returnContext);
             //log:printDebug(() => io:sprintf("participant registered: %s", trxId));
         }
         //var result = trap transactionParticipantWrapper(trxFunc);
