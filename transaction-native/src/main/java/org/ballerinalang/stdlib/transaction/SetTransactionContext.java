@@ -54,8 +54,7 @@ public class SetTransactionContext {
 
         Object[] trxContextData = new Object[]{
                 ValueCreator.createArrayValue(globalTransactionId.getBytes(Charset.defaultCharset())), retryNmbr,
-                startTimeObj, prevAttemptInfo
-        };
+                prevAttemptInfo, startTimeObj};
         BMap<BString, Object> infoRecord = ValueCreator.createRecordValue(trxContext, trxContextData);
         TransactionLocalContext trxCtx = TransactionLocalContext
                 .createTransactionParticipantLocalCtx(globalTransactionId, url, protocol, infoRecord);
