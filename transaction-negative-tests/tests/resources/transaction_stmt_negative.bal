@@ -351,3 +351,12 @@ function testReturnBeforeCommitInIf() returns int {
     }
     return 1;
 }
+
+function transactionalAnonyFunction() {
+    string str = "";
+    function () foo = transactional function ()  {
+       str += "within non-transactional function foo";
+    };
+
+    foo();
+}

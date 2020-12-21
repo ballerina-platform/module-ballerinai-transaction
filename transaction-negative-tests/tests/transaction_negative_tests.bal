@@ -12,7 +12,7 @@ public function testTransactionStatement() {
     system:Process|error execResult = system:exec(config:getAsString(BAL_EXEC_PATH), {}, (), "run",
     "tests/resources/transaction_stmt_negative.bal");
     string[] logLines = getLogLinesFromExecResult(execResult);
-    test:assertEquals(logLines.length(), 35);
+    test:assertEquals(logLines.length(), 36);
     validateLog(logLines[3], "ERROR", "transaction_stmt_negative.bal:(21:5,29:6)", "invalid transaction commit count");
     validateLog(logLines[4], "ERROR", "transaction_stmt_negative.bal:(27:9,27:18)", "rollback not allowed here");
     validateLog(logLines[5], "ERROR", "transaction_stmt_negative.bal:(36:5,44:6)", "transaction statement cannot " +
@@ -64,6 +64,8 @@ public function testTransactionStatement() {
     validateLog(logLines[31], "ERROR", "transaction_stmt_negative.bal:(325:29,325:35)", "commit not allowed here");
     validateLog(logLines[32], "ERROR", "transaction_stmt_negative.bal:(335:17,335:26)", "rollback not allowed here");
     validateLog(logLines[33], "ERROR", "transaction_stmt_negative.bal:(347:17,347:26)",
+    "return statement cannot be used to exit from a transaction without a commit or a rollback statement");
+    validateLog(logLines[34], "ERROR", "transaction_stmt_negative.bal:(347:17,347:26)",
     "return statement cannot be used to exit from a transaction without a commit or a rollback statement");
 }
 
