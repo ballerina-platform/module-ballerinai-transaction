@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/http;
+import ballerina/lang.'transaction as lang_trx;
 
 type InitiatorClientConfig record {
     string registerAtURL = "";
@@ -56,7 +57,7 @@ client class InitiatorClientEP {
         http:Response res = <http:Response> result;
         int statusCode = res.statusCode;
         if (statusCode != http:STATUS_OK) {
-            return TransactionError("Registration for transaction: " + transactionId + " failed response code: "
+            return lang_trx:Error("Registration for transaction: " + transactionId + " failed response code: "
                 + statusCode.toString());
         }
         json resPayload = check res.getJsonPayload();
