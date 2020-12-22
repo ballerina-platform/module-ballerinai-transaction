@@ -20,6 +20,7 @@ import ballerina/log;
 import ballerina/system;
 import ballerina/task;
 import ballerina/time;
+import ballerina/lang.'transaction as lang_trx;
 import ballerina/lang.'value as value;
 
 # ID of the local participant used when registering with the initiator.
@@ -263,7 +264,7 @@ function registerLocalParticipantWithInitiator(string transactionId, string tran
     LocalProtocol participantProtocol = {name:PROTOCOL_DURABLE};
     var initiatedTxn = initiatedTransactions[transactionId];
     if (initiatedTxn is ()) {
-        return TransactionError("Transaction-Unknown. Invalid TID:" + transactionId);
+        return lang_trx:Error("Transaction-Unknown. Invalid TID:" + transactionId);
     } else {
         if (isRegisteredParticipant(participantId, initiatedTxn.participants)) { // Already-Registered
             //log:printDebug(() => io:sprintf("Already-Registered. TID:%s,participant ID:%s", trxId,
@@ -274,7 +275,7 @@ function registerLocalParticipantWithInitiator(string transactionId, string tran
             };
             return txnCtx;
         } else if (!protocolCompatible(initiatedTxn.coordinationType, [participantProtocol])) { // Invalid-Protocol
-            return TransactionError("Invalid-Protocol in local participant. TID:" + transactionId + ",participant ID:" +
+            return lang_trx:Error("Invalid-Protocol in local participant. TID:" + transactionId + ",participant ID:" +
             participantId);
         } else {
             //Set initiator protocols
@@ -299,14 +300,14 @@ function registerLocalParticipantWithInitiator(string transactionId, string tran
 function removeParticipatedTransaction(string participatedTxnId) {
     var removed = trap participatedTransactions.remove(participatedTxnId);
     if (removed is error) {
-        panic TransactionError("Removing participated transaction: " + participatedTxnId + " failed");
+        panic lang_trx:Error("Removing participated transaction: " + participatedTxnId + " failed");
     }
 }
 
 function removeInitiatedTransaction(string transactionId) {
     var removed = trap initiatedTransactions.remove(transactionId);
     if (removed is error) {
-        panic TransactionError("Removing initiated transaction: " + transactionId + " failed");
+        panic lang_trx:Error("Removing initiated transaction: " + transactionId + " failed");
     }
 }
 
@@ -391,7 +392,7 @@ function registerParticipantWithRemoteInitiator(string transactionId, string tra
         log:printError(msg, err = result);
         // TODO : Fix me.
         //map data = { cause: err };
-        return TransactionError(msg);
+        return lang_trx:Error(msg);
     } else {
         RemoteProtocol[] coordinatorProtocols = result.coordinatorProtocols;
         TwoPhaseCommitTransaction twopcTxn = new(transactionId, transactionBlockId);
