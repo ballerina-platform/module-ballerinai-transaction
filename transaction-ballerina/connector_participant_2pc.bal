@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/http;
+import ballerina/lang.'transaction as lang_trx;
 
 type Participant2pcClientConfig record {
     string participantURL = "";
@@ -54,13 +55,13 @@ client class Participant2pcClientEP {
         http:Response res = <http:Response> result;
         int statusCode = res.statusCode;
         if (statusCode == http:STATUS_NOT_FOUND) {
-            return TransactionError(TRANSACTION_UNKNOWN);
+            return lang_trx:Error(TRANSACTION_UNKNOWN);
         } else if (statusCode == http:STATUS_OK) {
             json payload = check res.getJsonPayload();
             PrepareResponse prepareRes = check payload.cloneWithType(PrepareResponseTypedesc);
             return <@untainted> prepareRes.message;
         } else {
-            return TransactionError("Prepare failed. Transaction: " + transactionId + ", Participant: " +
+            return lang_trx:Error("Prepare failed. Transaction: " + transactionId + ", Participant: " +
                 self.conf.participantURL);
         }
     }
@@ -82,9 +83,9 @@ client class Participant2pcClientEP {
         } else if ((statusCode == http:STATUS_BAD_REQUEST && msg == NOTIFY_RESULT_NOT_PREPARED_STR) ||
             (statusCode == http:STATUS_NOT_FOUND && msg == TRANSACTION_UNKNOWN) ||
             (statusCode == http:STATUS_INTERNAL_SERVER_ERROR && msg == NOTIFY_RESULT_FAILED_EOT_STR)) {
-            return TransactionError(msg);
+            return lang_trx:Error(msg);
         } else { // Some other error state
-            return TransactionError("Notify failed. Transaction: " + transactionId + ", Participant: " +
+            return lang_trx:Error("Notify failed. Transaction: " + transactionId + ", Participant: " +
                 self.conf.participantURL);
         }
     }

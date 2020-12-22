@@ -33,7 +33,7 @@ transactional function beginTransactionInitiator(string transactionBlockId, int 
     boolean isTrxSuccess = false;
     int rCnt = 1;
     if (rMax < 0) {
-        panic TransactionError("invalid retry count");
+        panic lang_trx:Error("invalid retry count");
     }
     // If global tx enabled, it is managed via transaction coordinator.Otherwise it is managed locally
     // without any interaction with the transaction coordinator.
@@ -247,7 +247,7 @@ function abortTransaction(string transactionId, string transactionBlockId) retur
         if (initiatedTxn is TwoPhaseCommitTransaction) {
             return initiatedTxn.markForAbortion();
         } else {
-            panic TransactionError("Unknown transaction");
+            panic lang_trx:Error("Unknown transaction");
         }
     }
 }
