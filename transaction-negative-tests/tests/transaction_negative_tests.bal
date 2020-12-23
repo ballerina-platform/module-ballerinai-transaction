@@ -135,3 +135,13 @@ function validateLog(string log, string logLevel, string logLocation, string log
     test:assertTrue(stringutils:contains(log, logLocation));
     test:assertTrue(stringutils:contains(log, logMsg));
 }
+
+@test:Config {}
+public function testTransactionFunction() {
+    system:Process|error execResult = system:exec(config:getAsString(BAL_EXEC_PATH), {}, (), "run",
+    "tests/resources/transactional_functions_negative.bal");
+    string[] logLines = getLogLinesFromExecResult(execResult);
+    test:assertEquals(logLines.length(), 5);
+    validateLog(logLines[3], "ERROR", "transactional_functions_negative.bal:(18:23,20:6)",
+    "incompatible types: expected 'function () returns ()', found 'transactional function () returns ()");
+}
