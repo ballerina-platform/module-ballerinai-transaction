@@ -17,14 +17,14 @@
 import ballerina/cache;
 import ballerina/http;
 import ballerina/log;
-import ballerina/system;
+import ballerina/uuid;
 import ballerina/task;
 import ballerina/time;
 import ballerina/lang.'transaction as lang_trx;
 import ballerina/lang.'value as value;
 
 # ID of the local participant used when registering with the initiator.
-string localParticipantId = system:uuid();
+string localParticipantId = uuid:createType4AsString();
 
 # This map is used for caching transaction that are initiated.
 map<TwoPhaseCommitTransaction> initiatedTransactions = {};

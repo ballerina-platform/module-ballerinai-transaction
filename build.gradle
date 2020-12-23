@@ -30,6 +30,7 @@ ext.stdlibIoVersion = project.stdlibIoVersion
 ext.stdlibStringUtilsVersion = project.stdlibStringUtilsVersion
 ext.stdlibConfigVersion = project.stdlibConfigVersion
 ext.stdlibSystemVersion = project.stdlibSystemVersion
+ext.stdlibUuidVersion = project.stdlibUuidVersion
 ext.stdlibHttpVersion = project.stdlibHttpVersion
 
 ext.stdlibMimeVersion = project.stdlibMimeVersion
@@ -189,6 +190,7 @@ subprojects {
         ballerinaStdLibs "org.ballerinalang:stringutils-ballerina:${stdlibStringUtilsVersion}"
         ballerinaStdLibs "org.ballerinalang:config-ballerina:${stdlibConfigVersion}"
         ballerinaStdLibs "org.ballerinalang:system-ballerina:${stdlibSystemVersion}"
+        ballerinaStdLibs "org.ballerinalang:uuid-ballerina:${stdlibUuidVersion}"
 
         ballerinaStdLibs "org.ballerinalang:http-ballerina:${stdlibHttpVersion}"
         ballerinaStdLibs "org.ballerinalang:cache-ballerina:${stdlibCacheVersion}"
