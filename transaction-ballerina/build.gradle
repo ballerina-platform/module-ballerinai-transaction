@@ -91,7 +91,6 @@ task updateTomlVerions {
         def stdlibDependentIoVersion = project.stdlibIoVersion.split("-")[0]
         def stdlibDependentStringutilsVersion = project.stdlibStringUtilsVersion.split("-")[0]
         def stdlibDependentConfigVersion = project.stdlibConfigVersion.split("-")[0]
-        def stdlibDependentSystemVersion = project.stdlibSystemVersion.split("-")[0]
         def stdlibDependentUuidVersion = project.stdlibUuidVersion.split("-")[0]
         def stdlibDependentCacheVersion = project.stdlibCacheVersion.split("-")[0]
         def stdlibDependentTaskVersion = project.stdlibTaskVersion.split("-")[0]

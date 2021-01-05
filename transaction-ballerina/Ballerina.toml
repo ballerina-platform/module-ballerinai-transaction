@@ -40,8 +40,8 @@ version = "@stdlib.time.version@"
 
 [[dependency]]
 org = "ballerina"
-name = "os"
-version = "@stdlib.os.version@"
+name = "uuid"
+version = "@stdlib.uuid.version@"
 
 [[dependency]]
 org = "ballerina"
