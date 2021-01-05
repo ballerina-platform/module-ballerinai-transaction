@@ -16,7 +16,7 @@
 
 import ballerina/config;
 import ballerina/io;
-import ballerina/system;
+import ballerina/os;
 import ballerina/stringutils;
 import ballerina/test;
 
@@ -25,7 +25,7 @@ const UTF_8 = "UTF-8";
 
 @test:Config {}
 public function testTransactionStatement() {
-    system:Process|error execResult = system:exec(config:getAsString(BAL_EXEC_PATH), {}, (), "run",
+    os:Process|error execResult = os:exec(config:getAsString(BAL_EXEC_PATH), {}, (), "run",
     "tests/resources/transaction_stmt_negative.bal");
     string[] logLines = getLogLinesFromExecResult(execResult);
     test:assertEquals(logLines.length(), 35);
@@ -85,7 +85,7 @@ public function testTransactionStatement() {
 
 @test:Config {}
 public function testInvalidTrxHandlers() {
-    system:Process|error execResult = system:exec(config:getAsString(BAL_EXEC_PATH), {}, (), "run",
+    os:Process|error execResult = os:exec(config:getAsString(BAL_EXEC_PATH), {}, (), "run",
     "tests/resources/transaction_handlers_negative.bal");
     string[] logLines = getLogLinesFromExecResult(execResult);
     test:assertEquals(logLines.length(), 6);
@@ -98,7 +98,7 @@ public function testInvalidTrxHandlers() {
 
 @test:Config {}
 public function testTransactionWithSetRollbackOnly() {
-    system:Process|error execResult = system:exec(config:getAsString(BAL_EXEC_PATH), {}, (), "run",
+    os:Process|error execResult = os:exec(config:getAsString(BAL_EXEC_PATH), {}, (), "run",
     "tests/resources/transaction_with_setrollbackonly_test_negative.bal");
     string[] logLines = getLogLinesFromExecResult(execResult);
     test:assertEquals(logLines.length(), 5);
@@ -108,7 +108,7 @@ public function testTransactionWithSetRollbackOnly() {
 
 @test:Config {}
 public function testTransactionOnFail() {
-    system:Process|error execResult = system:exec(config:getAsString(BAL_EXEC_PATH), {}, (), "run",
+    os:Process|error execResult = os:exec(config:getAsString(BAL_EXEC_PATH), {}, (), "run",
     "tests/resources/transaction_on_fail_negative.bal");
     string[] logLines = getLogLinesFromExecResult(execResult);
     test:assertEquals(logLines.length(), 8);
@@ -119,8 +119,8 @@ public function testTransactionOnFail() {
     validateLog(logLines[6], "ERROR", "transaction_on_fail_negative.bal:(96:7,96:70)", "unreachable code");
 }
 
-function getLogLinesFromExecResult(system:Process|error execResult) returns string[] {
-    system:Process result = checkpanic execResult;
+function getLogLinesFromExecResult(os:Process|error execResult) returns string[] {
+    os:Process result = checkpanic execResult;
     int waitForExit = checkpanic result.waitForExit();
     int exitCode = checkpanic result.exitCode();
     io:ReadableByteChannel readableResult = result.stderr();
@@ -138,7 +138,7 @@ function validateLog(string log, string logLevel, string logLocation, string log
 
 @test:Config {}
 public function testTransactionFunction() {
-    system:Process|error execResult = system:exec(config:getAsString(BAL_EXEC_PATH), {}, (), "run",
+    os:Process|error execResult = os:exec(config:getAsString(BAL_EXEC_PATH), {}, (), "run",
     "tests/resources/transactional_functions_negative.bal");
     string[] logLines = getLogLinesFromExecResult(execResult);
     test:assertEquals(logLines.length(), 5);

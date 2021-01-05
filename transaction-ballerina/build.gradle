@@ -109,7 +109,6 @@ task updateTomlVerions {
         newConfig = newConfig.replace("@stdlib.time.version@", stdlibDependentTimeVersion)
         newConfig = newConfig.replace("@stdlib.http.version@", stdlibDependentHttpVersion)
         newConfig = newConfig.replace("@stdlib.log.version@", stdlibDependentLogVersion)
-        newConfig = newConfig.replace("@stdlib.system.version@", stdlibDependentSystemVersion)
         newConfig = newConfig.replace("@stdlib.uuid.version@", stdlibDependentUuidVersion)
         ballerinaConfigFile.text = newConfig
     }
