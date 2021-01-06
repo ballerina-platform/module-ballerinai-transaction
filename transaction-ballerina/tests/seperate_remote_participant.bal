@@ -20,11 +20,11 @@ import ballerina/log;
 string S2 = "";
 
 service /hello on new http:Listener(8890) {
-
-    resource function post remoteResource(http:Caller caller, http:Request req) {
+    transactional resource function post remoteResource(http:Caller caller, http:Request req) {
         S2 = " in-remote";
         var payload = req.getTextPayload();
         if (payload is string) {
+            log:print(payload);
             if (payload == "blowUp") {
                 int blowNum = blowUp3();
             }

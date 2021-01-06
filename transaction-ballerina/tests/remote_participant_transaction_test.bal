@@ -26,7 +26,6 @@ boolean remoteExecuted = false;
 http:Client separateRMParticipant01 = new("http://localhost:8890");
 
 service / on new http:Listener(8889) {
-
     transactional resource function post sayHello(http:Caller caller, http:Request req) {
         S1 += " in-remote";
         boolean remoteBlown = false;
@@ -57,6 +56,7 @@ service / on new http:Listener(8889) {
         boolean changeCode = false;
         var payload =  req.getTextPayload();
         if (payload is string) {
+            log:print(payload);
             if (payload == "fail") {
                 var x = nestedTrxInRemoteFunction(1);
                 changeCode = true;
@@ -82,7 +82,7 @@ service / on new http:Listener(8889) {
         }
     }
 
-    resource function get returnError(http:Caller caller, http:Request req) returns error? {
+    transactional resource function get returnError(http:Caller caller, http:Request req) returns error? {
         S1 = S1 + " in-remote";
         var payload =  req.getTextPayload();
 
@@ -265,7 +265,6 @@ function callParticipantMultipleTimes() returns string {
     S1 = "";
     int i = 1;
     transaction {
-        // calling local and remote participants multiple times.
         while (i < 5) {
             i += 1;
             var resp = participantEP->post("","");
@@ -298,7 +297,6 @@ function callParticipantMultipleTimes() returns string {
 }
 
 service / on new http:Listener(8888) {
-
     resource function post remoteParticipantTransactionSuccessTest(http:Caller caller,
     http:Request req) {
         string|error result = initiatorFunc(false, true, false);
