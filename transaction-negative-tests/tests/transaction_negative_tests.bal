@@ -116,7 +116,7 @@ public function testTransactionOnFail() {
     validateLog(logLines[4], "ERROR", "transaction_on_fail_negative.bal:(48:4,50:5)", "incompatible error " +
     "definition type: 'ErrorTypeA' will not be matched to 'ErrorTypeB'");
     validateLog(logLines[5], "ERROR", "transaction_on_fail_negative.bal:(80:7,80:42)", "unreachable code");
-    validateLog(logLines[6], "ERROR", "transaction_on_fail_negative.bal:(96:7,96:70)", "unreachable code");
+    validateLog(logLines[6], "ERROR", "transaction_on_fail_negative.bal:(96:7,96:76)", "unreachable code");
 }
 
 function getLogLinesFromExecResult(os:Process|error execResult) returns string[] {

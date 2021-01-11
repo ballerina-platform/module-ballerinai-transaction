@@ -133,7 +133,7 @@ class RemoteParticipant {
                 //});
             }
         }
-        panic lang_trx:Error("Remote participant:" + self.participantId + " replied with invalid outcome");
+        panic error lang_trx:Error("Remote participant:" + self.participantId + " replied with invalid outcome");
     }
 
     function notifyMe(string protocolUrl, string action) returns @tainted NotifyResult|error {
@@ -157,7 +157,7 @@ class RemoteParticipant {
                 return NOTIFY_RESULT_COMMITTED;
             }
         }
-        panic lang_trx:Error("Unknown status on notify remote participant");
+        panic error lang_trx:Error("Unknown status on notify remote participant");
     }
 }
 
@@ -195,7 +195,7 @@ class LocalParticipant {
         final string participantId = self.participantId;
         string participatedTxnId = getParticipatedTransactionId(transactionId, transactionBlockId);
         if (!participatedTransactions.hasKey(participatedTxnId)) {
-            return lang_trx:Error(TRANSACTION_UNKNOWN);
+            return error lang_trx:Error(TRANSACTION_UNKNOWN);
         }
         if (self.participatedTxn.state == TXN_STATE_ABORTED) {
             removeParticipatedTransaction(participatedTxnId);
@@ -261,10 +261,10 @@ class LocalParticipant {
                 if (successful) {
                     return NOTIFY_RESULT_COMMITTED;
                 } else {
-                    return lang_trx:Error(NOTIFY_RESULT_FAILED_EOT_STR);
+                    return error lang_trx:Error(NOTIFY_RESULT_FAILED_EOT_STR);
                 }
             } else {
-                return lang_trx:Error(NOTIFY_RESULT_NOT_PREPARED_STR);
+                return error lang_trx:Error(NOTIFY_RESULT_NOT_PREPARED_STR);
             }
         } else if (action == COMMAND_ABORT) {
             boolean successful = abortResourceManagers(self.participatedTxn.transactionId, participatedTxnBlockId);
@@ -272,10 +272,10 @@ class LocalParticipant {
             if (successful) {
                 return NOTIFY_RESULT_ABORTED;
             } else {
-               return lang_trx:Error(NOTIFY_RESULT_FAILED_EOT_STR);
+               return error lang_trx:Error(NOTIFY_RESULT_FAILED_EOT_STR);
             }
         } else {
-            panic lang_trx:Error("Invalid protocol action:" + action);
+            panic error lang_trx:Error("Invalid protocol action:" + action);
         }
     }
 }

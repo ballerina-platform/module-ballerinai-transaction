@@ -57,7 +57,7 @@ client class InitiatorClientEP {
         http:Response res = <http:Response> result;
         int statusCode = res.statusCode;
         if (statusCode != http:STATUS_OK) {
-            return lang_trx:Error("Registration for transaction: " + transactionId + " failed response code: "
+            return error lang_trx:Error("Registration for transaction: " + transactionId + " failed response code: "
                 + statusCode.toString());
         }
         json resPayload = check res.getJsonPayload();

@@ -47,7 +47,7 @@ function startTransaction(string transactionBlockId, lang_trx:Info? prevAttempt 
 function checkIfTransactional() {
 
      if(!transactional) {
-         panic lang_trx:Error("invoking transactional function " +
+         panic error lang_trx:Error("invoking transactional function " +
                                      "outside transactional scope is prohibited");
      }
 }

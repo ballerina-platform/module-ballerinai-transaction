@@ -92,7 +92,7 @@ function runActualCode(int failureCutOff, boolean requestRollback, boolean doPan
 
 function trxError()  returns int|error {
     if (5 == 5) {
-        return errors:Retriable("TransactionError");
+        return error errors:Retriable("TransactionError");
     }
     return 5;
 }
@@ -121,7 +121,7 @@ function transactionFailedHelper() returns string|error {
 }
 
 function getGenericError() returns error? {
-    return errors:Retriable("Generic Error", message = "Failed");
+    return error errors:Retriable("Generic Error", message = "Failed");
 }
 
 @test:Config {

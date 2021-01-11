@@ -32,8 +32,8 @@ service object {} participant2pcService = service object {
         consumes:["application/json"]
     }
     resource function post [string transactionBlockId]/prepare(http:Caller conn, http:Request req) {
-        json jsonPayload = <json>req.getJsonPayload();
-        PrepareRequest prepareReq = <PrepareRequest>jsonPayload.fromJsonWithType(PrepareRequest);
+        json jsonPayload = <json> checkpanic req.getJsonPayload();
+        PrepareRequest prepareReq = <PrepareRequest> checkpanic jsonPayload.fromJsonWithType(PrepareRequest);
         http:Response res = new;
         final string transactionId = prepareReq.transactionId;
         final string participatedTxnId = getParticipatedTransactionId(transactionId, transactionBlockId);
@@ -92,8 +92,8 @@ service object {} participant2pcService = service object {
     }
     resource function post [string transactionBlockId]/notify(http:Caller conn, http:Request req) {
         http:Response res = new;
-        json jsonPayload = <json>req.getJsonPayload();
-        NotifyRequest notifyReq = <NotifyRequest>jsonPayload.fromJsonWithType(NotifyRequest);
+        json jsonPayload = <json> checkpanic req.getJsonPayload();
+        NotifyRequest notifyReq = <NotifyRequest> checkpanic jsonPayload.fromJsonWithType(NotifyRequest);
         final string transactionId = notifyReq.transactionId;
         final string participatedTxnId = getParticipatedTransactionId(transactionId, transactionBlockId);
         final string message = notifyReq.message;
