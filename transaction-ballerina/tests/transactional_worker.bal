@@ -36,3 +36,24 @@ transactional function foo() returns int {
      res = wait wx;
      return res;
 }
+
+string ss = "";
+
+@test:Config {
+}
+function testNewStrandWithTrxContext() returns error? {
+    string str = "";
+    transaction {
+        str += "trx started";
+        var o = start testTransactionalInvo(ss);
+        str += wait o;
+        check commit;
+        str += " -> trx end";
+    }
+
+    test:assertEquals("trx started -> transactional call -> trx end", str);
+}
+
+transactional function testTransactionalInvo(string str) returns string {
+    return str + " -> transactional call";
+}
