@@ -67,8 +67,8 @@ service object {} initiatorService = service object {
         consumes:["application/json"]
     }
     resource function post [string transactionBlockId]/register(http:Caller conn, http:Request req) {
-        json jsonPayload = <json>req.getJsonPayload();
-        RegistrationRequest regReq = <RegistrationRequest>jsonPayload.fromJsonWithType(RegistrationRequest);
+        json jsonPayload = <json> checkpanic req.getJsonPayload();
+        RegistrationRequest regReq = <RegistrationRequest> checkpanic jsonPayload.fromJsonWithType(RegistrationRequest);
         final string participantId = regReq.participantId;
         final string txnId = regReq.transactionId;
         var initiatedTxn = initiatedTransactions[txnId];

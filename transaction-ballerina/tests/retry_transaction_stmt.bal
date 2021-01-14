@@ -79,7 +79,7 @@ function actualRetryTrxCode(int failureCutOff, boolean requestRollback, boolean 
 
 function trxErrorInRetry()  returns int|error {
     if (5 == 5) {
-        return errors:Retriable("TransactionError");
+        return error errors:Retriable("TransactionError");
     }
     return 5;
 }
@@ -101,7 +101,7 @@ function transactionFailedHelperWithRetry() returns string|error {
 }
 
 function getErrorInRetry() returns error? {
-    return errors:Retriable("Generic Error", message = "Failed");
+    return error errors:Retriable("Generic Error", message = "Failed");
 }
 
 @test:Config {
@@ -166,7 +166,7 @@ function multipleTrxSequenceWithRetry(boolean abort1, boolean abort2, boolean fa
             }
             if(fail1 && !failed1) {
               failed1 = true;
-              error err = errors:Retriable("TransactionError");
+              error err = error errors:Retriable("TransactionError");
               panic err;
             }
         } else {
@@ -192,7 +192,7 @@ function multipleTrxSequenceWithRetry(boolean abort1, boolean abort2, boolean fa
            }
            if(fail2 && !failed2) {
              failed2 = true;
-             error err = errors:Retriable("TransactionError");
+             error err = error errors:Retriable("TransactionError");
              panic err;
            }
         } else {

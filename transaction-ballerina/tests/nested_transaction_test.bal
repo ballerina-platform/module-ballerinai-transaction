@@ -257,7 +257,8 @@ function testTransactionLangLibForNestedTransactions() returns error? {
             if(newTransInfo is transactions:Info) {
                 test:assertEquals(transInfo.xid === newTransInfo.xid, true);
             } else {
-                panic AssertionErrorInNestedTrx(ASSERTION_ERROR_REASON_IN_NESTED_TRX, message = "unexpected output from getInfo");
+                panic error AssertionErrorInNestedTrx(ASSERTION_ERROR_REASON_IN_NESTED_TRX,
+                message = "unexpected output from getInfo");
             }
             transactions:onRollback(rollbackFunc);
             str += "In Trx";

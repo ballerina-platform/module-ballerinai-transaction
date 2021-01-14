@@ -29,7 +29,7 @@ ext.slf4jVersion = "1.7.30"
 ext.stdlibIoVersion = project.stdlibIoVersion
 ext.stdlibStringUtilsVersion = project.stdlibStringUtilsVersion
 ext.stdlibConfigVersion = project.stdlibConfigVersion
-ext.stdlibSystemVersion = project.stdlibSystemVersion
+ext.stdlibOsVersion = project.stdlibOsVersion
 ext.stdlibUuidVersion = project.stdlibUuidVersion
 ext.stdlibHttpVersion = project.stdlibHttpVersion
 
@@ -42,6 +42,9 @@ ext.stdlibFileVersion = project.stdlibFileVersion
 ext.stdlibReflectVersion = project.stdlibReflectVersion
 ext.stdlibRuntimeVersion = project.stdlibRuntimeVersion
 ext.stdlibTaskVersion = project.stdlibTaskVersion
+ext.stdlibJwtVersion = project.stdlibJwtVersion
+ext.stdlibOAuth2Version = project.stdlibOAuth2Version
+ext.stdlibEncodingVersion = project.stdlibEncodingVersion
 
 
 allprojects {
@@ -98,7 +101,7 @@ allprojects {
         }
 
         maven {
-            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-system'
+            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-os'
             credentials {
                 username System.getenv("packageUser")
                 password System.getenv("packagePAT")
@@ -176,6 +179,30 @@ allprojects {
                 password System.getenv("packagePAT")
             }
         }
+
+        maven {
+            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-jwt'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+
+        maven {
+            url 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-encoding'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+
+        maven {
+            url 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-oauth2'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
     }
 }
 
@@ -189,7 +216,7 @@ subprojects {
         ballerinaStdLibs "org.ballerinalang:io-ballerina:${stdlibIoVersion}"
         ballerinaStdLibs "org.ballerinalang:stringutils-ballerina:${stdlibStringUtilsVersion}"
         ballerinaStdLibs "org.ballerinalang:config-ballerina:${stdlibConfigVersion}"
-        ballerinaStdLibs "org.ballerinalang:system-ballerina:${stdlibSystemVersion}"
+        ballerinaStdLibs "org.ballerinalang:os-ballerina:${stdlibOsVersion}"
         ballerinaStdLibs "org.ballerinalang:uuid-ballerina:${stdlibUuidVersion}"
 
         ballerinaStdLibs "org.ballerinalang:http-ballerina:${stdlibHttpVersion}"
@@ -205,6 +232,9 @@ subprojects {
         ballerinaStdLibs "org.ballerinalang:crypto-ballerina:${stdlibCryptoVersion}"
         ballerinaStdLibs "org.ballerinalang:auth-ballerina:${stdlibAuthVersion}"
         ballerinaStdLibs "org.ballerinalang:mime-ballerina:${stdlibMimeVersion}"
+        ballerinaStdLibs "org.ballerinalang:jwt-ballerina:${stdlibJwtVersion}"
+        ballerinaStdLibs "org.ballerinalang:oauth2-ballerina:${stdlibOAuth2Version}"
+        ballerinaStdLibs "org.ballerinalang:encoding-ballerina:${stdlibEncodingVersion}"
     }
 }
 

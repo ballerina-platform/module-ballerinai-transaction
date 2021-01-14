@@ -120,8 +120,6 @@ function testMultipleTrxBlocks() returns error? {
 
 string ss = "";
 
-@test:Config {
-}
 function testNewStrandWithTransactionalFunc() returns error? {
     string str = "";
     transaction {
@@ -253,7 +251,7 @@ function testTransactionLangLib() returns error? {
         if(newTransInfo is transactions:Info) {
             test:assertEquals(transInfo.xid, newTransInfo.xid);
         } else {
-            panic AssertionError(ASSERTION_ERROR_REASON, message = "unexpected output from getInfo");
+            panic error AssertionError(ASSERTION_ERROR_REASON, message = "unexpected output from getInfo");
         }
         transactions:onRollback(rollbackFunc);
         str += "In Trx";

@@ -264,7 +264,7 @@ function registerLocalParticipantWithInitiator(string transactionId, string tran
     LocalProtocol participantProtocol = {name:PROTOCOL_DURABLE};
     var initiatedTxn = initiatedTransactions[transactionId];
     if (initiatedTxn is ()) {
-        return lang_trx:Error("Transaction-Unknown. Invalid TID:" + transactionId);
+        return error lang_trx:Error("Transaction-Unknown. Invalid TID:" + transactionId);
     } else {
         if (isRegisteredParticipant(participantId, initiatedTxn.participants)) { // Already-Registered
             //log:printDebug(() => io:sprintf("Already-Registered. TID:%s,participant ID:%s", trxId,
@@ -275,7 +275,7 @@ function registerLocalParticipantWithInitiator(string transactionId, string tran
             };
             return txnCtx;
         } else if (!protocolCompatible(initiatedTxn.coordinationType, [participantProtocol])) { // Invalid-Protocol
-            return lang_trx:Error("Invalid-Protocol in local participant. TID:" + transactionId + ",participant ID:" +
+            return error lang_trx:Error("Invalid-Protocol in local participant. TID:" + transactionId + ",participantID:" +
             participantId);
         } else {
             //Set initiator protocols
@@ -300,25 +300,25 @@ function registerLocalParticipantWithInitiator(string transactionId, string tran
 function removeParticipatedTransaction(string participatedTxnId) {
     var removed = trap participatedTransactions.remove(participatedTxnId);
     if (removed is error) {
-        panic lang_trx:Error("Removing participated transaction: " + participatedTxnId + " failed");
+        panic error lang_trx:Error("Removing participated transaction: " + participatedTxnId + " failed");
     }
 }
 
 function removeInitiatedTransaction(string transactionId) {
     var removed = trap initiatedTransactions.remove(transactionId);
     if (removed is error) {
-        panic lang_trx:Error("Removing initiated transaction: " + transactionId + " failed");
+        panic error lang_trx:Error("Removing initiated transaction: " + transactionId + " failed");
     }
 }
 
 function getInitiatorClient(string registerAtURL) returns InitiatorClientEP {
     InitiatorClientEP initiatorEP;
     if (httpClientCache.hasKey(registerAtURL)) {
-        return <InitiatorClientEP>httpClientCache.get(registerAtURL);
+        return <InitiatorClientEP> checkpanic httpClientCache.get(registerAtURL);
     } else {
         lock {
             if (httpClientCache.hasKey(registerAtURL)) {
-                return <InitiatorClientEP>httpClientCache.get(registerAtURL);
+                return <InitiatorClientEP> checkpanic httpClientCache.get(registerAtURL);
             }
             initiatorEP = new({ registerAtURL: registerAtURL, timeoutInMillis: 15000,
                 retryConfig: { count: 2, intervalInMillis: 5000 }
@@ -338,11 +338,11 @@ function getInitiatorClient(string registerAtURL) returns InitiatorClientEP {
 function getParticipant2pcClient(string participantURL) returns Participant2pcClientEP {
     Participant2pcClientEP participantEP;
     if (httpClientCache.hasKey(<@untainted> participantURL)) {
-        return <Participant2pcClientEP>httpClientCache.get(<@untainted>participantURL);
+        return <Participant2pcClientEP> checkpanic httpClientCache.get(<@untainted>participantURL);
     } else {
         lock {
             if (httpClientCache.hasKey(<@untainted> participantURL)) {
-                return <Participant2pcClientEP>httpClientCache.get(<@untainted>participantURL);
+                return <Participant2pcClientEP> checkpanic httpClientCache.get(<@untainted>participantURL);
             }
             participantEP = new({ participantURL: participantURL,
                 timeoutInMillis: 15000, retryConfig: { count: 2, intervalInMillis: 5000 }
@@ -392,7 +392,7 @@ function registerParticipantWithRemoteInitiator(string transactionId, string tra
         log:printError(msg, err = result);
         // TODO : Fix me.
         //map data = { cause: err };
-        return lang_trx:Error(msg);
+        return error lang_trx:Error(msg);
     } else {
         RemoteProtocol[] coordinatorProtocols = result.coordinatorProtocols;
         TwoPhaseCommitTransaction twopcTxn = new(transactionId, transactionBlockId);
