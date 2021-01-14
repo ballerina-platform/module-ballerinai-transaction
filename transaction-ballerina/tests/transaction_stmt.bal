@@ -571,6 +571,48 @@ function jumpMultiLevelsAndReturn() returns error? {
    }
 }
 
+string failureOutcomeStr = "start";
+@test:Config {
+}
+function testFailureOutcome () {
+    var res = failureOutcomeAndRollback();
+    test:assertEquals("start -> failure outcome -> trx rollback", failureOutcomeStr);
+}
+function failureOutcomeAndRollback() returns error? {
+    var onRollbackFunc = function(transactions:Info? info, error? cause, boolean willTry) {
+        failureOutcomeStr += " -> trx rollback";
+    };
+
+    transaction {
+        transactions:onRollback(onRollbackFunc);
+        if(5 == 5) {
+          failureOutcomeStr += " -> failure outcome";
+          fail error("Custom error");
+        }
+        var resCommit = commit;
+    }
+}
+
+string ignErrorStr = "start";
+@test:Config {
+}
+function testIgnoringErrorForRollback () {
+    var res = ignoreErrorReturnForRollback();
+    test:assertEquals("start -> error return", ignErrorStr);
+}
+function ignoreErrorReturnForRollback() returns error? {
+    var onRollbackFunc = function(transactions:Info? info, error? cause, boolean willTry) {
+        ignErrorStr += " -> trx rollback";
+    };
+
+    transaction {
+        transactions:onRollback(onRollbackFunc);
+        var resCommit = commit;
+        ignErrorStr += " -> error return";
+        return error("Custom error");
+    }
+}
+
 function getErrorOrInt() returns int|error {
   error err = error("custom error", message = "error value");
   return err;
