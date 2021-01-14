@@ -1,4 +1,4 @@
-// Copyright (c) 2020 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2021 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -130,7 +130,7 @@ function nestedTrxInRemoteFunction(int j) returns error? {
 
 function blowUp2(int i)  returns int|error {
     if (i == 1) {
-        return errors:Retriable("TransactionError");
+        return error errors:Retriable("TransactionError");
     } else if (i == 2) {
         panic error("TransactionError");
     } else {
@@ -301,10 +301,11 @@ service / on new http:Listener(8888) {
     http:Request req) {
         string|error result = initiatorFunc(false, true, false);
         http:Response res = new;
-        res.setPayload(result.toString());
+        res.setPayload(result is error ? result.toString() : result.toString());
         var r = caller->respond(res);
         if (r is error) {
-            log:printError("Error sending response: " + result.toString(), {"error":r.message()});
+            log:printError("Error sending response: " + (result is error ? result.toString() : result.toString()),
+            {"error":r.message()});
         }
     }
 
@@ -312,10 +313,11 @@ service / on new http:Listener(8888) {
     http:Request req) {
         string|error result = initiatorFunc(true, true, false);
         http:Response res = new;
-        res.setPayload(result.toString());
+        res.setPayload(result is error ? result.toString() : result.toString());
         var r = caller->respond(res);
         if (r is error) {
-            log:printError("Error sending response: " + result.toString(), {"error":r.message()});
+            log:printError("Error sending response: " + (result is error ? result.toString() : result.toString()),
+            {"error":r.message()});
         }
     }
 
@@ -323,10 +325,11 @@ service / on new http:Listener(8888) {
     http:Request req) {
         string|error result = initiatorFunc(false, true, true);
         http:Response res = new;
-        res.setPayload(result.toString());
+        res.setPayload(result is error ? result.toString() : result.toString());
         var r = caller->respond(res);
         if (r is error) {
-            log:printError("Error sending response: " + result.toString(), {"error":r.message()});
+            log:printError("Error sending response: " + (result is error ? result.toString() : result.toString()),
+            {"error":r.message()});
         }
     }
 
