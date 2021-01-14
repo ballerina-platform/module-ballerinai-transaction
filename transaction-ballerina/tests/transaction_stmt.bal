@@ -120,8 +120,6 @@ function testMultipleTrxBlocks() returns error? {
 
 string ss = "";
 
-@test:Config {
-}
 function testNewStrandWithTransactionalFunc() returns error? {
     string str = "";
     transaction {
