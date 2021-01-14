@@ -146,7 +146,7 @@ class TwoPhaseCommitTransaction {
                 string msg = "Aborting local resource managers failed for participated transaction:" +
                     participatedTxnId;
                 log:printError(msg);
-                return lang_trx:Error(msg);
+                return error lang_trx:Error(msg);
             }
         }
         return ();
@@ -178,7 +178,7 @@ class TwoPhaseCommitTransaction {
             if (res is future<[(PrepareResult|error)?, Participant]>) {
                 f = res;
             } else {
-                panic lang_trx:Error("Unexpected nil found");
+                panic error lang_trx:Error("Unexpected nil found");
             }
 
             [(PrepareResult|error)?, Participant] r = wait f;
@@ -245,7 +245,7 @@ class TwoPhaseCommitTransaction {
             if (r is future<(NotifyResult|error)?>) {
                 f = r;
             } else {
-                panic lang_trx:Error("Unexpected nil found");
+                panic error lang_trx:Error("Unexpected nil found");
             }
 
             (NotifyResult|error)? result = wait f;
@@ -295,7 +295,7 @@ class TwoPhaseCommitTransaction {
         } else {
             string msg = "Aborting local resource managers failed for transaction:" + participatedTxnId;
             log:printError(msg);
-            ret = lang_trx:Error(msg);
+            ret = error lang_trx:Error(msg);
         }
         return ret;
     }

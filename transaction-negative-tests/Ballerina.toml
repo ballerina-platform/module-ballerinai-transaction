@@ -20,8 +20,8 @@ version = "@stdlib.config.version@"
 
 [[dependency]]
 org = "ballerina"
-name = "system"
-version = "@stdlib.system.version@"
+name = "os"
+version = "@stdlib.os.version@"
 
 [[platform.java11.dependency]]
 path = "../transaction-native/build/libs/transaction-native-@project.version@.jar"

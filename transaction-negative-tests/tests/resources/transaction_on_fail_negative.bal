@@ -43,7 +43,7 @@ function testIncompatibleErrorTypeOnFail() returns string {
    transaction {
      str += "Before failure throw";
      var res = commit;
-     fail ErrorTypeA(TYPE_A_ERROR_REASON, message = "Error Type A");
+     fail error ErrorTypeA(TYPE_A_ERROR_REASON, message = "Error Type A");
    }
    on fail ErrorTypeB e {
       str += "-> Error caught ! ";
@@ -57,7 +57,7 @@ function testIgnoreReturnInOnFail() returns string {
    transaction {
      str += "Before failure throw";
      var res = commit;
-     fail ErrorTypeA(TYPE_A_ERROR_REASON, message = "Error Type A");
+     fail error ErrorTypeA(TYPE_A_ERROR_REASON, message = "Error Type A");
    }
    on fail ErrorTypeA e {
       str += "-> Error caught ! ";
@@ -72,7 +72,7 @@ function testUnreachableInOnFail() returns string {
    transaction {
      str += "Before failure throw";
      var res = commit;
-     fail ErrorTypeA(TYPE_A_ERROR_REASON, message = "Error Type A");
+     fail error ErrorTypeA(TYPE_A_ERROR_REASON, message = "Error Type A");
    }
    on fail ErrorTypeA e {
       str += "-> Error caught ! ";
@@ -91,9 +91,9 @@ function testNestedTrxWithLessOnFails() returns string {
       transaction {
           str += " -> Before error 2 is thrown";
           check commit;
-          fail ErrorTypeA(TYPE_A_ERROR_REASON, message = "Error Type A");
+          fail error ErrorTypeA(TYPE_A_ERROR_REASON, message = "Error Type A");
       }
-      fail ErrorTypeA(TYPE_A_ERROR_REASON, message = "Error Type A");
+      fail error ErrorTypeA(TYPE_A_ERROR_REASON, message = "Error Type A");
    }
    on fail error e1 {
        str += " -> Error caught !";
