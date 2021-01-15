@@ -56,7 +56,6 @@ service / on new http:Listener(8889) {
         boolean changeCode = false;
         var payload =  req.getTextPayload();
         if (payload is string) {
-            log:print(payload);
             if (payload == "fail") {
                 var x = nestedTrxInRemoteFunction(1);
                 changeCode = true;
@@ -153,10 +152,8 @@ function initiatorFunc(boolean throw1, boolean remote1, boolean blowRemote1) ret
             remoteExecuted = true;
             string blowOrNot = blowRemote1 ? "blowUp" : "Don't-blowUp";
             var resp = participantEP->post("", blowOrNot);
-            log:print("remote1-call-responded [" + blowOrNot + "]");
 
             if (resp is http:Response) {
-                log:print("remote response status code: " + resp.statusCode.toString());
                 if (resp.statusCode == 500) {
                     S1 = S1 + " remote1-blown";
                 } else {
@@ -269,7 +266,6 @@ function callParticipantMultipleTimes() returns string {
             i += 1;
             var resp = participantEP->post("","");
             if (resp is http:Response) {
-                log:print("remote response status code: " + resp.statusCode.toString());
                 if (resp.statusCode == 500) {
                     S1 = S1 + " remote error";
                 } else {
@@ -380,9 +376,6 @@ service / on new http:Listener(8888) {
         transaction {
             s += " in-trx";
             var reqText = req.getTextPayload();
-            if (reqText is string) {
-                log:print("req to remote: " + reqText);
-            }
             var result = separateRMParticipant01 -> post("/hello/remoteResource", <@untainted> req);
             if (result is http:Response) {
                 s += " [remote-status:" + result.statusCode.toString() + "] ";
@@ -500,7 +493,7 @@ function testRemoteParticipantReturnsError() {
     if (response is http:Response) {
         test:assertEquals(response.statusCode, 200, msg = "Response code mismatched");
         test:assertEquals(response.getTextPayload(), " in initiator-trx in-remote " +
-        "remote1-excepted:[transactionError] trx-committed after-trx");
+        "remote1-excepted:[TransactionError] trx-committed after-trx");
     }
 }
 
@@ -525,7 +518,7 @@ function testRemoteParticipantSeperateResourceManagerRemoteFail() {
     if (response is http:Response) {
         test:assertEquals(response.statusCode, 200, msg = "Response code mismatched");
         test:assertEquals(response.getTextPayload(), "in-remote-init in-trx [remote-status:500] " +
-        "transactionError from-init-local-participant trx-committed");
+        "TransactionError from-init-local-participant trx-committed");
     }
 }
 
