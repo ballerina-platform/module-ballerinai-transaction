@@ -24,7 +24,6 @@ service /hello on new http:Listener(8890) {
         S2 = " in-remote";
         var payload = req.getTextPayload();
         if (payload is string) {
-            log:print(payload);
             if (payload == "blowUp") {
                 int blowNum = blowUp3();
             }
