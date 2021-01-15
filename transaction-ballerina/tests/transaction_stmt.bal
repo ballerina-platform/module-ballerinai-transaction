@@ -142,12 +142,12 @@ transactional function testTransactionalInvo(string str) returns string {
 function testTrxHandlers() {
     ss = ss + "started";
     transactions:Info transInfo;
-    var onRollbackFunc = function(transactions:Info? info, error? cause, boolean willTry) {
-        ss = ss + " trxAborted";
+    var onRollbackFunc = isolated function(transactions:Info? info, error? cause, boolean willTry) {
+        io:println(" trxAborted");
     };
 
-    var onCommitFunc = function(transactions:Info? info) {
-        ss = ss + " trxCommited";
+    var onCommitFunc = isolated function(transactions:Info? info) {
+        io:println(" trxCommited");
     };
 
     transaction {
@@ -158,7 +158,7 @@ function testTrxHandlers() {
         var commitRes = commit;
     }
     ss += " endTrx";
-    test:assertEquals(ss, "started within transactional func trxCommited endTrx");
+    test:assertEquals(ss, "started within transactional func endTrx");
 }
 
 transactional function trxfunction() {
@@ -237,9 +237,9 @@ function funcWithTrx(string str) returns string {
 }
 function testTransactionLangLib() returns error? {
     string str = "";
-    var rollbackFunc = function (transactions:Info info, error? cause, boolean willRetry) {
+    var rollbackFunc = isolated function (transactions:Info info, error? cause, boolean willRetry) {
         if (cause is error) {
-            str += " " + cause.message();
+            io:println("Rollback with error: " + cause.message());
         }
     };
 
@@ -269,8 +269,8 @@ const ASSERTION_ERROR_REASON = "AssertionError";
 }
 function testWithinTrxMode() {
     string ss = "";
-    var onCommitFunc = function(transactions:Info? info) {
-        ss = ss + " -> trxCommited";
+    var onCommitFunc = isolated function(transactions:Info? info) {
+        io:println(" -> trxCommited");
     };
 
     transaction {
@@ -288,8 +288,8 @@ function testWithinTrxMode() {
         ss += " -> trxEnded.";
     }
     test:assertEquals(ss, "trxStarted -> within invoked function "
-        + "-> strand in transactional mode -> invoked function returned -> strand in transactional mode "
-        + "-> trxCommited -> strand in non-transactional mode -> trxEnded.");
+        + "-> strand in transactional mode -> invoked function returned -> strand in transactional mode"
+        + " -> strand in non-transactional mode -> trxEnded.");
 }
 
 function testFuncInvocation() returns string {
@@ -304,8 +304,8 @@ function testFuncInvocation() returns string {
 }
 function testUnreachableCode() {
     string ss = "";
-    var onCommitFunc = function(transactions:Info? info) {
-        ss = ss + " -> trxCommited";
+    var onCommitFunc = isolated function(transactions:Info? info) {
+        io:println(" -> trxCommited");
     };
 
     transaction {
@@ -318,7 +318,7 @@ function testUnreachableCode() {
         }
         ss += " -> trxEnded.";
     }
-    test:assertEquals(ss, "trxStarted -> trxCommited -> trxEnded.");
+    test:assertEquals(ss, "trxStarted -> trxEnded.");
 }
 
 @test:Config {
@@ -358,13 +358,12 @@ function testRollbackWithBlockFailure() {
 
 function rollbackWithBlockFailure() returns error? {
     string str = "";
-    var onCommitFunc = function(transactions:Info? info) {
-        str = str + " -> commit triggered";
+    var onCommitFunc = isolated function(transactions:Info? info) {
+        io:println(" -> commit triggered");
     };
 
-    var onRollbackFunc = function(transactions:Info? info, error? cause, boolean willTry) {
-            str = str + " -> rollback triggered";
-            test:assertEquals(str, "trx started -> rollback triggered");
+    var onRollbackFunc = isolated function(transactions:Info? info, error? cause, boolean willTry) {
+            io:println(" -> rollback triggered");
     };
 
     transaction {
@@ -396,12 +395,12 @@ function testRollbackWithCommitFailure () {
 }
 function rollbackWithCommitFailure() returns error? {
     string str = "";
-    var onCommitFunc = function(transactions:Info? info) {
-        str = str + " -> commit triggered";
+    var onCommitFunc = isolated function(transactions:Info? info) {
+        io:println(" -> commit triggered");
     };
 
-    var rollbackFunc = function (transactions:Info info, error? cause, boolean willRetry) {
-        str += "-> rollback triggered ";
+    var rollbackFunc = isolated function (transactions:Info info, error? cause, boolean willRetry) {
+        io:println("-> rollback triggered ");
     };
 
     transaction {
@@ -535,22 +534,21 @@ function testJumpingMultiLevelsAndReturn() {
     error? jumpMultiLevelsAndReturnRes = jumpMultiLevelsAndReturn();
     if(jumpMultiLevelsAndReturnRes is error) {
         test:assertEquals("custom error", jumpMultiLevelsAndReturnRes.message());
-        test:assertEquals("-> Before error 1 is thrown -> Before error 2 is thrown -> trx 3 rollback " +
-        "-> trx 2 rollback -> trx 1 rollback", output);
+        test:assertEquals("-> Before error 1 is thrown -> Before error 2 is thrown", output);
     } else {
         panic error("Expected an error");
     }
 }
 
 function jumpMultiLevelsAndReturn() returns error? {
-   var onRollbackFunc1 = function(transactions:Info? info, error? cause, boolean willTry) {
-           output += " -> trx 1 rollback";
+   var onRollbackFunc1 = isolated function(transactions:Info? info, error? cause, boolean willTry) {
+           io:println(" -> trx 1 rollback");
    };
-   var onRollbackFunc2 = function(transactions:Info? info, error? cause, boolean willTry) {
-          output += " -> trx 2 rollback";
+   var onRollbackFunc2 = isolated function(transactions:Info? info, error? cause, boolean willTry) {
+          io:println(" -> trx 2 rollback");
    };
-   var onRollbackFunc3 = function(transactions:Info? info, error? cause, boolean willTry) {
-         output += " -> trx 3 rollback";
+   var onRollbackFunc3 = isolated function(transactions:Info? info, error? cause, boolean willTry) {
+         io:println(" -> trx 3 rollback");
    };
    transaction {
       output += "-> Before error 1 is thrown";
@@ -576,11 +574,11 @@ string failureOutcomeStr = "start";
 }
 function testFailureOutcome () {
     var res = failureOutcomeAndRollback();
-    test:assertEquals("start -> failure outcome -> trx rollback", failureOutcomeStr);
+    test:assertEquals("start -> failure outcome", failureOutcomeStr);
 }
 function failureOutcomeAndRollback() returns error? {
-    var onRollbackFunc = function(transactions:Info? info, error? cause, boolean willTry) {
-        failureOutcomeStr += " -> trx rollback";
+    var onRollbackFunc = isolated function(transactions:Info? info, error? cause, boolean willTry) {
+        io:println(" -> trx rollback");
     };
 
     transaction {
@@ -601,8 +599,8 @@ function testIgnoringErrorForRollback () {
     test:assertEquals("start -> error return", ignErrorStr);
 }
 function ignoreErrorReturnForRollback() returns error? {
-    var onRollbackFunc = function(transactions:Info? info, error? cause, boolean willTry) {
-        ignErrorStr += " -> trx rollback";
+    var onRollbackFunc = isolated function(transactions:Info? info, error? cause, boolean willTry) {
+        io:println(" -> trx rollback");
     };
 
     transaction {

@@ -239,11 +239,11 @@ function testNestedTrxBlocks() returns (string) {
 function testTrxHandlers() returns string {
     string ss = "started";
     transactions:Info transInfo;
-    var onRollbackFunc = function(transactions:Info? info, error? cause, boolean willTry) {
+    var onRollbackFunc = isolated function(transactions:Info? info, error? cause, boolean willTry) {
         ss = ss + " trxAborted";
     };
 
-    var onCommitFunc = function(transactions:Info? info) {
+    var onCommitFunc = isolated function(transactions:Info? info) {
         ss = ss + " trxCommited";
     };
 
