@@ -500,7 +500,7 @@ function testRemoteParticipantReturnsError() {
     if (response is http:Response) {
         test:assertEquals(response.statusCode, 200, msg = "Response code mismatched");
         test:assertEquals(response.getTextPayload(), " in initiator-trx in-remote " +
-        "remote1-excepted:[transactionError] trx-committed after-trx");
+        "remote1-excepted:[TransactionError] trx-committed after-trx");
     }
 }
 
@@ -525,7 +525,7 @@ function testRemoteParticipantSeperateResourceManagerRemoteFail() {
     if (response is http:Response) {
         test:assertEquals(response.statusCode, 200, msg = "Response code mismatched");
         test:assertEquals(response.getTextPayload(), "in-remote-init in-trx [remote-status:500] " +
-        "transactionError from-init-local-participant trx-committed");
+        "TransactionError from-init-local-participant trx-committed");
     }
 }
 
