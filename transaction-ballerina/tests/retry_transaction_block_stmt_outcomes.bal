@@ -23,8 +23,8 @@ import ballerina/lang.'error as errors;
 function testCommitSuccessWithSuccessOutcome() returns error? {
     string str = "";
     boolean getErr = true;
-    var onCommitFunc = function(transactions:Info? info) {
-        str = str + "-> commit triggered ";
+    var onCommitFunc = isolated function(transactions:Info? info) {
+        io:println("-> commit triggered ");
     };
     retry transaction {
         str += "trx started ";
@@ -38,7 +38,7 @@ function testCommitSuccessWithSuccessOutcome() returns error? {
         }
     }
     str += "-> exit trx block";
-    test:assertEquals(str, "trx started -> trx started -> commit triggered -> exit trx block");
+    test:assertEquals(str, "trx started -> trx started -> exit trx block");
 }
 
 @test:Config {
@@ -47,9 +47,8 @@ function testCommitSuccessWithNoRetryFailOutcome() returns error? {
     string str = "";
     boolean getErr = true;
     error err = error("error");
-    var onCommitFunc = function(transactions:Info? info) {
-        str = str + "-> commit triggered ";
-        io:println(str);
+    var onCommitFunc = isolated function(transactions:Info? info) {
+        io:println("-> commit triggered ");
     };
 
     retry transaction {
@@ -72,9 +71,8 @@ function testcommitSuccessWithPanicOutcome() {
 
 function commitSuccessWithPanicOutcome() returns string|error {
     string str = "";
-    var onCommitFunc = function(transactions:Info? info) {
-        str = str + "-> commit triggered ";
-        io:println(str);
+    var onCommitFunc = isolated function(transactions:Info? info) {
+        io:println("-> commit triggered ");
     };
     retry transaction {
         str += "trx started ";
@@ -175,8 +173,8 @@ function testRollbackWithSuccessOutcome() returns error? {
     string str = "";
     boolean getErr = true;
     int x = -10;
-    var onRollbackFunc = function(transactions:Info? info, error? cause, boolean willTry) {
-        str += "-> rollback ";
+    var onRollbackFunc = isolated function(transactions:Info? info, error? cause, boolean willTry) {
+        io:println("-> rollback ");
     };
 
     retry transaction {
@@ -196,13 +194,13 @@ function testRollbackWithSuccessOutcome() returns error? {
         str += "-> end of trx block ";
     }
     str += "-> exit transaction block.";
-    test:assertEquals(str, "trx started -> trx started -> rollback -> end of trx block -> exit transaction block.");
+    test:assertEquals(str, "trx started -> trx started -> end of trx block -> exit transaction block.");
 }
 
 @test:Config {
 }
 function testRollbackWithFailOutcome() {
-    string|error rollbackWithFailOutcomeRes =  rollbackWithFailOutcome();
+    string|error rollbackWithFailOutcomeRes =  trap rollbackWithFailOutcome();
     if (rollbackWithFailOutcomeRes is error) {
        test:assertEquals(rollbackWithFailOutcomeRes.message().toString(), "Invalid number");
     } else {
@@ -213,11 +211,11 @@ function testRollbackWithFailOutcome() {
 function rollbackWithFailOutcome() returns string|error {
     string str = "";
     boolean getErr = true;
-    boolean rollbackperformed = false;
     int x = -10;
-    var onRollbackFunc = function(transactions:Info? info, error? cause, boolean willTry) {
+    var onRollbackFunc = isolated function(transactions:Info? info, error? cause, boolean willTry) {
         if (cause is error) {
-           rollbackperformed = true;
+           io:println("Rollback with error" + cause.message());
+           panic error("Invalid number");
         }
     };
 
@@ -235,9 +233,6 @@ function rollbackWithFailOutcome() returns string|error {
             var o = commit;
         }
 
-        if (rollbackperformed) {
-            fail error("Invalid number");
-        }
     }
     str += "-> exit transaction block.";
     return str;
@@ -255,14 +250,14 @@ function testRollbackWithPanicOutcome() {
         panic error("Expected an error");
     }
 
-    test:assertEquals(out, "trx started -> rollback triggered");
+    test:assertEquals(out, "trx started ");
     out = "";
 }
 
 function rollbackWithPanicOutcome() {
     boolean getErr = true;
-    var onRollbackFunc = function(transactions:Info? info, error? cause, boolean willTry) {
-        out += "-> rollback triggered";
+    var onRollbackFunc = isolated function(transactions:Info? info, error? cause, boolean willTry) {
+        io:println("-> rollback triggered");
     };
 
     retry transaction {
@@ -284,10 +279,10 @@ function testPanicFromRollbackWithUnusualSuccessOutcome() returns error? {
     string str = "";
     int x = -10;
     boolean getErr = true;
-    var onRollbackFunc = function(transactions:Info? info, error? cause, boolean willTry) {
+    var onRollbackFunc = isolated function(transactions:Info? info, error? cause, boolean willTry) {
         if (cause is error) {
             var err = trap panicWithError(cause);
-            str += "-> panic from rollback ";
+            io:println("-> panic from rollback ");
         }
     };
 
@@ -307,7 +302,7 @@ function testPanicFromRollbackWithUnusualSuccessOutcome() returns error? {
         }
     }
     str += "-> exit transaction block.";
-    test:assertEquals(str, "trx started -> trx started -> panic from rollback -> exit transaction block.");
+    test:assertEquals(str, "trx started -> trx started -> exit transaction block.");
 }
 
 @test:Config {
@@ -380,7 +375,7 @@ function panicFromRollbackWithPanicOutcome() returns error? {
     string str = "";
     boolean getErr = true;
     int x = -10;
-    var onRollbackFunc = function(transactions:Info? info, error? cause, boolean willTry) {
+    var onRollbackFunc = isolated function(transactions:Info? info, error? cause, boolean willTry) {
         if (cause is error) {
             panic cause;
         }
@@ -443,11 +438,11 @@ function noCommitOrRollbackPerformedWithRollbackAndFailOutcome() returns string|
     string str = "";
     int x = 0;
     boolean getErr = true;
-    var onCommitFunc = function(transactions:Info? info) {
-        str = str + "-> commit triggered ";
+    var onCommitFunc = isolated function(transactions:Info? info) {
+        io:println("-> commit triggered ");
     };
 
-    var onRollbackFunc = function(transactions:Info? info, error? cause, boolean willTry) {
+    var onRollbackFunc = isolated function(transactions:Info? info, error? cause, boolean willTry) {
         if (cause is error) {
             io:println("rollback due to fail");
         }
@@ -481,13 +476,13 @@ function noCommitOrRollbackPerformedWithRollbackAndPanicOutcome() returns error?
     string str = "";
     int x = 0;
     boolean getErr = true;
-    var onCommitFunc = function(transactions:Info? info) {
-        str = str + "-> commit triggered ";
+    var onCommitFunc = isolated function(transactions:Info? info) {
+        io:println("-> commit triggered ");
     };
 
-    var onRollbackFunc = function(transactions:Info? info, error? cause, boolean willTry) {
+    var onRollbackFunc = isolated function(transactions:Info? info, error? cause, boolean willTry) {
         if (cause is error) {
-           str = str + "-> rollback triggered ";
+           io:println("-> rollback triggered ");
            panic cause;
         }
     };
@@ -511,8 +506,8 @@ function noCommitOrRollbackPerformedWithRollbackAndPanicOutcome() returns error?
 }
 function testCommitSuccessWithSuccessOutcomeInNestedRetry() returns error? {
     var result = nestedRetryFunc(false, false);
-    test:assertEquals("trx started -> trx started -> trx started -> commit triggered -> nested retry ->" +
-        " nested retry -> nested retry -> commit triggered -> exit trx block", result);
+    test:assertEquals("trx started -> trx started -> trx started -> nested retry ->" +
+        " nested retry -> nested retry -> exit trx block", result);
 }
 
 @test:Config {
@@ -552,9 +547,8 @@ function commitFailWithPanicOutcomeInNestedRetry() {
 function nestedRetryFunc(boolean needPanic, boolean failCommit) returns string|error {
     string str = "";
     int count = 0;
-    var onCommitFunc = function(transactions:Info? info) {
-        str = str + "-> commit triggered ";
-        io:println(str);
+    var onCommitFunc = isolated function(transactions:Info? info) {
+        io:println("-> commit triggered ");
     };
 
     retry transaction {
@@ -592,140 +586,141 @@ function nestedRetryFunc(boolean needPanic, boolean failCommit) returns string|e
     return str;
 }
 
-@test:Config {
-}
-function testRollbackWithFailOutcomeInFirstNestedRetryStmt() returns error? {
-    var result = nestedRetryFuncWithRollback(true, false, false, false, false);
-    if (result is error) {
-        test:assertEquals("Rollback due to error in trx 1", result.message());
-    } else {
-        panic error("Expected an error");
-    }
-}
-
-@test:Config {
-}
-function testRollbackWithFailOutcomeInSecondNestedRetryStmt() returns error? {
-    var result = nestedRetryFuncWithRollback(true, false, false, false, true);
-    if (result is error) {
-        test:assertEquals(result.message(), "Rollback due to error in trx 2");
-    } else {
-        panic error("Expected an error");
-    }
-}
-
-@test:Config {
-}
-function testRollbackWithPanicOutcomeInFirstNestedRetryStmt() {
-    var result = trap nestedRetryFuncWithRollback(true, false, true, false, false);
-    if (result is error) {
-        test:assertEquals(result.message(), "Panic in nested retry 1");
-    } else {
-        panic error("Expected an error");
-    }
-}
-
-@test:Config {
-}
-function testPanicFromRollbackWithPanicOutcomeInSecondNestedRetryStmt() {
-    var result = trap nestedRetryFuncWithRollback(true, true, false, false, true);
-    if (result is error) {
-        test:assertEquals(result.message(), "Rollback due to error in trx 2");
-    }
-}
-
-function nestedRetryFuncWithRollback(boolean doRollback, boolean doPanicInRollback, boolean doPanicAfterRollback1,
-boolean doPanicAfterRollback2, boolean errInSecond) returns string|error {
-    string str = "";
-    int count = 0;
-    boolean errInRollback1 = false;
-    boolean errInRollback2 = false;
-    boolean errInFailedCheck = false;
-
-    retry(2) transaction {
-        retry(2) transaction {
-            var onCommitFunc = function(transactions:Info? info) {
-                str = str + "-> commit triggered in trx 1 ";
-            };
-            var onRollbackFunc = function(transactions:Info? info, error? cause, boolean willTry) {
-                str = str + "-> rollback triggered in trx 1 ";
-                if (cause is error) {
-                    if (doPanicInRollback && !errInSecond && !errInFailedCheck) {
-                       panic cause;
-                    } else {
-                        errInRollback1 = true;
-                    }
-                }
-            };
-            transactions:onCommit(onCommitFunc);
-            transactions:onRollback(onRollbackFunc);
-            count = count + 1;
-            str += "trx strated ";
-            if (count <= 3) {
-                errInFailedCheck = true;
-                var c = check incrementCount(2);
-            }
-            if (doRollback) {
-                str += "do rollback in 1";
-                errInFailedCheck = false;
-                rollback error("Rollback due to error in trx 1");
-            } else {
-                setRollbackOnlyErrorForTrx();
-                var e = commit;
-            }
-            if (errInRollback1 && !doPanicAfterRollback1 && !errInSecond) {
-                fail error errors:Retriable("Rollback due to error in trx 1");
-            }
-            if (doPanicAfterRollback1) {
-                panic error("Panic in nested retry 1");
-            }
-        }
-        check commit;
-    }
-    int count2 = 0;
-    errInFailedCheck = false;
-    retry(2) transaction {
-        retry(2) transaction {
-            var onCommitFunc = function(transactions:Info? info) {
-                str = str + "-> commit triggered in trx 2 ";
-            };
-            var onRollbackFunc = function(transactions:Info? info, error? cause, boolean willTry) {
-                str = str + "-> rollback triggered in trx 2 ";
-                if (cause is error) {
-                    if (doPanicInRollback && errInSecond && !errInFailedCheck) {
-                       panic cause;
-                    } else {
-                        errInRollback2 = true;
-                    }
-                }
-            };
-            transactions:onCommit(onCommitFunc);
-            transactions:onRollback(onRollbackFunc);
-            count2 = count2 + 1;
-            if (count2 <= 3) {
-                errInFailedCheck = true;
-                var c = check incrementCount(2);
-            }
-            if (doRollback) {
-                str += "do rollback in 2";
-                errInFailedCheck = false;
-                rollback error("Rollback due to error in trx 2");
-            } else {
-                setRollbackOnlyErrorForTrx();
-                var e = commit;
-            }
-            if (errInRollback2 && !doPanicAfterRollback2 && errInSecond) {
-                fail error errors:Retriable("Rollback due to error in trx 2");
-            }
-            if (doPanicAfterRollback2) {
-                panic error("Panic in nested retry 2");
-            }
-        }
-        check commit;
-    }
-    str += "-> exit trx block";
-    return str;
-}
+//@test:Config {
+//}
+//function testRollbackWithFailOutcomeInFirstNestedRetryStmt() returns error? {
+//    var result = nestedRetryFuncWithRollback(true, false, false, false, false);
+//    if (result is error) {
+//        test:assertEquals("Rollback due to error in trx 1", result.message());
+//    } else {
+//        panic error("Expected an error");
+//    }
+//}
+//
+//@test:Config {
+//}
+//function testRollbackWithFailOutcomeInSecondNestedRetryStmt() returns error? {
+//    var result = nestedRetryFuncWithRollback(true, false, false, false, true);
+//    if (result is error) {
+//        test:assertEquals(result.message(), "Rollback due to error in trx 2");
+//    } else {
+//        panic error("Expected an error");
+//    }
+//}
+//
+//@test:Config {
+//}
+//function testRollbackWithPanicOutcomeInFirstNestedRetryStmt() {
+//    var result = trap nestedRetryFuncWithRollback(true, false, true, false, false);
+//    if (result is error) {
+//        test:assertEquals(result.message(), "Panic in nested retry 1");
+//    } else {
+//        panic error("Expected an error");
+//    }
+//}
+//
+//@test:Config {
+//}
+//function testPanicFromRollbackWithPanicOutcomeInSecondNestedRetryStmt() {
+//    var result = trap nestedRetryFuncWithRollback(true, true, false, false, true);
+//    if (result is error) {
+//        test:assertEquals(result.message(), "Rollback due to error in trx 2");
+//    }
+//}
+//
+//function nestedRetryFuncWithRollback(isolated boolean doRollback, isolated boolean doPanicInRollback,
+//isolated boolean doPanicAfterRollback1, isolated boolean doPanicAfterRollback2, isolated boolean errInSecond) returns
+//string|error {
+//    string str = "";
+//    int count = 0;
+//    isolated boolean errInRollback1 = false;
+//    isolated boolean errInRollback2 = false;
+//    isolated boolean errInFailedCheck = false;
+//
+//    retry(2) transaction {
+//        retry(2) transaction {
+//            var onCommitFunc = isolated function(transactions:Info? info) {
+//                io:println("-> commit triggered in trx 1 ");
+//            };
+//            var onRollbackFunc = isolated function(transactions:Info? info, error? cause, boolean willTry) {
+//                io:println("-> rollback triggered in trx 1 ");
+//                if (cause is error) {
+//                    if (doPanicInRollback && !errInSecond && !errInFailedCheck) {
+//                       panic cause;
+//                    } else {
+//                        errInRollback1 = true;
+//                    }
+//                }
+//            };
+//            transactions:onCommit(onCommitFunc);
+//            transactions:onRollback(onRollbackFunc);
+//            count = count + 1;
+//            str += "trx strated ";
+//            if (count <= 3) {
+//                errInFailedCheck = true;
+//                var c = check incrementCount(2);
+//            }
+//            if (doRollback) {
+//                str += "do rollback in 1";
+//                errInFailedCheck = false;
+//                rollback error("Rollback due to error in trx 1");
+//            } else {
+//                setRollbackOnlyErrorForTrx();
+//                var e = commit;
+//            }
+//            if (errInRollback1 && !doPanicAfterRollback1 && !errInSecond) {
+//                fail error errors:Retriable("Rollback due to error in trx 1");
+//            }
+//            if (doPanicAfterRollback1) {
+//                panic error("Panic in nested retry 1");
+//            }
+//        }
+//        check commit;
+//    }
+//    int count2 = 0;
+//    errInFailedCheck = false;
+//    retry(2) transaction {
+//        retry(2) transaction {
+//            var onCommitFunc = isolated function(transactions:Info? info) {
+//                io:println("-> commit triggered in trx 2 ");
+//            };
+//            var onRollbackFunc = isolated function(transactions:Info? info, error? cause, boolean willTry) {
+//                io:println("-> rollback triggered in trx 2 ");
+//                if (cause is error) {
+//                    if (doPanicInRollback && errInSecond && !errInFailedCheck) {
+//                       panic cause;
+//                    } else {
+//                        errInRollback2 = true;
+//                    }
+//                }
+//            };
+//            transactions:onCommit(onCommitFunc);
+//            transactions:onRollback(onRollbackFunc);
+//            count2 = count2 + 1;
+//            if (count2 <= 3) {
+//                errInFailedCheck = true;
+//                var c = check incrementCount(2);
+//            }
+//            if (doRollback) {
+//                str += "do rollback in 2";
+//                errInFailedCheck = false;
+//                rollback error("Rollback due to error in trx 2");
+//            } else {
+//                setRollbackOnlyErrorForTrx();
+//                var e = commit;
+//            }
+//            if (errInRollback2 && !doPanicAfterRollback2 && errInSecond) {
+//                fail error errors:Retriable("Rollback due to error in trx 2");
+//            }
+//            if (doPanicAfterRollback2) {
+//                panic error("Panic in nested retry 2");
+//            }
+//        }
+//        check commit;
+//    }
+//    str += "-> exit trx block";
+//    return str;
+//}
 
 function incrementCount(int i) returns int|error {
     if (i == 2) {
@@ -742,6 +737,6 @@ transactional function setRollbackOnlyErrorForTrx() {
     transactions:setRollbackOnly(cause);
 }
 
-function panicWithError(error err) returns error? {
+isolated function panicWithError(error err) returns error? {
     panic err;
 }

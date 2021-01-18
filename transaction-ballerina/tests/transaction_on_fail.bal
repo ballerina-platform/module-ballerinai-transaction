@@ -13,6 +13,7 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+import ballerina/io;
 import ballerina/test;
 import ballerina/lang.'transaction as transactions;
 
@@ -135,14 +136,14 @@ function testJumpingToOnFail() {
 }
 function testJumpingMultiLevelToOnFail() {
    string str = "";
-   var onRollbackFunc1 = function(transactions:Info? info, error? cause, boolean willTry) {
-           str += " -> trx 1 rollback";
+   var onRollbackFunc1 = isolated function(transactions:Info? info, error? cause, boolean willTry) {
+           io:println(" -> trx 1 rollback");
    };
-   var onRollbackFunc2 = function(transactions:Info? info, error? cause, boolean willTry) {
-          str += " -> trx 2 rollback";
+   var onRollbackFunc2 = isolated function(transactions:Info? info, error? cause, boolean willTry) {
+          io:println(" -> trx 2 rollback");
    };
-   var onRollbackFunc3 = function(transactions:Info? info, error? cause, boolean willTry) {
-         str += " -> trx 3 rollback";
+   var onRollbackFunc3 = isolated function(transactions:Info? info, error? cause, boolean willTry) {
+         io:println(" -> trx 3 rollback");
    };
    transaction {
       str += "-> Before error 1 is thrown";
@@ -169,6 +170,6 @@ function testJumpingMultiLevelToOnFail() {
    }
    str += " -> Execution continues...";
 
-   test:assertEquals("-> Before error 1 is thrown -> Before error 2 is thrown -> trx 3 rollback -> Error caught in" +
-   " inner onfail -> trx 2 rollback -> trx 1 rollback -> Error caught in outter onfail -> Execution continues...", str);
+   test:assertEquals("-> Before error 1 is thrown -> Before error 2 is thrown -> Error caught in" +
+   " inner onfail -> Error caught in outter onfail -> Execution continues...", str);
 }
