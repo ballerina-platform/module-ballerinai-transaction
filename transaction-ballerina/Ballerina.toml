@@ -25,11 +25,6 @@ version = "@stdlib.http.version@"
 
 [[dependency]]
 org = "ballerina"
-name = "stringutils"
-version = "@stdlib.stringutils.version@"
-
-[[dependency]]
-org = "ballerina"
 name = "cache"
 version = "@stdlib.cache.version@"
 
