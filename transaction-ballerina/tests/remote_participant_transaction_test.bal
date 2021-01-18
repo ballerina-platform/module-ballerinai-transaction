@@ -23,7 +23,7 @@ string S1 = "";
 boolean thrown1 = false;
 boolean remoteExecuted = false;
 
-http:Client separateRMParticipant01 = new("http://localhost:8890");
+http:Client separateRMParticipant01 =  checkpanic new("http://localhost:8890");
 
 service / on new http:Listener(8889) {
     transactional resource function post sayHello(http:Caller caller, http:Request req) {
@@ -143,7 +143,7 @@ function initGlobalVar() {
 }
 
 function initiatorFunc(boolean throw1, boolean remote1, boolean blowRemote1) returns string|error {
-    http:Client participantEP = new("http://localhost:8889/sayHello");
+    http:Client participantEP = checkpanic new("http://localhost:8889/sayHello");
     initGlobalVar();
     S1 = "";
     retry transaction {
@@ -186,7 +186,7 @@ function initiatorFunc(boolean throw1, boolean remote1, boolean blowRemote1) ret
 }
 
 function initiateNestedTransactionInRemote(string blow) returns @tainted string {
-    http:Client remoteEp = new("http://localhost:8889/nestedTrx");
+    http:Client remoteEp = checkpanic new("http://localhost:8889/nestedTrx");
     S1 = "";
     transaction {
         S1 += " in-trx-block";
@@ -220,7 +220,7 @@ function initiateNestedTransactionInRemote(string blow) returns @tainted string 
 }
 
 function remoteErrorReturnInitiator() returns @tainted string {
-    http:Client remoteEp = new("http://localhost:8889");
+    http:Client remoteEp = checkpanic new("http://localhost:8889");
     S1 = "";
     transaction {
         S1 += " in initiator-trx";
@@ -258,7 +258,7 @@ transactional function localParticipant() returns string {
 }
 
 function callParticipantMultipleTimes() returns string {
-    http:Client participantEP = new("http://localhost:8889/sayHello");
+    http:Client participantEP = checkpanic new("http://localhost:8889/sayHello");
     S1 = "";
     int i = 1;
     transaction {
@@ -412,7 +412,7 @@ service / on new http:Listener(8888) {
 
 @test:Config {}
 function testRemoteParticipantTransactionSuccess() {
-    http:Client participantEP = new("http://localhost:8888/remoteParticipantTransactionSuccessTest");
+    http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantTransactionSuccessTest");
     http:Request req = new;
     var response = participantEP->post("", req);
     if (response is http:Response) {
@@ -424,7 +424,7 @@ function testRemoteParticipantTransactionSuccess() {
 
 @test:Config {}
 function testRemoteParticipantTransactionFailSuccess() {
-    http:Client participantEP = new("http://localhost:8888/remoteParticipantTransactionFailSuccessTest");
+    http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantTransactionFailSuccessTest");
     http:Request req = new;
     var response = participantEP->post("", req);
     if (response is http:Response) {
@@ -436,7 +436,7 @@ function testRemoteParticipantTransactionFailSuccess() {
 
 @test:Config {}
 function testRemoteParticipantTransactionExceptionInRemote() {
-    http:Client participantEP = new("http://localhost:8888/remoteParticipantTransactionPanicInRemote");
+    http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantTransactionPanicInRemote");
     http:Request req = new;
     var response = participantEP->post("", req);
     if (response is http:Response) {
@@ -448,7 +448,7 @@ function testRemoteParticipantTransactionExceptionInRemote() {
 
 @test:Config {}
 function testRemoteParticipantStartNestedTransaction() {
-    http:Client participantEP = new("http://localhost:8888/remoteParticipantStartNestedTransaction");
+    http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantStartNestedTransaction");
     http:Request req = new;
     var response = participantEP->post("", req);
     if (response is http:Response) {
@@ -461,7 +461,7 @@ function testRemoteParticipantStartNestedTransaction() {
 
 @test:Config {}
 function testRemoteParticipantFailInNestedTransaction() {
-    http:Client participantEP = new("http://localhost:8888/remoteParticipantFailInNestedTransaction");
+    http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantFailInNestedTransaction");
     http:Request req = new;
     var response = participantEP->post("", req);
     if (response is http:Response) {
@@ -474,7 +474,7 @@ function testRemoteParticipantFailInNestedTransaction() {
 
 @test:Config {}
 function testRemoteParticipantPanicInNestedTransaction() {
-    http:Client participantEP = new("http://localhost:8888/remoteParticipantPanicInNestedTransaction");
+    http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantPanicInNestedTransaction");
     http:Request req = new;
     var response = participantEP->post("", req);
     if (response is http:Response) {
@@ -487,7 +487,7 @@ function testRemoteParticipantPanicInNestedTransaction() {
 
 @test:Config {}
 function testRemoteParticipantReturnsError() {
-    http:Client participantEP = new("http://localhost:8888/remoteParticipantReturnsError");
+    http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantReturnsError");
     http:Request req = new;
     var response = participantEP->post("", req);
     if (response is http:Response) {
@@ -499,7 +499,7 @@ function testRemoteParticipantReturnsError() {
 
 @test:Config {}
 function testRemoteParticipantSeperateResourceManagerSuccess() {
-    http:Client participantEP = new("http://localhost:8888/remoteParticipantSeperateResourceManager");
+    http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantSeperateResourceManager");
     http:Request req = new;
     var response = participantEP->post("", req);
     if (response is http:Response) {
@@ -511,7 +511,7 @@ function testRemoteParticipantSeperateResourceManagerSuccess() {
 
 @test:Config {}
 function testRemoteParticipantSeperateResourceManagerRemoteFail() {
-    http:Client participantEP = new("http://localhost:8888/remoteParticipantSeperateResourceManager");
+    http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantSeperateResourceManager");
     http:Request req = new;
     req.setPayload("blowUp");
     var response = participantEP->post("", req);
@@ -524,7 +524,7 @@ function testRemoteParticipantSeperateResourceManagerRemoteFail() {
 
 @test:Config {}
 function testparticipantMultipleExecution() {
-    http:Client participantEP = new("http://localhost:8888/participantMultipleExecution");
+    http:Client participantEP = checkpanic new("http://localhost:8888/participantMultipleExecution");
     http:Request req = new;
     var response = participantEP->post("", req);
     if (response is http:Response) {

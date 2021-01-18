@@ -32,7 +32,7 @@ client class InitiatorClientEP {
     http:Client httpClient;
 
     function init(InitiatorClientConfig conf) {
-        http:Client httpEP = new(conf.registerAtURL, {
+        http:Client httpEP = checkpanic new(conf.registerAtURL, {
                 timeoutInMillis:conf.timeoutInMillis,
                 retryConfig:{
                     count:conf.retryConfig.count,

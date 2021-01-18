@@ -36,7 +36,7 @@ public client class FooClient {
     public http:Client httpClient;
 
     public function init(int port) {
-        self.httpClient = new("http://localhost:9090");
+        self.httpClient = checkpanic new("http://localhost:9090");
     }
 
     transactional remote function foo() returns @tainted any|error {
