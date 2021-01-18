@@ -53,7 +53,7 @@ function checkIfTransactional() {
 }
 
 function startTransactionCoordinator() returns error? {
-    http:Listener coordinatorListener = new http:Listener(coordinatorPort, { host: coordinatorHost });
+    http:Listener coordinatorListener = checkpanic new(coordinatorPort, { host: coordinatorHost });
     //attach initiatorService to listener
     error? attachInitiatorService = coordinatorListener.attach(initiatorService, "/balcoordinator/initiator");
     // attach participant2pcService to listener

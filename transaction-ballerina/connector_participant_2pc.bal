@@ -35,7 +35,7 @@ client class Participant2pcClientEP {
     Participant2pcClientConfig conf = {};
 
     function init(Participant2pcClientConfig c) {
-        http:Client httpEP = new(c.participantURL, {
+        http:Client httpEP = checkpanic new(c.participantURL, {
             timeoutInMillis: c.timeoutInMillis,
             retryConfig:{
                 count: c.retryConfig.count, intervalInMillis: c.retryConfig.intervalInMillis
