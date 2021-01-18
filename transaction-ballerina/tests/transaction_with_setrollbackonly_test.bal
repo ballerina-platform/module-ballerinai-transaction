@@ -13,7 +13,6 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-import ballerina/io;
 import ballerina/test;
 import ballerina/lang.'transaction as trx;
 
@@ -30,9 +29,9 @@ function testSetRollbackOnly() {
 
 function setRollbackOnly() returns error? {
     string str = "";
-    var rollbackFunc = isolated function (trx:Info info, error? cause, boolean willRetry) {
+    var rollbackFunc = function (trx:Info info, error? cause, boolean willRetry) {
         if (cause is error) {
-            io:println("Rollback with error: " + cause.message());
+            str += " " + cause.message();
         }
     };
     transaction {

@@ -13,7 +13,6 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-import ballerina/io;
 import ballerina/test;
 import ballerina/lang.'transaction as transactions;
 import ballerina/lang.'error as errors;
@@ -118,28 +117,28 @@ function testFailedTransactionOutputWithRetry() {
 }
 function testMultipleTrxSequenceSuccessWithRetry() {
     string result = multipleTrxSequenceWithRetry(false, false, false, false);
-    test:assertEquals(result, "start in-trx-1 end-1 in-trx-2 end-2");
+    test:assertEquals(result, "start in-trx-1 trxCommited-1 end-1 in-trx-2 trxCommited-2 end-2");
 }
 
 @test:Config {
 }
 function multipleTrxSequenceAbortFirstWithRetry() {
     string result = multipleTrxSequenceWithRetry(true, false, false, false);
-    test:assertEquals(result, "start in-trx-1 end-1 in-trx-2 end-2");
+    test:assertEquals(result, "start in-trx-1 trxRollbacked-1 end-1 in-trx-2 trxCommited-2 end-2");
 }
 
 @test:Config {
 }
 function multipleTrxSequenceAbortSecondWithRetry() {
     string result = multipleTrxSequenceWithRetry(false, true, false, false);
-    test:assertEquals(result, "start in-trx-1 end-1 in-trx-2 end-2");
+    test:assertEquals(result, "start in-trx-1 trxCommited-1 end-1 in-trx-2 trxRollbacked-2 end-2");
 }
 
 @test:Config {
 }
 function multipleTrxSequenceAbortBothWithRetry() {
     string result = multipleTrxSequenceWithRetry(true, true, false, false);
-    test:assertEquals(result, "start in-trx-1 end-1 in-trx-2 end-2");
+    test:assertEquals(result, "start in-trx-1 trxRollbacked-1 end-1 in-trx-2 trxRollbacked-2 end-2");
 }
 
 function multipleTrxSequenceWithRetry(boolean abort1, boolean abort2, boolean fail1, boolean fail2) returns string {
@@ -151,12 +150,12 @@ function multipleTrxSequenceWithRetry(boolean abort1, boolean abort2, boolean fa
     transactions:Info transInfo;
 
     retry(2) transaction {
-        var onRollbackFunc = isolated function(transactions:Info? info, error? cause, boolean willTry) {
-            io:println(" trxRollbacked-1");
+        var onRollbackFunc = function(transactions:Info? info, error? cause, boolean willTry) {
+            a = a + " trxRollbacked-1";
          };
 
-        var onCommitFunc = isolated function(transactions:Info? info) {
-            io:println(" trxCommited-1");
+        var onCommitFunc = function(transactions:Info? info) {
+            a = a + " trxCommited-1";
         };
         a += " in-trx-1";
         transactions:onRollback(onRollbackFunc);
@@ -177,12 +176,12 @@ function multipleTrxSequenceWithRetry(boolean abort1, boolean abort2, boolean fa
     a += " end-1";
 
     retry(2) transaction {
-        var onRollbackFunc = isolated function(transactions:Info? info, error? cause, boolean willTry) {
-            io:println(" trxRollbacked-2");
+        var onRollbackFunc = function(transactions:Info? info, error? cause, boolean willTry) {
+            a = a + " trxRollbacked-2";
         };
 
-        var onCommitFunc = isolated function(transactions:Info? info) {
-            io:println(" trxCommited-2");
+        var onCommitFunc = function(transactions:Info? info) {
+            a = a + " trxCommited-2";
         };
         a += " in-trx-2";
         transactions:onRollback(onRollbackFunc);

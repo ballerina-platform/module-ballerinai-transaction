@@ -127,12 +127,12 @@ string a = "";
 function testTrxHandlersWithNestedTransactions() {
     a = a + "started";
     transactions:Info transInfo;
-    var onRollbackFunc = isolated function(transactions:Info? info, error? cause, boolean willTry) {
-        io:println(" trxAborted");
+    var onRollbackFunc = function(transactions:Info? info, error? cause, boolean willTry) {
+        a = a + " trxAborted";
     };
 
-    var onCommitFunc = isolated function(transactions:Info? info) {
-        io:println(" trxCommited");
+    var onCommitFunc = function(transactions:Info? info) {
+        a = a + " trxCommited";
     };
 
     transaction {
@@ -146,7 +146,7 @@ function testTrxHandlersWithNestedTransactions() {
         var ii = commit;
     }
     a += " endTrx";
-    test:assertEquals(a, "started within transactional func endTrx");
+    test:assertEquals(a, "started within transactional func trxCommited endTrx");
 }
 
 transactional function trxfunctionForNestedTransactions() {
@@ -242,9 +242,9 @@ function funcWithTrxForNestedTrx(string str) returns string {
 }
 function testTransactionLangLibForNestedTransactions() returns error? {
     string str = "";
-    var rollbackFunc = isolated function (transactions:Info info, error? cause, boolean willRetry) {
+    var rollbackFunc = function (transactions:Info info, error? cause, boolean willRetry) {
         if (cause is error) {
-            io:println("Rollback with error: " + cause.message());
+            str += " " + cause.message();
         }
     };
 
@@ -278,8 +278,8 @@ const ASSERTION_ERROR_REASON_IN_NESTED_TRX = "AssertionError";
 }
 function testWithinTrxModeWithNestedTransactions() {
     string ss = "";
-    var onCommitFunc = isolated function(transactions:Info? info) {
-        io:println(" -> trxCommited");
+    var onCommitFunc = function(transactions:Info? info) {
+        ss = ss + " -> trxCommited";
     };
 
     transaction {
@@ -300,8 +300,8 @@ function testWithinTrxModeWithNestedTransactions() {
         var ii = commit;
     }
     test:assertEquals(ss, "trxStarted -> within invoked function "
-             + "-> strand in transactional mode -> invoked function returned -> strand in transactional mode"
-             + " -> strand in non-transactional mode -> trxEnded.");
+             + "-> strand in transactional mode -> invoked function returned -> strand in transactional mode "
+             + "-> trxCommited -> strand in non-transactional mode -> trxEnded.");
 }
 
 function testFuncInvocationForNestedTransaction() returns string {
@@ -316,8 +316,8 @@ function testFuncInvocationForNestedTransaction() returns string {
 }
 function testUnreachableCodeWithNestedTransactions() {
     string ss = "";
-    var onCommitFunc = isolated function(transactions:Info? info) {
-        io:println(" -> trxCommited");
+    var onCommitFunc = function(transactions:Info? info) {
+        ss = ss + " -> trxCommited";
     };
 
     transaction {
@@ -333,7 +333,7 @@ function testUnreachableCodeWithNestedTransactions() {
         }
         var ii = commit;
     }
-    test:assertEquals(ss, "trxStarted -> trxEnded.");
+    test:assertEquals(ss, "trxStarted -> trxCommited -> trxEnded.");
 }
 
 @test:Config {
@@ -430,11 +430,11 @@ function testNestedRollback () {
 }
 
 function nestedTrxWithRollbackHandlers() {
-     var onRollbackFunc1 = isolated function(transactions:Info? info, error? cause, boolean willTry) {
+     var onRollbackFunc1 = function(transactions:Info? info, error? cause, boolean willTry) {
           io:println("Rollback 1 executed");
      };
 
-     var onRollbackFunc2 = isolated function(transactions:Info? info, error? cause, boolean willTry) {
+     var onRollbackFunc2 = function(transactions:Info? info, error? cause, boolean willTry) {
           io:println("Rollback 2 executed");
      };
 
