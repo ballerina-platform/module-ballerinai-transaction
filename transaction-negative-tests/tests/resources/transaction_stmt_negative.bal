@@ -14,10 +14,10 @@
 // specific language governing permissions and limitations
 // under the License.
 import ballerina/lang.'transaction as transactions;
+import ballerina/io;
 
 function commitExpMissingInTransactionStmt(int i) returns (string) {
     string a = "start";
-
     transaction {
         a = a + " inTrx";
         if (i == 0) {
@@ -240,11 +240,11 @@ function testTrxHandlers() returns string {
     string ss = "started";
     transactions:Info transInfo;
     var onRollbackFunc = isolated function(transactions:Info? info, error? cause, boolean willTry) {
-        ss = ss + " trxAborted";
+        io:println("trxAborted");
     };
 
     var onCommitFunc = isolated function(transactions:Info? info) {
-        ss = ss + " trxCommited";
+        io:println(" trxCommited");
     };
 
     transaction {
