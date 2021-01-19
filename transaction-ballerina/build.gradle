@@ -89,7 +89,6 @@ task copyStdlibs(type: Copy) {
 task updateTomlVerions {
     doLast {
         def stdlibDependentIoVersion = project.stdlibIoVersion.split("-")[0]
-        def stdlibDependentConfigVersion = project.stdlibConfigVersion.split("-")[0]
         def stdlibDependentUuidVersion = project.stdlibUuidVersion.split("-")[0]
         def stdlibDependentCacheVersion = project.stdlibCacheVersion.split("-")[0]
         def stdlibDependentTaskVersion = project.stdlibTaskVersion.split("-")[0]
@@ -100,7 +99,6 @@ task updateTomlVerions {
         def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
         newConfig = newConfig.replace("@stdlib.io.version@", stdlibDependentIoVersion)
-        newConfig = newConfig.replace("@stdlib.config.version@", stdlibDependentConfigVersion)
         newConfig = newConfig.replace("@stdlib.cache.version@", stdlibDependentCacheVersion)
         newConfig = newConfig.replace("@stdlib.task.version@", stdlibDependentTaskVersion)
         newConfig = newConfig.replace("@stdlib.time.version@", stdlibDependentTimeVersion)

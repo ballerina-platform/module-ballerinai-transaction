@@ -14,18 +14,17 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/config;
 import ballerina/io;
 import ballerina/os;
 import ballerina/regex;
 import ballerina/test;
 
-const BAL_EXEC_PATH = "bal_exec_path";
 const UTF_8 = "UTF-8";
+configurable string bal_exec_path = ?;
 
 @test:Config {}
 public function testTransactionStatement() {
-    os:Process|error execResult = os:exec(config:getAsString(BAL_EXEC_PATH), {}, (), "run",
+    os:Process|error execResult = os:exec(bal_exec_path, {}, (), "run",
     "tests/resources/transaction_stmt_negative.bal");
     string[] logLines = getLogLinesFromExecResult(execResult);
     test:assertEquals(logLines.length(), 35);
@@ -85,7 +84,7 @@ public function testTransactionStatement() {
 
 @test:Config {}
 public function testInvalidTrxHandlers() {
-    os:Process|error execResult = os:exec(config:getAsString(BAL_EXEC_PATH), {}, (), "run",
+    os:Process|error execResult = os:exec(bal_exec_path, {}, (), "run",
     "tests/resources/transaction_handlers_negative.bal");
     string[] logLines = getLogLinesFromExecResult(execResult);
     test:assertEquals(logLines.length(), 6);
@@ -98,7 +97,7 @@ public function testInvalidTrxHandlers() {
 
 @test:Config {}
 public function testTransactionWithSetRollbackOnly() {
-    os:Process|error execResult = os:exec(config:getAsString(BAL_EXEC_PATH), {}, (), "run",
+    os:Process|error execResult = os:exec(bal_exec_path, {}, (), "run",
     "tests/resources/transaction_with_setrollbackonly_test_negative.bal");
     string[] logLines = getLogLinesFromExecResult(execResult);
     test:assertEquals(logLines.length(), 5);
@@ -108,7 +107,7 @@ public function testTransactionWithSetRollbackOnly() {
 
 @test:Config {}
 public function testTransactionOnFail() {
-    os:Process|error execResult = os:exec(config:getAsString(BAL_EXEC_PATH), {}, (), "run",
+    os:Process|error execResult = os:exec(bal_exec_path, {}, (), "run",
     "tests/resources/transaction_on_fail_negative.bal");
     string[] logLines = getLogLinesFromExecResult(execResult);
     test:assertEquals(logLines.length(), 8);
@@ -138,7 +137,7 @@ function validateLog(string log, string logLevel, string logLocation, string log
 
 @test:Config {}
 public function testTransactionFunction() {
-    os:Process|error execResult = os:exec(config:getAsString(BAL_EXEC_PATH), {}, (), "run",
+    os:Process|error execResult = os:exec(bal_exec_path, {}, (), "run",
     "tests/resources/transactional_functions_negative.bal");
     string[] logLines = getLogLinesFromExecResult(execResult);
     test:assertEquals(logLines.length(), 5);

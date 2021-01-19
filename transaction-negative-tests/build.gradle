@@ -80,19 +80,19 @@ task copyStdlibs(type: Copy) {
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
 def tomlVersion = project.version.split("-")[0]
 def originalConfig = ballerinaConfigFile.text
+def configTOMLFile = new File("$project.projectDir/tests/Config.toml")
+def initialTOMLcontent = configTOMLFile.text
 
 task updateTomlVerions {
     doLast {
         def stdlibDependentIoVersion = project.stdlibIoVersion.split("-")[0]
         def stdlibDependentRegexVersion = project.stdlibRegexVersion.split("-")[0]
-        def stdlibDependentConfigVersion = project.stdlibConfigVersion.split("-")[0]
         def stdlibDependentOsVersion = project.stdlibOsVersion.split("-")[0]
 
         def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
         newConfig = newConfig.replace("@stdlib.io.version@", stdlibDependentIoVersion)
         newConfig = newConfig.replace("@stdlib.regex.version@", stdlibDependentRegexVersion)
-        newConfig = newConfig.replace("@stdlib.config.version@", stdlibDependentConfigVersion)
         newConfig = newConfig.replace("@stdlib.os.version@", stdlibDependentOsVersion)
         ballerinaConfigFile.text = newConfig
     }
@@ -101,7 +101,12 @@ task updateTomlVerions {
 task revertTomlFile {
     doLast {
         ballerinaConfigFile.text = originalConfig
+        configTOMLFile.text = initialTOMLcontent
     }
+}
+
+def setExecPath(configTOMLFile, distributionBinPath) {
+    configTOMLFile.text = configTOMLFile.text.replace("@exec.path@", distributionBinPath)
 }
 
 task ballerinaNegativeTests {
@@ -112,13 +117,14 @@ task ballerinaNegativeTests {
     finalizedBy(revertTomlFile)
     doLast {
         def distributionBinPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bin"
+        setExecPath(configTOMLFile,distributionBinPath)
         exec {
             workingDir project.projectDir
             environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "$distributionBinPath/bal.bat test --bal_exec_path=${distributionBinPath}/bal"
+                commandLine 'cmd', '/c', "$distributionBinPath/bal.bat test"
             } else {
-                commandLine 'sh', '-c', "$distributionBinPath/bal test --bal_exec_path=${distributionBinPath}/bal"
+                commandLine 'sh', '-c', "$distributionBinPath/bal test"
             }
         }
     }
