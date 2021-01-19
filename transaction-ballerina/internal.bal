@@ -18,7 +18,7 @@ import ballerina/lang.'transaction as lang_trx;
 import ballerina/java;
 import ballerina/http;
 
-class TimestampImpl  {
+readonly class TimestampImpl  {
     *lang_trx:Timestamp;
 
     public function toMillisecondsInt() returns int {
