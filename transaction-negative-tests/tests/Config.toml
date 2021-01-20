@@ -1,0 +1,2 @@
+[transaction_negative_tests]
+bal_exec_path = "@exec.path@/bal"

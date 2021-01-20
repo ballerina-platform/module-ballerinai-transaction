@@ -14,17 +14,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/config;
-
 const string basePath = "/balcoordinator";
 final string initiatorCoordinatorBasePath = basePath + "/initiator";
 final string initiator2pcCoordinatorBasePath = basePath + "/initiator/2pc";
 final string participant2pcCoordinatorBasePath = basePath + "/participant/2pc";
 final string registrationPath = "/register";
 final string registrationPathPattern = "/{transactionBlockId}" + registrationPath;
-
-final string coordinatorHost = config:getAsString("b7a.transactions.coordinator.host", getHostAddress());
-final int coordinatorPort = config:getAsInt("b7a.transactions.coordinator.port", getAvailablePort());
 
 const string TRANSACTION_CONTEXT_VERSION = "1.0";
 
@@ -50,3 +45,6 @@ const string OUTCOME_MIXED = "mixed";
 const string OUTCOME_HAZARD = "hazard";
 
 const string TRANSACTION_UNKNOWN = "Transaction-Unknown";
+
+configurable string coordinatorHost = getHostAddress();
+configurable int coordinatorPort =  getAvailablePort();
