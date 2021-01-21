@@ -1,25 +1,25 @@
 [package]
 org = "ballerinai"
 name = "transaction_negative_tests"
-version = "@toml.version@"
+version = "1.0.4"
 
 [[dependency]]
 org = "ballerina"
 name = "io"
-version = "@stdlib.io.version@"
+version = "0.5.5"
 
 [[dependency]]
 org = "ballerina"
 name = "regex"
-version = "@stdlib.regex.version@"
+version = "0.6.0"
 
 [[dependency]]
 org = "ballerina"
 name = "os"
-version = "@stdlib.os.version@"
+version = "0.7.0"
 
 [[platform.java11.dependency]]
-path = "../transaction-native/build/libs/transaction-native-@project.version@.jar"
+path = "../transaction-native/build/libs/transaction-native-1.0.4-SNAPSHOT.jar"
 groupId = "ballerina"
 artifactId = "transaction"
-version = "@project.version@"
+version = "1.0.4-SNAPSHOT"
