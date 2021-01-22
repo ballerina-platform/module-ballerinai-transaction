@@ -78,6 +78,7 @@ task copyStdlibs(type: Copy) {
 }
 
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
+def ballerinaDependencyFile = new File("$project.projectDir/Dependencies.toml")
 def tomlVersion = project.version.split("-")[0]
 def originalConfig = ballerinaConfigFile.text
 def configTOMLFile = new File("$project.projectDir/tests/Config.toml")
@@ -91,10 +92,12 @@ task updateTomlVerions {
 
         def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
-        newConfig = newConfig.replace("@stdlib.io.version@", stdlibDependentIoVersion)
-        newConfig = newConfig.replace("@stdlib.regex.version@", stdlibDependentRegexVersion)
-        newConfig = newConfig.replace("@stdlib.os.version@", stdlibDependentOsVersion)
         ballerinaConfigFile.text = newConfig
+
+        def newDependencyConfig = ballerinaDependencyFile.text.replace("@stdlib.io.version@", stdlibDependentIoVersion)
+        newDependencyConfig = newDependencyConfig.replace("@stdlib.regex.version@", stdlibDependentRegexVersion)
+        newDependencyConfig = newDependencyConfig.replace("@stdlib.os.version@", stdlibDependentOsVersion)
+        ballerinaDependencyFile.text = newDependencyConfig
     }
 }
 

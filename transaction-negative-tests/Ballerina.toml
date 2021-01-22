@@ -3,21 +3,6 @@ org = "ballerinai"
 name = "transaction_negative_tests"
 version = "@toml.version@"
 
-[[dependency]]
-org = "ballerina"
-name = "io"
-version = "@stdlib.io.version@"
-
-[[dependency]]
-org = "ballerina"
-name = "regex"
-version = "@stdlib.regex.version@"
-
-[[dependency]]
-org = "ballerina"
-name = "os"
-version = "@stdlib.os.version@"
-
 [[platform.java11.dependency]]
 path = "../transaction-native/build/libs/transaction-native-@project.version@.jar"
 groupId = "ballerina"
