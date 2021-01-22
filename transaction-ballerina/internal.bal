@@ -15,7 +15,7 @@
 // under the License.
 
 import ballerina/lang.'transaction as lang_trx;
-import ballerina/java;
+import ballerina/jballerina.java;
 import ballerina/http;
 
 readonly class TimestampImpl  {
