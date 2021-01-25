@@ -55,7 +55,6 @@ import static io.ballerina.runtime.transactions.TransactionConstants.TRANSACTION
 public class Utils {
     private static final String STRUCT_TYPE_TRANSACTION_CONTEXT = "TransactionContext";
     private static final String STRUCT_TYPE_TRANSACTION_INFO = "Info";
-    private static final Module TRANSACTION_INTERNAL_MODULE = new Module("ballerinai", "transaction", "1.0.2");
 
     public static void notifyResourceManagerOnAbort(BString transactionBlockId) {
         TransactionLocalContext transactionLocalContext =
@@ -121,7 +120,7 @@ public class Utils {
         return ValueCreator.createRecordValue(trxContext, trxContextData);
     }
 
-    public static Object registerLocalParticipant(BString transactionBlockId, BFunctionPointer fpCommitted,
+    public static Object registerLocalParticipant(Environment env, BString transactionBlockId, BFunctionPointer fpCommitted,
                                                   BFunctionPointer fpAborted) {
         TransactionLocalContext transactionLocalContext =
                 TransactionResourceManager.getInstance().getCurrentTransactionContext();
@@ -135,7 +134,7 @@ public class Utils {
         // Register committed and aborted function handler if exists.
         transactionResourceManager.registerParticipation(transactionLocalContext.getGlobalTransactionId(),
                 transactionBlockId.getValue());
-        BMap<BString, Object> trxContext = ValueCreator.createRecordValue(TRANSACTION_INTERNAL_MODULE,
+        BMap<BString, Object> trxContext = ValueCreator.createRecordValue(env.getCurrentModule(),
                                                                                    STRUCT_TYPE_TRANSACTION_CONTEXT);
         Object[] trxContextData = new Object[] {
                 TransactionConstants.DEFAULT_CONTEXT_VERSION, transactionLocalContext.getGlobalTransactionId(),
