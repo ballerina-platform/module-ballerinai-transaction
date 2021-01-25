@@ -119,8 +119,8 @@ public class Utils {
         return ValueCreator.createRecordValue(trxContext, trxContextData);
     }
 
-    public static Object registerLocalParticipant(Environment env, BString transactionBlockId, BFunctionPointer fpCommitted,
-                                                  BFunctionPointer fpAborted) {
+    public static Object registerLocalParticipant(Environment env, BString transactionBlockId,
+                                                  BFunctionPointer fpCommitted, BFunctionPointer fpAborted) {
         TransactionLocalContext transactionLocalContext =
                 TransactionResourceManager.getInstance().getCurrentTransactionContext();
         if (transactionLocalContext == null) {
