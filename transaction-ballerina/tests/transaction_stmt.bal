@@ -120,8 +120,11 @@ function testMultipleTrxBlocks() returns error? {
 
 string ss = "";
 
+@test:Config {
+}
 function testNewStrandWithTransactionalFunc() returns error? {
     string str = "";
+    ss = "";
     transaction {
         str += "trx started";
         var o = start testTransactionalInvo(ss);
