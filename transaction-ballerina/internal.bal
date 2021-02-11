@@ -62,6 +62,19 @@ function startTransactionCoordinator() returns error? {
     return coordinatorListener.'start();
 }
 
+//function commitResourceManagers(string transactionId, string transactionBlockId) returns boolean {
+//    boolean suc = cleanResourceManagers(transactionId, transactionBlockId);
+//    if(transactional) {
+//           lang_trx:Info previnfo = lang_trx:info();
+//           lang_trx:CommitHandler[] commitFunc = getCommitHandlerList();
+//           foreach var handler in commitFunc {
+//                handler(previnfo);
+//           }
+//    }
+//
+//    return suc;
+//}
+
 # Commit local resource managers.
 #
 # + transactionId - Globally unique transaction ID.
@@ -105,10 +118,35 @@ function setTransactionContext(TransactionContext transactionContext, lang_trx:I
 #
 # + transactionBlockId - ID of the transaction block.
 # + err - The cause of the rollback.
-function rollbackTransaction(string transactionBlockId, error? err = ()) = @java:Method {
+transactional function rollbackTransaction(string transactionBlockId, error? err = ()) {
+    clearTransaction(transactionBlockId);
+    lang_trx:Info previnfo = lang_trx:info();
+    lang_trx:RollbackHandler[] rollbackFunc = getRollbackHandlerList();
+    foreach var handler in rollbackFunc {
+         handler(previnfo, err, false);
+    }
+}
+
+# Rollback the transaction.
+#
+# + transactionBlockId - ID of the transaction block.
+# + err - The cause of the rollback.
+function clearTransaction(string transactionBlockId) = @java:Method {
     'class: "org.ballerinalang.stdlib.transaction.RollbackTransaction",
     name: "rollbackTransaction"
 } external;
+
+function getRollbackHandlerList() returns lang_trx:RollbackHandler[] =
+@java:Method {
+    'class: "org.ballerinalang.stdlib.transaction.GetCommitRollbackHandlers",
+    name: "getRollbackHandlerList"
+} external;
+
+//function getCommitHandlerList() returns lang_trx:CommitHandler[] =
+//@java:Method {
+//    'class: "org.ballerinalang.stdlib.transaction.GetCommitRollbackHandlers",
+//    name: "getCommitHandlerList"
+//} external;
 
 # Get and Cleanup the failure.
 #

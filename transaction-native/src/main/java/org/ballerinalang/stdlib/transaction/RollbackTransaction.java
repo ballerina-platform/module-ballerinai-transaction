@@ -28,7 +28,7 @@ import io.ballerina.runtime.transactions.TransactionResourceManager;
  */
 public class RollbackTransaction {
 
-    public static void rollbackTransaction(BString transactionBlockId, Object err) {
-        TransactionResourceManager.getInstance().rollbackTransaction(transactionBlockId.getValue(), err);
+    public static void rollbackTransaction(BString transactionBlockId) {
+        TransactionResourceManager.getInstance().rollbackTransaction(transactionBlockId.getValue());
     }
 }

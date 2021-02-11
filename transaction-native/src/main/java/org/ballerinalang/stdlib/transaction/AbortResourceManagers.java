@@ -30,6 +30,6 @@ public class AbortResourceManagers {
 
     public static boolean abortResourceManagers(BString transactionId, BString transactionBlockId) {
         return TransactionResourceManager.getInstance().notifyAbort(transactionId.getValue(),
-                transactionBlockId.getValue(), null);
+                transactionBlockId.getValue());
     }
 }

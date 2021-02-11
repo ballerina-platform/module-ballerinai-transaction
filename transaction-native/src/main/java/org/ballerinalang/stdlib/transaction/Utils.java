@@ -59,12 +59,11 @@ public class Utils {
         TransactionLocalContext transactionLocalContext =
                 TransactionResourceManager.getInstance().getCurrentTransactionContext();
         TransactionResourceManager.getInstance()
-                .notifyAbort(transactionLocalContext.getGlobalTransactionId(), transactionBlockId.getValue(),
-                null);
+                .notifyAbort(transactionLocalContext.getGlobalTransactionId(), transactionBlockId.getValue());
     }
 
-    public static void rollbackTransaction(BString transactionBlockId, Object error) {
-        TransactionResourceManager.getInstance().rollbackTransaction(transactionBlockId.getValue(), error);
+    public static void rollbackTransaction(BString transactionBlockId) {
+        TransactionResourceManager.getInstance().rollbackTransaction(transactionBlockId.getValue());
     }
 
     public static void cleanupTransactionContext(BString transactionBlockId) {
@@ -191,7 +190,7 @@ public class Utils {
 
     public static boolean abortResourceManagers(BString transactionId, BString transactionBlockId) {
         return TransactionResourceManager.getInstance().notifyAbort(transactionId.getValue(),
-                transactionBlockId.getValue(), null);
+                transactionBlockId.getValue());
     }
 
     public static boolean commitResourceManagers(BString transactionId, BString transactionBlockId) {
