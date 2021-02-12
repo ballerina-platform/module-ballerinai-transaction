@@ -77,18 +77,19 @@ task copyStdlibs(type: Copy) {
     }
 }
 
+def snapshotVersion = "-SNAPSHOT"
+def tomlVersion = project.version.replace("${snapshotVersion}", "")
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
 def ballerinaDependencyFile = new File("$project.projectDir/Dependencies.toml")
-def tomlVersion = project.version.split("-")[0]
 def originalConfig = ballerinaConfigFile.text
 def configTOMLFile = new File("$project.projectDir/tests/Config.toml")
 def initialTOMLcontent = configTOMLFile.text
 
 task updateTomlVerions {
     doLast {
-        def stdlibDependentIoVersion = project.stdlibIoVersion.split("-")[0]
-        def stdlibDependentRegexVersion = project.stdlibRegexVersion.split("-")[0]
-        def stdlibDependentOsVersion = project.stdlibOsVersion.split("-")[0]
+        def stdlibDependentIoVersion = project.stdlibIoVersion.replace("${snapshotVersion}", "")
+        def stdlibDependentRegexVersion = project.stdlibRegexVersion.replace("${snapshotVersion}", "")
+        def stdlibDependentOsVersion = project.stdlibOsVersion.replace("${snapshotVersion}", "")
 
         def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
