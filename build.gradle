@@ -219,7 +219,7 @@ subprojects {
 
 def moduleVersion = project.version
 if (moduleVersion.indexOf('-') != -1) {
-    moduleVersion = project.version.replace("-SNAPSHOT", "")
+    moduleVersion = moduleVersion.substring(0, moduleVersion.indexOf('-'))
 }
 
 release {
