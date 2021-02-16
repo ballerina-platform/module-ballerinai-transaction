@@ -44,13 +44,12 @@ jar {
 
 def packageName = "transaction"
 def packageOrg = "ballerinai"
+def snapshotVersion = "-SNAPSHOT"
+def tomlVersion = project.version.replace("${snapshotVersion}", "")
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
 def ballerinaDependencyFile = new File("$project.projectDir/Dependencies.toml")
 def artifactCacheParent = file("$project.projectDir/build/cache_parent/")
 def artifactLibParent = file("$project.projectDir/build/lib_parent/")
-def tomlVersion = project.version.split("-")[0]
-//def targetBallerinaJar = file("$project.projectDir/target/caches/jar_cache/${moduleOrg}/${moduleName}/${tomlVersion}/${moduleOrg}-${moduleName}-${tomlVersion}.jar")
-//def targetNativeJar = file("$project.rootDir/${moduleName}-native/build/libs/${moduleName}-native-${project.version}.jar")
 def originalConfig = ballerinaConfigFile.text
 def originalDependencies = ballerinaDependencyFile.text
 
@@ -90,13 +89,13 @@ task copyStdlibs(type: Copy) {
 
 task updateTomlVerions {
     doLast {
-        def stdlibDependentIoVersion = project.stdlibIoVersion.split("-")[0]
-        def stdlibDependentUuidVersion = project.stdlibUuidVersion.split("-")[0]
-        def stdlibDependentCacheVersion = project.stdlibCacheVersion.split("-")[0]
-        def stdlibDependentTaskVersion = project.stdlibTaskVersion.split("-")[0]
-        def stdlibDependentTimeVersion = project.stdlibTimeVersion.split("-")[0]
-        def stdlibDependentHttpVersion = project.stdlibHttpVersion.split("-")[0]
-        def stdlibDependentLogVersion = project.stdlibLogVersion.split("-")[0]
+        def stdlibDependentIoVersion = project.stdlibIoVersion.replace("${snapshotVersion}", "")
+        def stdlibDependentUuidVersion = project.stdlibUuidVersion.replace("${snapshotVersion}", "")
+        def stdlibDependentCacheVersion = project.stdlibCacheVersion.replace("${snapshotVersion}", "")
+        def stdlibDependentTaskVersion = project.stdlibTaskVersion.replace("${snapshotVersion}", "")
+        def stdlibDependentTimeVersion = project.stdlibTimeVersion.replace("${snapshotVersion}", "")
+        def stdlibDependentHttpVersion = project.stdlibHttpVersion.replace("${snapshotVersion}", "")
+        def stdlibDependentLogVersion = project.stdlibLogVersion.replace("${snapshotVersion}", "")
 
         def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
