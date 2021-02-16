@@ -63,7 +63,7 @@ public class Utils {
     }
 
     public static void rollbackTransaction(BString transactionBlockId) {
-        TransactionResourceManager.getInstance().rollbackTransaction(transactionBlockId.getValue());
+        TransactionResourceManager.getInstance().notifyTransactionAbort(transactionBlockId.getValue());
     }
 
     public static void cleanupTransactionContext(BString transactionBlockId) {

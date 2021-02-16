@@ -22,13 +22,13 @@ import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.transactions.TransactionResourceManager;
 
 /**
- * Extern function transaction:rollbackTransaction.
+ * Extern function transaction:notifyAbort.
  *
  * @since Swan Lake
  */
-public class RollbackTransaction {
+public class NotifyAbortTransaction {
 
-    public static void rollbackTransaction(BString transactionBlockId) {
-        TransactionResourceManager.getInstance().rollbackTransaction(transactionBlockId.getValue());
+    public static void notifyAbort(BString transactionBlockId) {
+        TransactionResourceManager.getInstance().notifyTransactionAbort(transactionBlockId.getValue());
     }
 }

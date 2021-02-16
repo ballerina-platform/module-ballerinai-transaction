@@ -62,27 +62,33 @@ function startTransactionCoordinator() returns error? {
     return coordinatorListener.'start();
 }
 
-//function commitResourceManagers(string transactionId, string transactionBlockId) returns boolean {
-//    boolean suc = cleanResourceManagers(transactionId, transactionBlockId);
-//    if(transactional) {
-//           lang_trx:Info previnfo = lang_trx:info();
-//           lang_trx:CommitHandler[] commitFunc = getCommitHandlerList();
-//           foreach var handler in commitFunc {
-//                handler(previnfo);
-//           }
-//    }
-//
-//    return suc;
-//}
+function commitResourceManagers(string transactionId, string transactionBlockId) returns boolean {
+    if transactional {
+       lang_trx:Info previnfo = lang_trx:info();
+       lang_trx:CommitHandler[] commitFunc = getCommitHandlerList();
+       foreach var handler in commitFunc {
+            handler(previnfo);
+       }
+    }
+    boolean res = notifyCommit(transactionId, transactionBlockId);
+    setContextAsNonTransactional();
+    cleanResourceManagers(transactionId, transactionBlockId);
+    return res;
+}
 
-# Commit local resource managers.
+# Notify local resource managers to commit.
 #
 # + transactionId - Globally unique transaction ID.
 # + transactionBlockId - ID of the transaction block. Each transaction block in a process has a unique ID.
 # + return - true or false representing whether the commit is successful or not.
-function commitResourceManagers(string transactionId, string transactionBlockId) returns boolean = @java:Method {
+function notifyCommit(string transactionId, string transactionBlockId) returns boolean = @java:Method {
     'class: "org.ballerinalang.stdlib.transaction.CommitResourceManagers",
-    name: "commitResourceManagers"
+    name: "notifyCommit"
+} external;
+
+function cleanResourceManagers(string transactionId, string transactionBlockId) = @java:Method {
+    'class: "org.ballerinalang.stdlib.transaction.CommitResourceManagers",
+    name: "cleanResourceManagers"
 } external;
 
 # Prepare local resource managers.
@@ -119,21 +125,23 @@ function setTransactionContext(TransactionContext transactionContext, lang_trx:I
 # + transactionBlockId - ID of the transaction block.
 # + err - The cause of the rollback.
 transactional function rollbackTransaction(string transactionBlockId, error? err = ()) {
-    clearTransaction(transactionBlockId);
-    lang_trx:Info previnfo = lang_trx:info();
-    lang_trx:RollbackHandler[] rollbackFunc = getRollbackHandlerList();
-    foreach var handler in rollbackFunc {
-         handler(previnfo, err, false);
+    notifyAbort(transactionBlockId);
+    if transactional {
+        lang_trx:Info previnfo = lang_trx:info();
+        lang_trx:RollbackHandler[] rollbackFunc = getRollbackHandlerList();
+        foreach var handler in rollbackFunc {
+             handler(previnfo, err, false);
+        }
     }
 }
 
-# Rollback the transaction.
+# Notify transaction abort.
 #
 # + transactionBlockId - ID of the transaction block.
-# + err - The cause of the rollback.
-function clearTransaction(string transactionBlockId) = @java:Method {
-    'class: "org.ballerinalang.stdlib.transaction.RollbackTransaction",
-    name: "rollbackTransaction"
+# + err - The cause of the abort.
+function notifyAbort(string transactionBlockId) = @java:Method {
+    'class: "org.ballerinalang.stdlib.transaction.NotifyAbortTransaction",
+    name: "notifyAbort"
 } external;
 
 function getRollbackHandlerList() returns lang_trx:RollbackHandler[] =
@@ -142,11 +150,11 @@ function getRollbackHandlerList() returns lang_trx:RollbackHandler[] =
     name: "getRollbackHandlerList"
 } external;
 
-//function getCommitHandlerList() returns lang_trx:CommitHandler[] =
-//@java:Method {
-//    'class: "org.ballerinalang.stdlib.transaction.GetCommitRollbackHandlers",
-//    name: "getCommitHandlerList"
-//} external;
+function getCommitHandlerList() returns lang_trx:CommitHandler[] =
+@java:Method {
+    'class: "org.ballerinalang.stdlib.transaction.GetCommitRollbackHandlers",
+    name: "getCommitHandlerList"
+} external;
 
 # Get and Cleanup the failure.
 #
