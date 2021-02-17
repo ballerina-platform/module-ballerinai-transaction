@@ -18,6 +18,10 @@ import ballerina/lang.'transaction as lang_trx;
 import ballerina/jballerina.java;
 import ballerina/http;
 
+type Type1 lang_trx:RollbackHandler[]|()[];
+
+type Type2 lang_trx:CommitHandler[]|()[];
+
 readonly class TimestampImpl  {
     *lang_trx:Timestamp;
 
@@ -64,11 +68,13 @@ function startTransactionCoordinator() returns error? {
 
 function commitResourceManagers(string transactionId, string transactionBlockId) returns boolean {
     if transactional {
-       lang_trx:Info previnfo = lang_trx:info();
-       lang_trx:CommitHandler[] commitFunc = getCommitHandlerList();
-       foreach var handler in commitFunc {
-            handler(previnfo);
-       }
+        Type2 commitFunc = getCommitHandlerList();
+        if(commitFunc is lang_trx:CommitHandler[]) {
+          lang_trx:Info previnfo = lang_trx:info();
+          foreach lang_trx:CommitHandler handler in <lang_trx:CommitHandler[]>commitFunc {
+              handler(previnfo);
+          }
+        }
     }
     boolean res = notifyCommit(transactionId, transactionBlockId);
     setContextAsNonTransactional();
@@ -127,10 +133,12 @@ function setTransactionContext(TransactionContext transactionContext, lang_trx:I
 transactional function rollbackTransaction(string transactionBlockId, error? err = ()) {
     notifyAbort(transactionBlockId);
     if transactional {
-        lang_trx:Info previnfo = lang_trx:info();
-        lang_trx:RollbackHandler[] rollbackFunc = getRollbackHandlerList();
-        foreach var handler in rollbackFunc {
+        Type1 rollbackFunc = getRollbackHandlerList();
+        if(rollbackFunc is lang_trx:RollbackHandler[]) {
+          lang_trx:Info previnfo = lang_trx:info();
+          foreach lang_trx:RollbackHandler handler in <lang_trx:RollbackHandler[]>rollbackFunc {
              handler(previnfo, err, false);
+          }
         }
     }
 }
@@ -144,13 +152,13 @@ function notifyAbort(string transactionBlockId) = @java:Method {
     name: "notifyAbort"
 } external;
 
-function getRollbackHandlerList() returns lang_trx:RollbackHandler[] =
+function getRollbackHandlerList() returns Type1 =
 @java:Method {
     'class: "org.ballerinalang.stdlib.transaction.GetCommitRollbackHandlers",
     name: "getRollbackHandlerList"
 } external;
 
-function getCommitHandlerList() returns lang_trx:CommitHandler[] =
+function getCommitHandlerList() returns Type2 =
 @java:Method {
     'class: "org.ballerinalang.stdlib.transaction.GetCommitRollbackHandlers",
     name: "getCommitHandlerList"
