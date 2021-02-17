@@ -16,6 +16,7 @@
 import ballerina/io;
 import ballerina/test;
 import ballerina/lang.'transaction as transactions;
+import ballerina/lang.runtime;
 
 @test:Config {
 }
@@ -617,4 +618,56 @@ function ignoreErrorReturnForRollback() returns error? {
 function getErrorOrInt() returns int|error {
   error err = error("custom error", message = "error value");
   return err;
+}
+
+isolated string handlerOutput = "started";
+
+var onRollbackFunc = isolated function(transactions:Info? info, error? cause, boolean willTry) {
+    lock {
+        handlerOutput += "-> trx aborted";
+    }
+    io:println(" trxAborted");
+};
+
+var onCommitFunc = isolated function(transactions:Info? info) {
+    runtime:sleep(5);
+    lock {
+        handlerOutput += "-> trx commited";
+    }
+    io:println(" trxCommited");
+};
+
+@test:Config {
+}
+function testRuntimeSleepWithCommit() returns error? {
+    transaction {
+        transactions:onRollback(onRollbackFunc);
+        transactions:onCommit(onCommitFunc);
+        check commit;
+    }
+    lock {
+        handlerOutput += "-> trx ended";
+        test:assertEquals(handlerOutput, "started-> trx commited-> trx ended");
+    }
+}
+
+@test:Config {
+}
+function testRuntimeSleepWithRollback() returns error? {
+    transaction {
+        lock {
+            handlerOutput = "started";
+        }
+        transactions:onRollback(onRollbackFunc);
+        transactions:onCommit(onCommitFunc);
+        if(1==1) {
+            rollback error("Custom Error");
+        } else {
+            check commit;
+        }
+    }
+    lock {
+        handlerOutput += "-> trx ended";
+        test:assertEquals(handlerOutput, "started-> trx aborted-> trx ended");
+    }
 }
