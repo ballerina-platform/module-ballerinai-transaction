@@ -22,7 +22,7 @@ type Type1 lang_trx:RollbackHandler[]|()[];
 
 type Type2 lang_trx:CommitHandler[]|()[];
 
-readonly class TimestampImpl  {
+readonly class TimestampImpl {
     *lang_trx:Timestamp;
 
     public function toMillisecondsInt() returns int {
@@ -36,8 +36,8 @@ readonly class TimestampImpl  {
 
 function startTransaction(string transactionBlockId, lang_trx:Info? prevAttempt = ()) returns string {
     string transactionId = "";
-  //  TransactionContext|error txnContext = createTransactionContext(TWO_PHASE_COMMIT, transactionBlockId);
-  TransactionContext|error txnContext = beginTransaction((), transactionBlockId, "", TWO_PHASE_COMMIT);
+    //  TransactionContext|error txnContext = createTransactionContext(TWO_PHASE_COMMIT, transactionBlockId);
+    TransactionContext|error txnContext = beginTransaction((), transactionBlockId, "", TWO_PHASE_COMMIT);
     if (txnContext is error) {
         panic txnContext;
     } else {
@@ -49,11 +49,9 @@ function startTransaction(string transactionBlockId, lang_trx:Info? prevAttempt 
 }
 
 function checkIfTransactional() {
-
-     if(!transactional) {
-         panic error lang_trx:Error("invoking transactional function " +
-                                     "outside transactional scope is prohibited");
-     }
+    if (!transactional) {
+        panic error lang_trx:Error("invoking transactional function " + "outside transactional scope is prohibited");
+    }
 }
 
 function startTransactionCoordinator() returns error? {
@@ -69,11 +67,11 @@ function startTransactionCoordinator() returns error? {
 function commitResourceManagers(string transactionId, string transactionBlockId) returns boolean {
     if transactional {
         Type2 commitFunc = getCommitHandlerList();
-        if(commitFunc is lang_trx:CommitHandler[]) {
-          lang_trx:Info previnfo = lang_trx:info();
-          foreach lang_trx:CommitHandler handler in <lang_trx:CommitHandler[]>commitFunc {
-              handler(previnfo);
-          }
+        if (commitFunc is lang_trx:CommitHandler[]) {
+            lang_trx:Info previnfo = lang_trx:info();
+            foreach lang_trx:CommitHandler handler in <lang_trx:CommitHandler[]>commitFunc {
+                handler(previnfo);
+            }
         }
     }
     boolean res = notifyCommit(transactionId, transactionBlockId);
@@ -130,15 +128,19 @@ function setTransactionContext(TransactionContext transactionContext, lang_trx:I
 #
 # + transactionBlockId - ID of the transaction block.
 # + err - The cause of the rollback.
-transactional function rollbackTransaction(string transactionBlockId, error? err = ()) {
+function rollbackTransaction(string transactionBlockId, error? err = (), error:RetryManager? retryManager = ()) {
     notifyAbort(transactionBlockId);
     if transactional {
         Type1 rollbackFunc = getRollbackHandlerList();
-        if(rollbackFunc is lang_trx:RollbackHandler[]) {
-          lang_trx:Info previnfo = lang_trx:info();
-          foreach lang_trx:RollbackHandler handler in <lang_trx:RollbackHandler[]>rollbackFunc {
-             handler(previnfo, err, false);
-          }
+        boolean shouldRetry = false;
+        if (rollbackFunc is lang_trx:RollbackHandler[]) {
+            lang_trx:Info previnfo = lang_trx:info();
+            if (retryManager is error:RetryManager) {
+                shouldRetry = retryManager.shouldRetry(err);
+            }
+            foreach lang_trx:RollbackHandler handler in <lang_trx:RollbackHandler[]>rollbackFunc {
+                handler(previnfo, err, shouldRetry);
+            }
         }
     }
 }
@@ -152,14 +154,12 @@ function notifyAbort(string transactionBlockId) = @java:Method {
     name: "notifyAbort"
 } external;
 
-function getRollbackHandlerList() returns Type1 =
-@java:Method {
+function getRollbackHandlerList() returns Type1 = @java:Method {
     'class: "org.ballerinalang.stdlib.transaction.GetCommitRollbackHandlers",
     name: "getRollbackHandlerList"
 } external;
 
-function getCommitHandlerList() returns Type2 =
-@java:Method {
+function getCommitHandlerList() returns Type2 = @java:Method {
     'class: "org.ballerinalang.stdlib.transaction.GetCommitRollbackHandlers",
     name: "getCommitHandlerList"
 } external;
