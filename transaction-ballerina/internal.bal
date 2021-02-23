@@ -18,7 +18,11 @@ import ballerina/lang.'transaction as lang_trx;
 import ballerina/jballerina.java;
 import ballerina/http;
 
-readonly class TimestampImpl  {
+type Type1 lang_trx:RollbackHandler[]|()[];
+
+type Type2 lang_trx:CommitHandler[]|()[];
+
+readonly class TimestampImpl {
     *lang_trx:Timestamp;
 
     public function toMillisecondsInt() returns int {
@@ -32,8 +36,8 @@ readonly class TimestampImpl  {
 
 function startTransaction(string transactionBlockId, lang_trx:Info? prevAttempt = ()) returns string {
     string transactionId = "";
-  //  TransactionContext|error txnContext = createTransactionContext(TWO_PHASE_COMMIT, transactionBlockId);
-  TransactionContext|error txnContext = beginTransaction((), transactionBlockId, "", TWO_PHASE_COMMIT);
+    //  TransactionContext|error txnContext = createTransactionContext(TWO_PHASE_COMMIT, transactionBlockId);
+    TransactionContext|error txnContext = beginTransaction((), transactionBlockId, "", TWO_PHASE_COMMIT);
     if (txnContext is error) {
         panic txnContext;
     } else {
@@ -45,11 +49,9 @@ function startTransaction(string transactionBlockId, lang_trx:Info? prevAttempt 
 }
 
 function checkIfTransactional() {
-
-     if(!transactional) {
-         panic error lang_trx:Error("invoking transactional function " +
-                                     "outside transactional scope is prohibited");
-     }
+    if (!transactional) {
+        panic error lang_trx:Error("invoking transactional function " + "outside transactional scope is prohibited");
+    }
 }
 
 function startTransactionCoordinator() returns error? {
@@ -62,14 +64,35 @@ function startTransactionCoordinator() returns error? {
     return coordinatorListener.'start();
 }
 
-# Commit local resource managers.
+function commitResourceManagers(string transactionId, string transactionBlockId) returns boolean {
+    if transactional {
+        Type2 commitFunc = getCommitHandlerList();
+        if (commitFunc is lang_trx:CommitHandler[]) {
+            lang_trx:Info previnfo = lang_trx:info();
+            foreach lang_trx:CommitHandler handler in <lang_trx:CommitHandler[]>commitFunc {
+                handler(previnfo);
+            }
+        }
+    }
+    boolean res = notifyCommit(transactionId, transactionBlockId);
+    cleanResourceManagers(transactionId, transactionBlockId);
+    setContextAsNonTransactional();
+    return res;
+}
+
+# Notify local resource managers to commit.
 #
 # + transactionId - Globally unique transaction ID.
 # + transactionBlockId - ID of the transaction block. Each transaction block in a process has a unique ID.
 # + return - true or false representing whether the commit is successful or not.
-function commitResourceManagers(string transactionId, string transactionBlockId) returns boolean = @java:Method {
+function notifyCommit(string transactionId, string transactionBlockId) returns boolean = @java:Method {
     'class: "org.ballerinalang.stdlib.transaction.CommitResourceManagers",
-    name: "commitResourceManagers"
+    name: "notifyCommit"
+} external;
+
+function cleanResourceManagers(string transactionId, string transactionBlockId) = @java:Method {
+    'class: "org.ballerinalang.stdlib.transaction.CommitResourceManagers",
+    name: "cleanResourceManagers"
 } external;
 
 # Prepare local resource managers.
@@ -105,9 +128,40 @@ function setTransactionContext(TransactionContext transactionContext, lang_trx:I
 #
 # + transactionBlockId - ID of the transaction block.
 # + err - The cause of the rollback.
-function rollbackTransaction(string transactionBlockId, error? err = ()) = @java:Method {
-    'class: "org.ballerinalang.stdlib.transaction.RollbackTransaction",
-    name: "rollbackTransaction"
+function rollbackTransaction(string transactionBlockId, error? err = (), error:RetryManager? retryManager = ()) {
+    notifyAbort(transactionBlockId);
+    if transactional {
+        Type1 rollbackFunc = getRollbackHandlerList();
+        boolean shouldRetry = false;
+        if (rollbackFunc is lang_trx:RollbackHandler[]) {
+            lang_trx:Info previnfo = lang_trx:info();
+            if (retryManager is error:RetryManager) {
+                shouldRetry = retryManager.shouldRetry(err);
+            }
+            foreach lang_trx:RollbackHandler handler in <lang_trx:RollbackHandler[]>rollbackFunc {
+                handler(previnfo, err, shouldRetry);
+            }
+        }
+    }
+}
+
+# Notify transaction abort.
+#
+# + transactionBlockId - ID of the transaction block.
+# + err - The cause of the abort.
+function notifyAbort(string transactionBlockId) = @java:Method {
+    'class: "org.ballerinalang.stdlib.transaction.NotifyAbortTransaction",
+    name: "notifyAbort"
+} external;
+
+function getRollbackHandlerList() returns Type1 = @java:Method {
+    'class: "org.ballerinalang.stdlib.transaction.GetCommitRollbackHandlers",
+    name: "getRollbackHandlerList"
+} external;
+
+function getCommitHandlerList() returns Type2 = @java:Method {
+    'class: "org.ballerinalang.stdlib.transaction.GetCommitRollbackHandlers",
+    name: "getCommitHandlerList"
 } external;
 
 # Get and Cleanup the failure.

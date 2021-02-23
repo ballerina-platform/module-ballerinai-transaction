@@ -272,8 +272,6 @@ transactional function endTransaction(string transactionId, string transactionBl
         panic err;
     }
 
-    setContextAsNonTransactional();
-
     // Only the initiator can end the transaction. Here we check whether the entity trying to end the transaction is
     // an initiator or just a local participant
     if (!participatedTransactions.hasKey(participatedTxnId)) {
