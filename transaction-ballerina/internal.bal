@@ -75,8 +75,8 @@ function commitResourceManagers(string transactionId, string transactionBlockId)
         }
     }
     boolean res = notifyCommit(transactionId, transactionBlockId);
-    setContextAsNonTransactional();
     cleanResourceManagers(transactionId, transactionBlockId);
+    setContextAsNonTransactional();
     return res;
 }
 
