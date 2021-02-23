@@ -45,7 +45,7 @@ public client class FooClient {
 
 }
 
-@test:Config {}
+//@test:Config {}
 function testTransactionalServices() {
     transaction {
         var response = stClient->foo();
