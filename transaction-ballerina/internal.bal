@@ -128,16 +128,13 @@ function setTransactionContext(TransactionContext transactionContext, lang_trx:I
 #
 # + transactionBlockId - ID of the transaction block.
 # + err - The cause of the rollback.
-function rollbackTransaction(string transactionBlockId, error? err = (), error:RetryManager? retryManager = ()) {
+# + shouldRetry - true if the transaction will be retried, false otherwise.
+function rollbackTransaction(string transactionBlockId, error? err = (), boolean shouldRetry = false) {
     notifyAbort(transactionBlockId);
     if transactional {
         Type1 rollbackFunc = getRollbackHandlerList();
-        boolean shouldRetry = false;
         if (rollbackFunc is lang_trx:RollbackHandler[]) {
             lang_trx:Info previnfo = lang_trx:info();
-            if (retryManager is error:RetryManager) {
-                shouldRetry = retryManager.shouldRetry(err);
-            }
             foreach lang_trx:RollbackHandler handler in <lang_trx:RollbackHandler[]>rollbackFunc {
                 handler(previnfo, err, shouldRetry);
             }
