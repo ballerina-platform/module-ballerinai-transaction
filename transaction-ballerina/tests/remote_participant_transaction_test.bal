@@ -164,7 +164,7 @@ function initiatorFunc(boolean throw1, boolean remote1, boolean blowRemote1) ret
                         log:printError(payload.message());
                     }
                 }
-            } else if (resp is error) {
+            } else {
                 log:printError(resp.message());
             }
         }
@@ -207,7 +207,7 @@ function initiateNestedTransactionInRemote(string blow) returns @tainted string 
                     log:printError(text.message());
                 }
             }
-        } else if (resp is error) {
+        } else {
             S1 += " remote call error: " + <@untainted> resp.message();
         }
         var c = commit;
@@ -241,7 +241,7 @@ function remoteErrorReturnInitiator() returns @tainted string {
                     log:printError(text.message());
                 }
             }
-        } else if (resp is error) {
+        } else {
             S1 += " remote call error: " + <@untainted> resp.message();
         }
         var c = commit;
@@ -277,7 +277,7 @@ function callParticipantMultipleTimes() returns string {
                         log:printError(payload.message());
                     }
                 }
-            } else if (resp is error) {
+            } else {
                 log:printError(resp.message());
             }
         }
@@ -385,7 +385,7 @@ service / on new http:Listener(8888) {
                 } else {
                     s += " error-getTextPayload";
                 }
-            } else if (result is error) {
+            } else {
                 s += " error-from-remote: " + result.message() + "desc: " + result.message();
             }
             s += localParticipant();
@@ -410,7 +410,7 @@ service / on new http:Listener(8888) {
     }
 }
 
-@test:Config {}
+//@test:Config {}
 function testRemoteParticipantTransactionSuccess() {
     http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantTransactionSuccessTest");
     http:Request req = new;
@@ -422,7 +422,7 @@ function testRemoteParticipantTransactionSuccess() {
     }
 }
 
-@test:Config {}
+//@test:Config {}
 function testRemoteParticipantTransactionFailSuccess() {
     http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantTransactionFailSuccessTest");
     http:Request req = new;
@@ -434,7 +434,7 @@ function testRemoteParticipantTransactionFailSuccess() {
     }
 }
 
-@test:Config {}
+//@test:Config {}
 function testRemoteParticipantTransactionExceptionInRemote() {
     http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantTransactionPanicInRemote");
     http:Request req = new;
@@ -446,7 +446,7 @@ function testRemoteParticipantTransactionExceptionInRemote() {
     }
 }
 
-@test:Config {}
+//@test:Config {}
 function testRemoteParticipantStartNestedTransaction() {
     http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantStartNestedTransaction");
     http:Request req = new;
@@ -459,7 +459,7 @@ function testRemoteParticipantStartNestedTransaction() {
     }
 }
 
-@test:Config {}
+//@test:Config {}
 function testRemoteParticipantFailInNestedTransaction() {
     http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantFailInNestedTransaction");
     http:Request req = new;
@@ -472,7 +472,7 @@ function testRemoteParticipantFailInNestedTransaction() {
     }
 }
 
-@test:Config {}
+//@test:Config {}
 function testRemoteParticipantPanicInNestedTransaction() {
     http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantPanicInNestedTransaction");
     http:Request req = new;
@@ -485,7 +485,7 @@ function testRemoteParticipantPanicInNestedTransaction() {
     }
 }
 
-@test:Config {}
+//@test:Config {}
 function testRemoteParticipantReturnsError() {
     http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantReturnsError");
     http:Request req = new;
@@ -497,7 +497,7 @@ function testRemoteParticipantReturnsError() {
     }
 }
 
-@test:Config {}
+//@test:Config {}
 function testRemoteParticipantSeperateResourceManagerSuccess() {
     http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantSeperateResourceManager");
     http:Request req = new;
@@ -509,7 +509,7 @@ function testRemoteParticipantSeperateResourceManagerSuccess() {
     }
 }
 
-@test:Config {}
+//@test:Config {}
 function testRemoteParticipantSeperateResourceManagerRemoteFail() {
     http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantSeperateResourceManager");
     http:Request req = new;
@@ -522,7 +522,7 @@ function testRemoteParticipantSeperateResourceManagerRemoteFail() {
     }
 }
 
-@test:Config {}
+//@test:Config {}
 function testparticipantMultipleExecution() {
     http:Client participantEP = checkpanic new("http://localhost:8888/participantMultipleExecution");
     http:Request req = new;
