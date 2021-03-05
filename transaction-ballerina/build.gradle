@@ -167,9 +167,9 @@ task ballerinaTest {
             workingDir project.projectDir
             environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "$distributionBinPath/bal.bat test --code-coverage --includes=* ${debugParams} && exit %%ERRORLEVEL%%"
+                commandLine 'cmd', '/c', "$distributionBinPath/bal.bat test --code-coverage --includes=* ${groupParams} ${disableGroups} ${debugParams} && exit %%ERRORLEVEL%%"
             } else {
-                commandLine 'sh', '-c', "$distributionBinPath/bal test --code-coverage --includes=* ${debugParams}"
+                commandLine 'sh', '-c', "$distributionBinPath/bal test --code-coverage --includes=* ${groupParams} ${disableGroups} ${debugParams}"
             }
         }
     }
@@ -181,6 +181,7 @@ test {
 
 task ballerinaBuild {
     dependsOn(":transaction-native:build")
+    dependsOn(initializeVariables)
     dependsOn(unpackJballerinaTools)
     dependsOn(updateTomlVerions)
     finalizedBy(revertTomlFile)

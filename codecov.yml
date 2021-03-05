@@ -1,5 +1,5 @@
 fixes:
-  - "ballerina/transaction/*/::transaction-ballerina/"
+  - "ballerinai/transaction/*/::transaction-ballerina/"
 
 ignore:
   - "**/tests"
