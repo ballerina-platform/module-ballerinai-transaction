@@ -5,7 +5,8 @@ Ballerina Transaction Internal Module
   [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerinai-transaction.svg)](https://github.com/ballerina-platform/module-ballerinai-transaction/commits/master)
     [![Github issues](https://img.shields.io/github/issues/ballerina-platform/module-ballerinai-transaction.svg?label=Open%20Issues)](https://github.com/ballerina-platform/module-ballerinai-transaction/issues)
   [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-  
+  [![codecov](https://codecov.io/gh/ballerina-platform/module-ballerinai-transaction/branch/master/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/module-ballerinai-transaction)
+
 The transaction internal module is a dependency module which required for Ballerina transactions. This internal
  module is depend on a few other ballerina std-libs such as http, io, config and system.
 
