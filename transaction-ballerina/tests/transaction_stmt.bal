@@ -671,3 +671,17 @@ function testRuntimeSleepWithRollback() returns error? {
         test:assertEquals(handlerOutput, "started-> trx aborted-> trx ended");
     }
 }
+
+@test:Config {
+}
+function testForeachInTrx() {
+    string str = "start";
+    transaction {
+        int[] intArr = [1,2, 3];
+        foreach var i in intArr {
+           str += (" -> " + i.toString());
+        }
+        var i = commit;
+    }
+    test:assertEquals(str, "start -> 1 -> 2 -> 3");
+}
