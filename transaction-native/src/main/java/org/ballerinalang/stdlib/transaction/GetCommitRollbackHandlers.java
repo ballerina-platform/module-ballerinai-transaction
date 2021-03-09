@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -18,18 +18,21 @@
 
 package org.ballerinalang.stdlib.transaction;
 
-import io.ballerina.runtime.api.values.BString;
+import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.transactions.TransactionResourceManager;
 
 /**
- * Extern function transaction:abortResourceManagers.
+ * Extern function transaction:getCommitRollbackHandlers.
  *
  * @since Swan Lake
  */
-public class AbortResourceManagers {
+public class GetCommitRollbackHandlers {
 
-    public static boolean abortResourceManagers(BString transactionId, BString transactionBlockId) {
-        return TransactionResourceManager.getInstance().notifyAbort(transactionId.getValue(),
-                transactionBlockId.getValue());
+    public static BArray getRollbackHandlerList() {
+        return TransactionResourceManager.getInstance().getRegisteredRollbackHandlerList();
+    }
+
+    public static BArray getCommitHandlerList() {
+        return TransactionResourceManager.getInstance().getRegisteredCommitHandlerList();
     }
 }

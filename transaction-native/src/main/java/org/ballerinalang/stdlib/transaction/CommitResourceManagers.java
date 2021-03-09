@@ -27,9 +27,13 @@ import io.ballerina.runtime.transactions.TransactionResourceManager;
  * @since Swan Lake
  */
 public class CommitResourceManagers {
-
-    public static boolean commitResourceManagers(BString transactionId, BString transactionBlockId) {
+    public static boolean notifyCommit(BString transactionId, BString transactionBlockId) {
         return TransactionResourceManager.getInstance().notifyCommit(transactionId.getValue(),
                                                                      transactionBlockId.getValue());
+    }
+
+    public static void cleanResourceManagers(BString transactionId, BString transactionBlockId) {
+        TransactionResourceManager.getInstance().cleanTransaction(transactionId.getValue(),
+                transactionBlockId.getValue());
     }
 }

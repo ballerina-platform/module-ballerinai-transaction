@@ -506,8 +506,8 @@ function noCommitOrRollbackPerformedWithRollbackAndPanicOutcome() returns error?
 }
 function testCommitSuccessWithSuccessOutcomeInNestedRetry() returns error? {
     var result = nestedRetryFunc(false, false);
-    test:assertEquals("trx started -> trx started -> trx started -> nested retry ->" +
-        " nested retry -> nested retry -> exit trx block", result);
+    test:assertEquals(result, "trx started -> trx started -> trx started -> nested retry ->" +
+        " nested retry -> nested retry -> exit trx block");
 }
 
 @test:Config {
@@ -527,8 +527,8 @@ function commitSuccessWithPanicOutcomeInNestedRetry() {
 }
 function testCommitFailWithUnusualSuccessOutcomeInNestedRetry() returns error? {
     var result = nestedRetryFunc(false, true);
-    test:assertEquals("trx started -> trx started -> trx started -> nested retry -> nested retry" +
-    " -> nested retry -> exit trx block", result);
+    test:assertEquals(result, "trx started -> trx started -> trx started -> nested retry -> nested retry" +
+    " -> nested retry -> exit trx block");
 }
 
 @test:Config {
