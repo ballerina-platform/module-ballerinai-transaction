@@ -112,7 +112,7 @@ function cleanupTransactions() returns error? {
                     }
                 }
             }
-            if (time:utcDiffSeconds(time:utcNow(), twopcTxn.createdTime) >= 600) {
+            if (time:currentTime().time - twopcTxn.createdTime >= 600000) {
                 // We don't want dead transactions hanging around
                 removeInitiatedTransaction(twopcTxn.transactionId);
             }
