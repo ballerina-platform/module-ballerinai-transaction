@@ -34,7 +34,7 @@ service /hello on new http:Listener(8890) {
 
         var resp = caller->respond(res);
         if (resp is error) {
-            log:printError("Error sending response", {"error":resp.message()});
+            log:printError("Error sending response", 'err = resp);
         }
     }
 }
