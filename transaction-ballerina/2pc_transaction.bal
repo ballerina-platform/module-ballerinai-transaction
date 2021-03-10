@@ -256,7 +256,7 @@ class TwoPhaseCommitTransaction {
 
     // This function will be called by the initiator
     function abortInitiatorTransaction() returns string|lang_trx:Error {
-        log:printInfo(io:sprintf("Aborting initiated transaction: %s:%s", self.transactionId, self.transactionBlockId));
+        log:printInfo("Aborting initiated transaction: " + self.transactionId + ":" + self.transactionBlockId);
         string|lang_trx:Error ret = "";
         // return response to the initiator. ( Aborted | Mixed )
         var result = self.notifyParticipants(COMMAND_ABORT, ());
