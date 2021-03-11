@@ -36,11 +36,9 @@ map<TwoPhaseCommitTransaction> initiatedTransactions = {};
 cache:Cache httpClientCache = new;
 
 private function init () {
-    time:ZoneOffset zoneOffset = {hours: 5, minutes: 30};
     time:Utc currentUtc = time:utcNow();
     time:Utc newTime = time:utcAddSeconds(currentUtc, 1);
     time:Civil time = time:utcToCivil(newTime);
-    time.utcOffset = zoneOffset;
     var result = task:scheduleJobRecurByFrequency(new Cleanup(), 60,
                                 startTime = time);
 }
