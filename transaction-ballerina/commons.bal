@@ -35,13 +35,10 @@ map<TwoPhaseCommitTransaction> initiatedTransactions = {};
 # This cache is used for caching HTTP connectors against the URL, since creating connectors is expensive.
 cache:Cache httpClientCache = new;
 
-private function init () {
-    time:Utc currentUtc = time:utcNow();
-    time:Utc newTime = time:utcAddSeconds(currentUtc, 1);
-    time:Civil time = time:utcToCivil(newTime);
-    var result = task:scheduleJobRecurByFrequency(new Cleanup(), 60,
-                                startTime = time);
-}
+time:Utc currentUtc = time:utcNow();
+time:Utc newTime = time:utcAddSeconds(currentUtc, 1);
+time:Civil time = time:utcToCivil(newTime);
+var result = task:scheduleJobRecurByFrequency(new Cleanup(), 60, startTime = time);
 
 class Cleanup {
     *task:Job;
