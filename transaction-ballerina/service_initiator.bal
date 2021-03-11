@@ -112,7 +112,7 @@ service object {} initiatorService = service object {
                     var resResult = conn->respond(res);
                     if (resResult is http:ListenerError) {
                         log:printError("Sending response for register request for transaction " + txnId +
-                                " failed", 'err = resResult);
+                                " failed", 'error = resResult);
                     } else {
                         log:printDebug("Registered remote participant: " + participantId +
                         " for transaction: " + txnId);

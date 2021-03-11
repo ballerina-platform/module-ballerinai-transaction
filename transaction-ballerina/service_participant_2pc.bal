@@ -73,7 +73,7 @@ service object {} participant2pcService = service object {
             var resResult = conn->respond(res);
             if (resResult is error) {
                 log:printError("Sending response for prepare request for transaction " +
-                transactionId + " failed", 'err = resResult);
+                transactionId + " failed", 'error = resResult);
             }
         } else {
             panic jsonResponse;
@@ -143,7 +143,7 @@ service object {} participant2pcService = service object {
             var resResult = conn->respond(res);
             if (resResult is http:ListenerError) {
                 log:printError("Sending response for notify request for transaction " + transactionId +
-                        " failed", 'err = resResult);
+                        " failed", 'error = resResult);
             }
         } else {
             panic jsonResponse;

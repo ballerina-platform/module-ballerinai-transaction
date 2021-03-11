@@ -108,7 +108,7 @@ function cleanupTransactions() returns error? {
                         removeInitiatedTransaction(twopcTxn.transactionId);
                     } else {
                         log:printError("Auto-commit of participated transaction: " +
-                        twopcTxn.transactionId + " failed", 'err = result);
+                        twopcTxn.transactionId + " failed", 'error = result);
                     }
                 }
             }
@@ -193,7 +193,7 @@ function respondToBadRequest(http:Caller ep, string msg) {
         res.setJsonPayload(<@untainted json> resPayload);
         var resResult = ep->respond(res);
         if (resResult is error) {
-            log:printError("Could not send Bad Request error response to caller", 'err = resResult);
+            log:printError("Could not send Bad Request error response to caller", 'error = resResult);
         } else {
             return;
         }
@@ -377,7 +377,7 @@ function registerParticipantWithRemoteInitiator(string transactionId, string tra
     var result = initiatorEP->register(transactionId, transactionBlockId, participantProtocols);
     if (result is error) {
         string msg = "Cannot register with coordinator for transaction: " + transactionId;
-        log:printError(msg, 'err = result);
+        log:printError(msg, 'error = result);
         // TODO : Fix me.
         //map data = { cause: err };
         return error lang_trx:Error(msg);
