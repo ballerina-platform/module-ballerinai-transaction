@@ -196,9 +196,9 @@ task ballerinaBuild {
             workingDir project.projectDir
             environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "$distributionBinPath/bal.bat build ${testParams} ${debugParams} && exit %%ERRORLEVEL%%"
+                commandLine 'cmd', '/c', "$distributionBinPath/bal.bat build ${testParams} ${debugParams} -c && exit %%ERRORLEVEL%%"
             } else {
-                commandLine 'sh', '-c', "$distributionBinPath/bal build ${testParams} ${debugParams}"
+                commandLine 'sh', '-c', "$distributionBinPath/bal build ${testParams} ${debugParams} -c"
             }
         }
 
