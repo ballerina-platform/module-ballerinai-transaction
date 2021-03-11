@@ -35,13 +35,20 @@ map<TwoPhaseCommitTransaction> initiatedTransactions = {};
 # This cache is used for caching HTTP connectors against the URL, since creating connectors is expensive.
 cache:Cache httpClientCache = new;
 
-listener task:Listener timer = new({
-    intervalInMillis: 60000,
-    initialDelayInMillis: 1000
-});
+private function init () {
+    time:ZoneOffset zoneOffset = {hours: 5, minutes: 30};
+    time:Utc currentUtc = time:utcNow();
+    time:Utc newTime = time:utcAddSeconds(currentUtc, 1);
+    time:Civil time = time:utcToCivil(newTime);
+    time.utcOffset = zoneOffset;
+    var result = task:scheduleJobRecurByFrequency(new Cleanup(), 60,
+                                startTime = time);
+}
 
-service on timer {
-    remote function onTrigger() {
+class Cleanup {
+    *task:Job;
+
+    public function execute() {
         checkpanic cleanupTransactions();
     }
 }
