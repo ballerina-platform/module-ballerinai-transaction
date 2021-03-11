@@ -82,8 +82,7 @@ service object {} initiatorService = service object {
             } else {
                 RemoteProtocol[] participantProtocols = regReq.participantProtocols;
                 if (isRegisteredParticipant(participantId, initiatedTxn.participants)) {
-                    //log:printDebug(() => io:sprintf("Already-Registered. TID:%s,participant ID:%s", txnId,
-                    //        participantId));
+                    log:printDebug("Already-Registered. TID:" + txnId + ", participant ID:" + participantId);
                 } else {
                     RemoteParticipant participant = new(participantId, initiatedTxn.transactionId,
                                                         participantProtocols);
@@ -113,10 +112,10 @@ service object {} initiatorService = service object {
                     var resResult = conn->respond(res);
                     if (resResult is http:ListenerError) {
                         log:printError("Sending response for register request for transaction " + txnId +
-                                " failed", err = resResult);
+                                " failed", 'error = resResult);
                     } else {
-                        //log:printDebug(() => io:sprintf("Registered remote participant: %s for transaction: %s",
-                        //        participantId, txnId));
+                        log:printDebug("Registered remote participant: " + participantId +
+                        " for transaction: " + txnId);
                     }
                 } else {
                     panic resPayload;
