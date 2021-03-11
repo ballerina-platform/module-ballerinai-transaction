@@ -37,7 +37,7 @@ service object {} participant2pcService = service object {
         http:Response res = new;
         final string transactionId = prepareReq.transactionId;
         final string participatedTxnId = getParticipatedTransactionId(transactionId, transactionBlockId);
-        //log:printDebug(() => io:sprintf("Prepare received for transaction: %s", participatedTxnId));
+        log:printDebug("Prepare received for transaction: " + participatedTxnId);
         PrepareResponse prepareRes = {};
 
         var participatedTxn = participatedTransactions[participatedTxnId];
@@ -56,13 +56,13 @@ service object {} participant2pcService = service object {
                     res.statusCode = http:STATUS_OK;
                     participatedTxn.state = TXN_STATE_PREPARED;
                     prepareRes.message = PREPARE_RESULT_PREPARED_STR;
-                    //log:printDebug(() => io:sprintf("Prepared transaction: %s", transactionId));
+                    log:printDebug("Prepared transaction: " + transactionId);
                 } else {
                     res.statusCode = http:STATUS_OK;
                     prepareRes.message = PREPARE_RESULT_ABORTED_STR;
                     participatedTxn.state = TXN_STATE_ABORTED;
                     removeParticipatedTransaction(participatedTxnId);
-                    //log:printDebug(() => io:sprintf("Aborted transaction: %s", transactionId));
+                    log:printDebug("Aborted transaction: " + transactionId);
                 }
             }
         }
@@ -73,7 +73,7 @@ service object {} participant2pcService = service object {
             var resResult = conn->respond(res);
             if (resResult is error) {
                 log:printError("Sending response for prepare request for transaction " +
-                transactionId + " failed", err = resResult);
+                transactionId + " failed", 'error = resResult);
             }
         } else {
             panic jsonResponse;
@@ -97,7 +97,7 @@ service object {} participant2pcService = service object {
         final string transactionId = notifyReq.transactionId;
         final string participatedTxnId = getParticipatedTransactionId(transactionId, transactionBlockId);
         final string message = notifyReq.message;
-        //log:printDebug(() => io:sprintf("Notify(%s) received for transaction: %s", message, participatedTxnId));
+        log:printDebug("Notify(" + message + ") received for transaction: " + participatedTxnId);
         NotifyResponse notifyRes = {};
         var txn = participatedTransactions[participatedTxnId];
         if (txn is ()) {
@@ -143,7 +143,7 @@ service object {} participant2pcService = service object {
             var resResult = conn->respond(res);
             if (resResult is http:ListenerError) {
                 log:printError("Sending response for notify request for transaction " + transactionId +
-                        " failed", err = resResult);
+                        " failed", 'error = resResult);
             }
         } else {
             panic jsonResponse;
