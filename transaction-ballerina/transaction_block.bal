@@ -16,6 +16,7 @@
 
 import ballerina/jballerina.java;
 import ballerina/lang.'transaction as lang_trx;
+import ballerina/log;
 
 # Handles the transaction initiator block.
 # Transaction initiator block will be desugared to following method.
