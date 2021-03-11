@@ -51,7 +51,6 @@ public class Exec {
             env.entrySet().forEach(entry -> pbEnv.put(entry.getKey().getValue(), entry.getValue().getValue()));
         }
         try {
-            System.out.println(commandList.toString());
             return OSUtils.getProcessObject(pb.start());
         } catch (IOException e) {
             return OSUtils.getBallerinaError(OSConstants.PROCESS_EXEC_ERROR, e);

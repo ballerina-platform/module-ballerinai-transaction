@@ -67,7 +67,6 @@ public class OSUtils {
 
     public static BObject getProcessObject(Process process) throws IOException {
         BObject obj = (BObject) ValueCreator.createObjectValue(ModuleUtils.getModule(), PROCESS_TYPE);
-        System.out.println(obj);
         obj.addNativeData(PROCESS_FIELD, process);
         return obj;
     }
