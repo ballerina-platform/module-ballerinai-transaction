@@ -35,13 +35,15 @@ map<TwoPhaseCommitTransaction> initiatedTransactions = {};
 # This cache is used for caching HTTP connectors against the URL, since creating connectors is expensive.
 cache:Cache httpClientCache = new;
 
-listener task:Listener timer = new({
-    intervalInMillis: 60000,
-    initialDelayInMillis: 1000
-});
+time:Utc currentUtc = time:utcNow();
+time:Utc newTime = time:utcAddSeconds(currentUtc, 1);
+time:Civil time = time:utcToCivil(newTime);
+var result = task:scheduleJobRecurByFrequency(new Cleanup(), 60, startTime = time);
 
-service on timer {
-    remote function onTrigger() {
+class Cleanup {
+    *task:Job;
+
+    public function execute() {
         checkpanic cleanupTransactions();
     }
 }
@@ -57,15 +59,14 @@ function cleanupTransactions() returns error? {
         //foreach var twopcTxn in participatedTransactions {
             final string participatedTxnId = getParticipatedTransactionId(twopcTxn.transactionId,
                 twopcTxn.transactionBlockId);
-            if (time:currentTime().time - twopcTxn.createdTime >= 120000) {
+            if (time:utcDiffSeconds(time:utcNow(), twopcTxn.createdTime) >= 120) {
                 if (twopcTxn.state != TXN_STATE_ABORTED && twopcTxn.state != TXN_STATE_COMMITTED) {
                     if (twopcTxn.state != TXN_STATE_PREPARED) {
                         boolean prepareSuccessful =
                             prepareResourceManagers(twopcTxn.transactionId, twopcTxn.transactionBlockId);
                         if (prepareSuccessful) {
                             twopcTxn.state = TXN_STATE_PREPARED;
-                            //log:printDebug(() => io:sprintf("Auto-prepared participated  transaction: %s",
-                            //        participatedTxnId));
+                            log:printDebug("Auto-prepared participated  transaction: " + participatedTxnId);
                         } else {
                             log:printError("Auto-prepare of participated transaction: " + participatedTxnId +
                                     " failed");
@@ -76,8 +77,7 @@ function cleanupTransactions() returns error? {
                             twopcTxn.transactionBlockId);
                         if (commitSuccessful) {
                             twopcTxn.state = TXN_STATE_COMMITTED;
-                            //log:printDebug(() => io:sprintf("Auto-committed participated  transaction: %s",
-                            //        participatedTxnId));
+                            log:printDebug("Auto-committed participated  transaction: " + participatedTxnId);
                             removeParticipatedTransaction(participatedTxnId);
                         } else {
                             log:printError("Auto-commit of participated transaction: " + participatedTxnId + " failed");
@@ -85,7 +85,7 @@ function cleanupTransactions() returns error? {
                     }
                 }
             }
-            if (time:currentTime().time - twopcTxn.createdTime >= 600000) {
+            if (time:utcDiffSeconds(time:utcNow(), twopcTxn.createdTime) >= 600) {
                 // We don't want dead transactions hanging around
                 removeParticipatedTransaction(participatedTxnId);
             }
@@ -99,25 +99,22 @@ function cleanupTransactions() returns error? {
             i += 1;
        //TODO:commenting due to a caching issue
        //foreach var twopcTxn in initiatedTransactions {
-            if (time:currentTime().time - twopcTxn.createdTime >= 120000) {
+            if (time:utcDiffSeconds(time:utcNow(), twopcTxn.createdTime) >= 120) {
                 if (twopcTxn.state != TXN_STATE_ABORTED) {
                     // Commit the transaction since prepare hasn't been received
                     var result = twopcTxn.twoPhaseCommit();
                     if (result is string) {
                         final string trxId = twopcTxn.transactionId;
                         final string outcome = result;
-                        //log:printDebug(isolated function () returns string {
-                        //    return io:sprintf("Auto-committed initiated transaction: %s. Result: %s",
-                        //            trxId, outcome);
-                        //});
+                        log:printDebug("Auto-committed initiated transaction: " + trxId + ". Result: " + outcome);
                         removeInitiatedTransaction(twopcTxn.transactionId);
                     } else {
                         log:printError("Auto-commit of participated transaction: " +
-                        twopcTxn.transactionId + " failed", err = result);
+                        twopcTxn.transactionId + " failed", 'error = result);
                     }
                 }
             }
-            if (time:currentTime().time - twopcTxn.createdTime >= 600000) {
+            if (time:utcDiffSeconds(time:utcNow(), twopcTxn.createdTime) >= 600) {
                 // We don't want dead transactions hanging around
                 removeInitiatedTransaction(twopcTxn.transactionId);
             }
@@ -198,7 +195,7 @@ function respondToBadRequest(http:Caller ep, string msg) {
         res.setJsonPayload(<@untainted json> resPayload);
         var resResult = ep->respond(res);
         if (resResult is error) {
-            log:printError("Could not send Bad Request error response to caller", err = resResult);
+            log:printError("Could not send Bad Request error response to caller", 'error = resResult);
         } else {
             return;
         }
@@ -267,8 +264,7 @@ function registerLocalParticipantWithInitiator(string transactionId, string tran
         return error lang_trx:Error("Transaction-Unknown. Invalid TID:" + transactionId);
     } else {
         if (isRegisteredParticipant(participantId, initiatedTxn.participants)) { // Already-Registered
-            //log:printDebug(() => io:sprintf("Already-Registered. TID:%s,participant ID:%s", trxId,
-            //        participantId));
+            log:printDebug("Already-Registered. TID:" + trxId + ", participant ID:" + participantId);
             TransactionContext txnCtx = {
                 transactionId:transactionId, transactionBlockId:transactionBlockId,
                 coordinationType:TWO_PHASE_COMMIT, registerAtURL:registerAtURL
@@ -290,8 +286,7 @@ function registerLocalParticipantWithInitiator(string transactionId, string tran
             participatedTransactions[participatedTxnId] = participatedTxn;
             TransactionContext txnCtx = {transactionId:transactionId, transactionBlockId:transactionBlockId,
             coordinationType:TWO_PHASE_COMMIT, registerAtURL:registerAtURL};
-            //log:printDebug(() => io:sprintf("Registered local participant: %s for transaction:%s",
-            //        participantId, trxId));
+            log:printDebug("Registered local participant: " + participantId + " for transaction:" + trxId);
             return txnCtx;
         }
     }
@@ -320,15 +315,13 @@ function getInitiatorClient(string registerAtURL) returns InitiatorClientEP {
             if (httpClientCache.hasKey(registerAtURL)) {
                 return <InitiatorClientEP> checkpanic httpClientCache.get(registerAtURL);
             }
-            initiatorEP = new({ registerAtURL: registerAtURL, timeoutInMillis: 15000,
-                retryConfig: { count: 2, intervalInMillis: 5000 }
+            initiatorEP = new({ registerAtURL: registerAtURL, timeout: 15,
+                retryConfig: { count: 2, interval: 5 }
             });
             cache:Error? result = httpClientCache.put(registerAtURL, initiatorEP);
             if (result is cache:Error) {
                 final string url = registerAtURL;
-                //log:printDebug(isolated function() returns string {
-                //    return io:sprintf("Failed to add http client with key: %s to the cache.", url);
-                //});
+                log:printDebug("Failed to add http client with key: " + url + " to the cache.");
             }
             return initiatorEP;
         }
@@ -345,14 +338,12 @@ function getParticipant2pcClient(string participantURL) returns Participant2pcCl
                 return <Participant2pcClientEP> checkpanic httpClientCache.get(<@untainted>participantURL);
             }
             participantEP = new({ participantURL: participantURL,
-                timeoutInMillis: 15000, retryConfig: { count: 2, intervalInMillis: 5000 }
+                timeout: 15, retryConfig: { count: 2, interval: 5 }
             });
             cache:Error? result = httpClientCache.put(participantURL, participantEP);
             if (result is cache:Error) {
                 final string url = participantURL;
-                //log:printDebug(isolated function() returns string {
-                //    return io:sprintf("Failed to add http client with key: %s to the cache.", url);
-                //});
+                log:printDebug("Failed to add http client with key: " + url + " to the cache.");
             }
             return participantEP;
         }
@@ -375,7 +366,7 @@ function registerParticipantWithRemoteInitiator(string transactionId, string tra
 
     // Register with the coordinator only if the participant has not already done so
     if (participatedTransactions.hasKey(participatedTxnId)) {
-        //log:printDebug(() => io:sprintf("Already registered with initiator for transaction:%s",  participatedTxnId));
+        log:printDebug("Already registered with initiator for transaction:" + participatedTxnId);
         TransactionContext txnCtx = {
             transactionId:transactionId, transactionBlockId:transactionBlockId,
             coordinationType:TWO_PHASE_COMMIT, registerAtURL:registerAtURL
@@ -383,13 +374,12 @@ function registerParticipantWithRemoteInitiator(string transactionId, string tra
         return txnCtx;
     }
     final string url = registerAtURL;
-    //log:printDebug(() => io:sprintf("Registering for transaction: %s with coordinator: %s",
-    //        participatedTxnId, url));
+    log:printDebug("Registering for transaction: " + participatedTxnId + " with coordinator: " + url);
 
     var result = initiatorEP->register(transactionId, transactionBlockId, participantProtocols);
     if (result is error) {
         string msg = "Cannot register with coordinator for transaction: " + transactionId;
-        log:printError(msg, err = result);
+        log:printError(msg, 'error = result);
         // TODO : Fix me.
         //map data = { cause: err };
         return error lang_trx:Error(msg);
@@ -403,7 +393,7 @@ function registerParticipantWithRemoteInitiator(string transactionId, string tra
             coordinationType:TWO_PHASE_COMMIT, registerAtURL:registerAtURL
         };
         final string trxId = transactionId;
-        //log:printDebug(() => io:sprintf("Registered with coordinator for transaction: %s", trxId));
+        log:printDebug("Registered with coordinator for transaction: " + trxId);
         return txnCtx;
     }
 }

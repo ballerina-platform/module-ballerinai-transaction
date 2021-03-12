@@ -47,7 +47,7 @@ service / on new http:Listener(8889) {
 
         var resp = caller->respond(res);
         if (resp is error) {
-            log:printError("Error sending response", {"error":resp.message()});
+            log:printError("Error sending response", 'error = resp);
         }
     }
 
@@ -77,7 +77,7 @@ service / on new http:Listener(8889) {
         }
         var resp = caller->respond(res);
         if (resp is error) {
-            log:printError("Error sending response", {"error":resp.message()});
+            log:printError("Error sending response", 'error = resp);
         }
     }
 
@@ -93,7 +93,7 @@ service / on new http:Listener(8889) {
 
         var resp = caller->respond(res);
         if (resp is error) {
-            log:printError("Error sending response", {"error":resp.message()});
+            log:printError("Error sending response", 'error = resp);
         }
         return;
     }
@@ -301,7 +301,7 @@ service / on new http:Listener(8888) {
         var r = caller->respond(res);
         if (r is error) {
             log:printError("Error sending response: " + (result is error ? result.toString() : result.toString()),
-            {"error":r.message()});
+            'error = r);
         }
     }
 
@@ -313,7 +313,7 @@ service / on new http:Listener(8888) {
         var r = caller->respond(res);
         if (r is error) {
             log:printError("Error sending response: " + (result is error ? result.toString() : result.toString()),
-            {"error":r.message()});
+            'error = r);
         }
     }
 
@@ -325,7 +325,7 @@ service / on new http:Listener(8888) {
         var r = caller->respond(res);
         if (r is error) {
             log:printError("Error sending response: " + (result is error ? result.toString() : result.toString()),
-            {"error":r.message()});
+            'error = r);
         }
     }
 
@@ -335,7 +335,7 @@ service / on new http:Listener(8888) {
         res.setPayload(<@untainted> result);
         var r = caller->respond(res);
         if (r is error) {
-            log:printError("Error sending response: " + result, {"error":r.message()});
+            log:printError("Error sending response: " + result, 'error = r);
         }
     }
 
@@ -345,7 +345,7 @@ service / on new http:Listener(8888) {
         res.setPayload(<@untainted> result);
         var r = caller->respond(res);
         if (r is error) {
-            log:printError("Error sending response: " + result, {"error":r.message()});
+            log:printError("Error sending response: " + result, 'error = r);
         }
     }
 
@@ -355,7 +355,7 @@ service / on new http:Listener(8888) {
         res.setPayload(<@untainted> result);
         var r = caller->respond(res);
         if (r is error) {
-            log:printError("Error sending response: " + result, {"error":r.message()});
+            log:printError("Error sending response: " + result, 'error = r);
         }
     }
 
@@ -365,7 +365,7 @@ service / on new http:Listener(8888) {
         res.setPayload(<@untainted> result);
         var r = caller->respond(res);
         if (r is error) {
-            log:printError("Error sending response: " + result, {"error":r.message()});
+            log:printError("Error sending response: " + result, 'error = r);
         }
     }
 
@@ -405,12 +405,12 @@ service / on new http:Listener(8888) {
         res.setPayload(result);
         var r = caller->respond(res);
         if (r is error) {
-            log:printError("Error sending response: " + result, {"error":r.message()});
+            log:printError("Error sending response: " + result, 'error = r);
         }
     }
 }
 
-//@test:Config {}
+@test:Config {}
 function testRemoteParticipantTransactionSuccess() {
     http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantTransactionSuccessTest");
     http:Request req = new;
@@ -422,7 +422,7 @@ function testRemoteParticipantTransactionSuccess() {
     }
 }
 
-//@test:Config {}
+@test:Config {}
 function testRemoteParticipantTransactionFailSuccess() {
     http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantTransactionFailSuccessTest");
     http:Request req = new;
@@ -434,7 +434,7 @@ function testRemoteParticipantTransactionFailSuccess() {
     }
 }
 
-//@test:Config {}
+@test:Config {}
 function testRemoteParticipantTransactionExceptionInRemote() {
     http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantTransactionPanicInRemote");
     http:Request req = new;
@@ -446,7 +446,7 @@ function testRemoteParticipantTransactionExceptionInRemote() {
     }
 }
 
-//@test:Config {}
+@test:Config {}
 function testRemoteParticipantStartNestedTransaction() {
     http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantStartNestedTransaction");
     http:Request req = new;
@@ -459,7 +459,7 @@ function testRemoteParticipantStartNestedTransaction() {
     }
 }
 
-//@test:Config {}
+@test:Config {}
 function testRemoteParticipantFailInNestedTransaction() {
     http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantFailInNestedTransaction");
     http:Request req = new;
@@ -472,7 +472,7 @@ function testRemoteParticipantFailInNestedTransaction() {
     }
 }
 
-//@test:Config {}
+@test:Config {}
 function testRemoteParticipantPanicInNestedTransaction() {
     http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantPanicInNestedTransaction");
     http:Request req = new;
@@ -485,7 +485,7 @@ function testRemoteParticipantPanicInNestedTransaction() {
     }
 }
 
-//@test:Config {}
+@test:Config {}
 function testRemoteParticipantReturnsError() {
     http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantReturnsError");
     http:Request req = new;
@@ -497,7 +497,7 @@ function testRemoteParticipantReturnsError() {
     }
 }
 
-//@test:Config {}
+@test:Config {}
 function testRemoteParticipantSeperateResourceManagerSuccess() {
     http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantSeperateResourceManager");
     http:Request req = new;
@@ -509,7 +509,7 @@ function testRemoteParticipantSeperateResourceManagerSuccess() {
     }
 }
 
-//@test:Config {}
+@test:Config {}
 function testRemoteParticipantSeperateResourceManagerRemoteFail() {
     http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantSeperateResourceManager");
     http:Request req = new;
@@ -522,7 +522,7 @@ function testRemoteParticipantSeperateResourceManagerRemoteFail() {
     }
 }
 
-//@test:Config {}
+@test:Config {}
 function testparticipantMultipleExecution() {
     http:Client participantEP = checkpanic new("http://localhost:8888/participantMultipleExecution");
     http:Request req = new;
