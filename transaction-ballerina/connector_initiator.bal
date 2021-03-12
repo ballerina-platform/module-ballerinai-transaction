@@ -19,10 +19,10 @@ import ballerina/lang.'transaction as lang_trx;
 
 type InitiatorClientConfig record {
     string registerAtURL = "";
-    int timeoutInMillis = 0;
+    decimal timeout = 0;
     record {
         int count = 0;
-        int intervalInMillis = 0;
+        decimal interval = 0;
     } retryConfig = {};
 };
 
@@ -33,10 +33,10 @@ client class InitiatorClientEP {
 
     function init(InitiatorClientConfig conf) {
         http:Client httpEP = checkpanic new(conf.registerAtURL, {
-                timeoutInMillis:conf.timeoutInMillis,
+                timeout:conf.timeout,
                 retryConfig:{
                     count:conf.retryConfig.count,
-                    intervalInMillis:conf.retryConfig.intervalInMillis
+                    interval:conf.retryConfig.interval
                 }
             });
         self.httpClient = httpEP;

@@ -315,8 +315,8 @@ function getInitiatorClient(string registerAtURL) returns InitiatorClientEP {
             if (httpClientCache.hasKey(registerAtURL)) {
                 return <InitiatorClientEP> checkpanic httpClientCache.get(registerAtURL);
             }
-            initiatorEP = new({ registerAtURL: registerAtURL, timeoutInMillis: 15000,
-                retryConfig: { count: 2, intervalInMillis: 5000 }
+            initiatorEP = new({ registerAtURL: registerAtURL, timeout: 15,
+                retryConfig: { count: 2, interval: 5 }
             });
             cache:Error? result = httpClientCache.put(registerAtURL, initiatorEP);
             if (result is cache:Error) {
@@ -338,7 +338,7 @@ function getParticipant2pcClient(string participantURL) returns Participant2pcCl
                 return <Participant2pcClientEP> checkpanic httpClientCache.get(<@untainted>participantURL);
             }
             participantEP = new({ participantURL: participantURL,
-                timeoutInMillis: 15000, retryConfig: { count: 2, intervalInMillis: 5000 }
+                timeout: 15, retryConfig: { count: 2, interval: 5 }
             });
             cache:Error? result = httpClientCache.put(participantURL, participantEP);
             if (result is cache:Error) {
