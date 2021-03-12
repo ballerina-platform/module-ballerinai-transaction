@@ -13,7 +13,7 @@ plugins {
 
 rootProject.name = 'transaction'
 include(':build-config:checkstyle')
-include ':transaction-native', ':transaction-ballerina', ':transaction-negative-tests'
+include ':transaction-native', ':transaction-ballerina', ':transaction-test-utils', ':transaction-negative-tests'
 
 gradleEnterprise {
     buildScan {

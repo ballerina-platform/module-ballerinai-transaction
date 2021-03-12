@@ -8,3 +8,16 @@ path = "../transaction-native/build/libs/transaction-native-@project.version@.ja
 groupId = "ballerina"
 artifactId = "transaction"
 version = "@project.version@"
+
+[[platform.java11.dependency]]
+path = "../transaction-test-utils/build/libs/transaction-test-utils-@project.version@.jar"
+groupId = "org.ballerinalang.stdlib.transaction"
+scope = "testOnly"
+artifactId = "transaction"
+version = "@project.version@"
+
+[[platform.java11.dependency]]
+path = "./lib/io-native-@io.native.version@.jar"
+groupId = "org.ballerinalang"
+artifactId = "io-native"
+version = "@io.native.version@"

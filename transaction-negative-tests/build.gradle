@@ -21,6 +21,7 @@ description = 'Ballerina - Transactions Negative Tests'
 
 configurations {
     jbalTools
+    externalJars
 }
 
 dependencies {
@@ -28,7 +29,11 @@ dependencies {
     jbalTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
         transitive = false
     }
+    externalJars (group: 'org.ballerinalang', name: 'io-native', version: "${stdlibIoVersion}") {
+        transitive = false
+    }
     compile project(':transaction-native')
+    compile project(':transaction-test-utils')
 }
 
 clean {
@@ -77,6 +82,11 @@ task copyStdlibs(type: Copy) {
     }
 }
 
+task copyToLib(type: Copy) {
+    into "$project.projectDir/lib"
+    from configurations.externalJars
+}
+
 def snapshotVersion = "-SNAPSHOT"
 def tomlVersion = project.version.replace("${snapshotVersion}", "")
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
@@ -87,12 +97,15 @@ def initialTOMLcontent = configTOMLFile.text
 
 task updateTomlVerions {
     doLast {
+        def stdlibNativeIoVersion = project.stdlibIoVersion
+
         def stdlibDependentIoVersion = project.stdlibIoVersion.replace("${snapshotVersion}", "")
         def stdlibDependentRegexVersion = project.stdlibRegexVersion.replace("${snapshotVersion}", "")
         def stdlibDependentOsVersion = project.stdlibOsVersion.replace("${snapshotVersion}", "")
 
         def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
+        newConfig = newConfig.replace("@io.native.version@", stdlibNativeIoVersion)
         ballerinaConfigFile.text = newConfig
 
         def newDependencyConfig = ballerinaDependencyFile.text.replace("@stdlib.io.version@", stdlibDependentIoVersion)
@@ -116,7 +129,9 @@ def setExecPath(configTOMLFile, distributionBinPath) {
 task ballerinaNegativeTests {
     inputs.dir file(project.projectDir)
     dependsOn(copyStdlibs)
+    dependsOn(copyToLib)
     dependsOn(":transaction-ballerina:build")
+    dependsOn(":transaction-test-utils:build")
     dependsOn(updateTomlVerions)
     finalizedBy(revertTomlFile)
     doLast {
