@@ -180,7 +180,7 @@ task ballerinaBuild {
     inputs.dir file(project.projectDir)
 
     def (debugParams , balJavaDebugParam) = getDebugParams()
-    def testParams =  ""
+    def testParams = ""
 
     gradle.taskGraph.whenReady { graph ->
         if (graph.hasTask(":${packageName}-ballerina:build") || graph.hasTask(":${packageName}-ballerina:publishToMavenLocal")) {
@@ -190,7 +190,7 @@ task ballerinaBuild {
         }
 
         if (graph.hasTask(":${packageName}-ballerina:test")) {
-            testParams = "--code-coverage --includes=org.ballerinalang.transaction.*:ballerinai.*"
+            testParams = "--code-coverage --includes=ballerinai.*:org.ballerinalang.stdlib.transaction.*"
         } else {
             testParams = "--skip-tests"
         }

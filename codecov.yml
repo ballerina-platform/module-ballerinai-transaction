@@ -2,7 +2,6 @@ fixes:
   - "ballerinai/transaction/*/::transaction-ballerina/"
 
 ignore:
-  - "**/tests"
-  - "transaction-test-utils"
-  - "transaction-negetive-tests"
+  - "transaction-test-utils/"
+  - "transaction-negative-tests/"
 
