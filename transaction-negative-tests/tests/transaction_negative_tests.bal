@@ -15,17 +15,22 @@
 // under the License.
 
 import ballerina/io;
-import ballerina/os;
 import ballerina/regex;
 import ballerina/test;
+import ballerina/jballerina.java;
 
 const UTF_8 = "UTF-8";
 configurable string bal_exec_path = ?;
 
+const string TRX_STATEMENT_FILE = "tests/resources/transaction_stmt_negative.bal";
+const string INVALID_TRX_HANDLER_FILE = "tests/resources/transaction_handlers_negative.bal";
+const string ROLLBACK_ONLT_TRX_FILE = "tests/resources/transaction_with_setrollbackonly_test_negative.bal";
+const string TRX_ON_FAIL_FILE = "tests/resources/transaction_on_fail_negative.bal";
+const string TRANSACTIONAL_FUNC_FILE = "tests/resources/transactional_functions_negative.bal";
+
 @test:Config {}
 public function testTransactionStatement() {
-    os:Process|error execResult = os:exec(bal_exec_path, {}, (), "run",
-    "tests/resources/transaction_stmt_negative.bal");
+    Process|error execResult = exec(bal_exec_path, {}, (), "run",TRX_STATEMENT_FILE);
     string[] logLines = getLogLinesFromExecResult(execResult);
     test:assertEquals(logLines.length(), 35);
     validateLog(logLines[3], "ERROR", "transaction_stmt_negative.bal:(21:5,29:6)", "invalid transaction commit count");
@@ -84,8 +89,7 @@ public function testTransactionStatement() {
 
 @test:Config {}
 public function testInvalidTrxHandlers() {
-    os:Process|error execResult = os:exec(bal_exec_path, {}, (), "run",
-    "tests/resources/transaction_handlers_negative.bal");
+    Process|error execResult = exec(bal_exec_path, {}, (), "run", INVALID_TRX_HANDLER_FILE);
     string[] logLines = getLogLinesFromExecResult(execResult);
     test:assertEquals(logLines.length(), 6);
     validateLog(logLines[3], "ERROR", "transaction_handlers_negative.bal:(31:33,31:47)", "incompatible types: expected " +
@@ -97,8 +101,7 @@ public function testInvalidTrxHandlers() {
 
 @test:Config {}
 public function testTransactionWithSetRollbackOnly() {
-    os:Process|error execResult = os:exec(bal_exec_path, {}, (), "run",
-    "tests/resources/transaction_with_setrollbackonly_test_negative.bal");
+    Process|error execResult = exec(bal_exec_path, {}, (), "run", ROLLBACK_ONLT_TRX_FILE);
     string[] logLines = getLogLinesFromExecResult(execResult);
     test:assertEquals(logLines.length(), 5);
     validateLog(logLines[3], "ERROR", "transaction_with_setrollbackonly_test_negative.bal:(26:5,26:27)",
@@ -107,8 +110,7 @@ public function testTransactionWithSetRollbackOnly() {
 
 @test:Config {}
 public function testTransactionOnFail() {
-    os:Process|error execResult = os:exec(bal_exec_path, {}, (), "run",
-    "tests/resources/transaction_on_fail_negative.bal");
+    Process|error execResult = exec(bal_exec_path, {}, (), "run", TRX_ON_FAIL_FILE);
     string[] logLines = getLogLinesFromExecResult(execResult);
     test:assertEquals(logLines.length(), 8);
     validateLog(logLines[3], "ERROR", "transaction_on_fail_negative.bal:(32:6,32:35)", "unreachable code");
@@ -118,8 +120,8 @@ public function testTransactionOnFail() {
     validateLog(logLines[6], "ERROR", "transaction_on_fail_negative.bal:(96:7,96:76)", "unreachable code");
 }
 
-function getLogLinesFromExecResult(os:Process|error execResult) returns string[] {
-    os:Process result = checkpanic execResult;
+function getLogLinesFromExecResult(Process|error execResult) returns string[] {
+    Process result = checkpanic execResult;
     int waitForExit = checkpanic result.waitForExit();
     int exitCode = checkpanic result.exitCode();
     io:ReadableByteChannel readableResult = result.stderr();
@@ -137,10 +139,15 @@ function validateLog(string log, string logLevel, string logLocation, string log
 
 @test:Config {}
 public function testTransactionFunction() {
-    os:Process|error execResult = os:exec(bal_exec_path, {}, (), "run",
-    "tests/resources/transactional_functions_negative.bal");
+    Process|error execResult = exec(bal_exec_path, {}, (), "run", TRANSACTIONAL_FUNC_FILE);
     string[] logLines = getLogLinesFromExecResult(execResult);
     test:assertEquals(logLines.length(), 5);
     validateLog(logLines[3], "ERROR", "transactional_functions_negative.bal:(18:23,20:6)",
     "incompatible types: expected 'function () returns ()', found 'transactional function () returns ()");
 }
+
+function exec(@untainted string command, @untainted map<string> env = {},
+                     @untainted string? dir = (), @untainted string... args) returns Process|error = @java:Method {
+    name: "exec",
+    'class: "org.ballerinalang.stdlib.transaction.testutils.nativeimpl.Exec"
+} external;

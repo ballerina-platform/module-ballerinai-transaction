@@ -47,7 +47,7 @@ service / on new http:Listener(8889) {
 
         var resp = caller->respond(res);
         if (resp is error) {
-            log:printError("Error sending response", {"error":resp.message()});
+            log:printError("Error sending response", 'error = resp);
         }
     }
 
@@ -77,7 +77,7 @@ service / on new http:Listener(8889) {
         }
         var resp = caller->respond(res);
         if (resp is error) {
-            log:printError("Error sending response", {"error":resp.message()});
+            log:printError("Error sending response", 'error = resp);
         }
     }
 
@@ -93,7 +93,7 @@ service / on new http:Listener(8889) {
 
         var resp = caller->respond(res);
         if (resp is error) {
-            log:printError("Error sending response", {"error":resp.message()});
+            log:printError("Error sending response", 'error = resp);
         }
         return;
     }
@@ -164,7 +164,7 @@ function initiatorFunc(boolean throw1, boolean remote1, boolean blowRemote1) ret
                         log:printError(payload.message());
                     }
                 }
-            } else if (resp is error) {
+            } else {
                 log:printError(resp.message());
             }
         }
@@ -207,7 +207,7 @@ function initiateNestedTransactionInRemote(string blow) returns @tainted string 
                     log:printError(text.message());
                 }
             }
-        } else if (resp is error) {
+        } else {
             S1 += " remote call error: " + <@untainted> resp.message();
         }
         var c = commit;
@@ -241,7 +241,7 @@ function remoteErrorReturnInitiator() returns @tainted string {
                     log:printError(text.message());
                 }
             }
-        } else if (resp is error) {
+        } else {
             S1 += " remote call error: " + <@untainted> resp.message();
         }
         var c = commit;
@@ -277,7 +277,7 @@ function callParticipantMultipleTimes() returns string {
                         log:printError(payload.message());
                     }
                 }
-            } else if (resp is error) {
+            } else {
                 log:printError(resp.message());
             }
         }
@@ -301,7 +301,7 @@ service / on new http:Listener(8888) {
         var r = caller->respond(res);
         if (r is error) {
             log:printError("Error sending response: " + (result is error ? result.toString() : result.toString()),
-            {"error":r.message()});
+            'error = r);
         }
     }
 
@@ -313,7 +313,7 @@ service / on new http:Listener(8888) {
         var r = caller->respond(res);
         if (r is error) {
             log:printError("Error sending response: " + (result is error ? result.toString() : result.toString()),
-            {"error":r.message()});
+            'error = r);
         }
     }
 
@@ -325,7 +325,7 @@ service / on new http:Listener(8888) {
         var r = caller->respond(res);
         if (r is error) {
             log:printError("Error sending response: " + (result is error ? result.toString() : result.toString()),
-            {"error":r.message()});
+            'error = r);
         }
     }
 
@@ -335,7 +335,7 @@ service / on new http:Listener(8888) {
         res.setPayload(<@untainted> result);
         var r = caller->respond(res);
         if (r is error) {
-            log:printError("Error sending response: " + result, {"error":r.message()});
+            log:printError("Error sending response: " + result, 'error = r);
         }
     }
 
@@ -345,7 +345,7 @@ service / on new http:Listener(8888) {
         res.setPayload(<@untainted> result);
         var r = caller->respond(res);
         if (r is error) {
-            log:printError("Error sending response: " + result, {"error":r.message()});
+            log:printError("Error sending response: " + result, 'error = r);
         }
     }
 
@@ -355,7 +355,7 @@ service / on new http:Listener(8888) {
         res.setPayload(<@untainted> result);
         var r = caller->respond(res);
         if (r is error) {
-            log:printError("Error sending response: " + result, {"error":r.message()});
+            log:printError("Error sending response: " + result, 'error = r);
         }
     }
 
@@ -365,7 +365,7 @@ service / on new http:Listener(8888) {
         res.setPayload(<@untainted> result);
         var r = caller->respond(res);
         if (r is error) {
-            log:printError("Error sending response: " + result, {"error":r.message()});
+            log:printError("Error sending response: " + result, 'error = r);
         }
     }
 
@@ -385,7 +385,7 @@ service / on new http:Listener(8888) {
                 } else {
                     s += " error-getTextPayload";
                 }
-            } else if (result is error) {
+            } else {
                 s += " error-from-remote: " + result.message() + "desc: " + result.message();
             }
             s += localParticipant();
@@ -405,7 +405,7 @@ service / on new http:Listener(8888) {
         res.setPayload(result);
         var r = caller->respond(res);
         if (r is error) {
-            log:printError("Error sending response: " + result, {"error":r.message()});
+            log:printError("Error sending response: " + result, 'error = r);
         }
     }
 }

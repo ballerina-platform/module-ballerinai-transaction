@@ -19,10 +19,10 @@ import ballerina/lang.'transaction as lang_trx;
 
 type Participant2pcClientConfig record {
     string participantURL = "";
-    int timeoutInMillis = 0;
+    decimal timeout = 0;
     record {
         int count = 0;
-        int intervalInMillis = 0;
+        decimal interval = 0;
     } retryConfig = {};
 };
 
@@ -36,9 +36,9 @@ client class Participant2pcClientEP {
 
     function init(Participant2pcClientConfig c) {
         http:Client httpEP = checkpanic new(c.participantURL, {
-            timeoutInMillis: c.timeoutInMillis,
+            timeout: c.timeout,
             retryConfig:{
-                count: c.retryConfig.count, intervalInMillis: c.retryConfig.intervalInMillis
+                count: c.retryConfig.count, interval: c.retryConfig.interval
             }
         });
         self.httpClient = httpEP;
