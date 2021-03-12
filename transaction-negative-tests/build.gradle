@@ -136,14 +136,16 @@ task ballerinaNegativeTests {
     finalizedBy(revertTomlFile)
     doLast {
         def distributionBinPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bin"
+        def testParams = "--code-coverage --includes=ballerinai.*:org.ballerinalang.stdlib.transaction.*"
+        
         setExecPath(configTOMLFile,distributionBinPath)
         exec {
             workingDir project.projectDir
             environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "$distributionBinPath/bal.bat test"
+                commandLine 'cmd', '/c', "$distributionBinPath/bal.bat test ${testParams}"
             } else {
-                commandLine 'sh', '-c', "$distributionBinPath/bal test"
+                commandLine 'sh', '-c', "$distributionBinPath/bal test ${testParams}"
             }
         }
     }
