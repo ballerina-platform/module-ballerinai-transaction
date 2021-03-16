@@ -120,6 +120,57 @@ task revertTomlFile {
     }
 }
 
+def getDebugParams() {
+    def debugParams = ""
+    def balJavaDebugParam = ""
+
+    if (project.hasProperty("debug")) {
+        debugParams = "--debug ${project.findProperty("debug")}"
+    }
+    if (project.hasProperty("balJavaDebug")) {
+        balJavaDebugParam = "BAL_JAVA_DEBUG=${project.findProperty("balJavaDebug")}"
+    }
+
+    return [debugParams, balJavaDebugParam]
+}
+
+task ballerinaTest {
+    dependsOn(":transaction-native:build")
+    dependsOn(unpackJballerinaTools)
+    dependsOn(updateTomlVerions)
+    finalizedBy(revertTomlFile)
+
+    def (debugParams , balJavaDebugParam) = getDebugParams()
+    def groupParams = ""
+    def disableGroups = ""
+
+    if (project.hasProperty("groups")) {
+        groupParams = "--groups ${project.findProperty("groups")}"
+    }
+    if (project.hasProperty("disable")) {
+        disableGroups = "--disable-groups ${project.findProperty("disable")}"
+    }
+
+    def distributionBinPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bin"
+    def testParams = "--code-coverage --includes=ballerinai.*:org.ballerinalang.stdlib.transaction.*"
+    
+    doLast {
+        exec {
+            workingDir project.projectDir
+            environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                commandLine 'cmd', '/c', "${balJavaDebugParam} ${distributionBinPath}/bal.bat test ${testParams} ${groupParams} ${disableGroups} ${debugParams} && exit %%ERRORLEVEL%%"
+            } else {
+                commandLine 'sh', '-c', "${balJavaDebugParam} ${distributionBinPath}/bal test ${testParams} ${groupParams} ${disableGroups} ${debugParams}"
+            }
+        }
+    }
+}
+
+test {
+    dependsOn(ballerinaTest)
+}
+
 task ballerinaBuild {
     dependsOn(":transaction-native:build")
     dependsOn(unpackJballerinaTools)
@@ -127,18 +178,35 @@ task ballerinaBuild {
     finalizedBy(revertTomlFile)
     dependsOn(test)
     inputs.dir file(project.projectDir)
+
+    def (debugParams , balJavaDebugParam) = getDebugParams()
+    def testParams = ""
+
+    gradle.taskGraph.whenReady { graph ->
+        if (graph.hasTask(":${packageName}-ballerina:build") || graph.hasTask(":${packageName}-ballerina:publishToMavenLocal")) {
+            ballerinaTest.enabled = false
+        } else {
+            ballerinaTest.enabled = true
+        }
+
+        if (graph.hasTask(":${packageName}-ballerina:test")) {
+            testParams = "--code-coverage --includes=ballerinai.*:org.ballerinalang.stdlib.transaction.*"
+        } else {
+            testParams = "--skip-tests"
+        }
+    }
+
+    def distributionBinPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bin"
+
     doLast {
-
-        def distributionBinPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bin"
-
         // Build and populate caches
         exec {
             workingDir project.projectDir
             environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "$distributionBinPath/bal.bat build --skip-tests -c && exit %%ERRORLEVEL%%"
+                commandLine 'cmd', '/c', "${balJavaDebugParam} ${distributionBinPath}/bal.bat build ${testParams} ${debugParams} -c && exit %%ERRORLEVEL%%"
             } else {
-                commandLine 'sh', '-c', "$distributionBinPath/bal build --skip-tests -c"
+                commandLine 'sh', '-c', "${balJavaDebugParam} ${distributionBinPath}/bal build ${testParams} ${debugParams} -c"
             }
         }
 
@@ -162,35 +230,6 @@ task ballerinaBuild {
 
     outputs.dir artifactCacheParent
     outputs.dir artifactLibParent
-}
-
-task ballerinaTest {
-    dependsOn(":transaction-native:build")
-    dependsOn(unpackJballerinaTools)
-    dependsOn(updateTomlVerions)
-    finalizedBy(revertTomlFile)
-
-    def distributionBinPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bin"
-    def debugParams = ""
-    if (project.hasProperty("debug")) {
-        debugParams = "--debug ${project.findProperty("debug")}"
-    }
-
-    doLast {
-        exec {
-            workingDir project.projectDir
-            environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
-            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "$distributionBinPath/bal.bat test ${debugParams} && exit %%ERRORLEVEL%%"
-            } else {
-                commandLine 'sh', '-c', "$distributionBinPath/bal test ${debugParams}"
-            }
-        }
-    }
-}
-
-test {
-    dependsOn(ballerinaTest)
 }
 
 task createArtifactZip(type: Zip) {
