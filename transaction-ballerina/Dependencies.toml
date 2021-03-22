@@ -1,41 +1,34 @@
 [[dependency]]
 org = "ballerina"
-name = "test"
-version = "0.0.0"
+name = "io"
+version = "@stdlib.io.version@"
 
 [[dependency]]
 org = "ballerina"
 name = "log"
-version = "1.1.0-alpha5"
-
-[[dependency]]
-org = "ballerina"
-name = "io"
-version = "0.6.0-alpha5"
-
-[[dependency]]
-org = "ballerina"
-name = "task"
-version = "2.0.0-alpha5"
-
-[[dependency]]
-org = "ballerina"
-name = "uuid"
-version = "0.10.0-alpha5"
-
-[[dependency]]
-org = "ballerina"
-name = "cache"
-version = "2.1.0-alpha5"
-
-[[dependency]]
-org = "ballerina"
-name = "time"
-version = "2.0.0-alpha5"
+version = "@stdlib.log.version@"
 
 [[dependency]]
 org = "ballerina"
 name = "http"
-version = "1.1.0-alpha5"
+version = "@stdlib.http.version@"
 
+[[dependency]]
+org = "ballerina"
+name = "cache"
+version = "@stdlib.cache.version@"
 
+[[dependency]]
+org = "ballerina"
+name = "time"
+version = "@stdlib.time.version@"
+
+[[dependency]]
+org = "ballerina"
+name = "uuid"
+version = "@stdlib.uuid.version@"
+
+[[dependency]]
+org = "ballerina"
+name = "task"
+version = "@stdlib.task.version@"
