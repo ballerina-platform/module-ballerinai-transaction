@@ -49,6 +49,7 @@ class TwoPhaseCommitTransaction {
         }
     }
 
+    // Invoke the rollback handlers. Should be called after the prepare phase
     function invokeRollbackHandlers() {
         if transactional {
             RollbackHandlerType rollbackFunc = getRollbackHandlerList();
