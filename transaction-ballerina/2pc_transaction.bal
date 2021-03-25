@@ -36,6 +36,31 @@ class TwoPhaseCommitTransaction {
         self.coordinationType = coordinationType;
     }
 
+    // Invoke the commit handlers. Should be called after the prepare phase
+    function invokeCommitHandlers() {
+        if transactional {
+            CommitHandlerType commitFunc = getCommitHandlerList();
+            if (commitFunc is lang_trx:CommitHandler[]) {
+                lang_trx:Info previnfo = lang_trx:info();
+                foreach lang_trx:CommitHandler handler in <lang_trx:CommitHandler[]>commitFunc {
+                    handler(previnfo);
+                }
+            }
+        }
+    }
+
+    function invokeRollbackHandlers() {
+        if transactional {
+            RollbackHandlerType rollbackFunc = getRollbackHandlerList();
+            if (rollbackFunc is lang_trx:RollbackHandler[]) {
+                lang_trx:Info previnfo = lang_trx:info();
+                foreach lang_trx:RollbackHandler handler in <lang_trx:RollbackHandler[]>rollbackFunc {
+                    handler(previnfo, err, shouldRetry);
+                }
+            }
+        }
+    }
+
     // This function will be called by the initiator
     function twoPhaseCommit() returns string|lang_trx:Error {
         final string transactionId = self.transactionId;
@@ -66,6 +91,9 @@ class TwoPhaseCommitTransaction {
             // if all volatile participants voted YES, Next call prepare on all durable participants
             PrepareDecision prepareDurablesDecision = self.prepareParticipants(PROTOCOL_DURABLE);
             if (prepareDurablesDecision == PREPARE_DECISION_COMMIT) {
+
+                self.invokeCommitHandlers();
+
                 // If all durable participants voted YES (PREPARED or READONLY), next call notify(commit) on all
                 // (durable & volatile) participants and return committed to the initiator
                 var result = self.notifyParticipants(COMMAND_COMMIT, ());
@@ -84,6 +112,7 @@ class TwoPhaseCommitTransaction {
             } else {
                 // If some durable participants voted NO, next call notify(abort) on all participants
                 // and return aborted to the initiator
+                invokeRollbackHandlers();
                 var result = self.notifyParticipants(COMMAND_ABORT, ());
                 if (result is error) {
                     // return Hazard outcome if a participant cannot successfully end its branch of the transaction
@@ -104,6 +133,7 @@ class TwoPhaseCommitTransaction {
         } else {
             // If some volatile participants voted NO, next call notify(abort) on all volatile articipants
             // and return aborted to the initiator
+            invokeRollbackHandlers();
             var result = self.notifyParticipants(COMMAND_ABORT, PROTOCOL_VOLATILE);
             if (result is error) {
                 // return Hazard outcome if a participant cannot successfully end its branch of the transaction
