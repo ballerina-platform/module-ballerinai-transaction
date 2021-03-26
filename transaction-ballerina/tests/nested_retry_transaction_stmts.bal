@@ -194,7 +194,7 @@ function multipleTrxSequence(boolean abort1, boolean abort2, boolean fail1, bool
                       panic err;
                     }
                 } else {
-                    var commitRes = commit;
+                    var commitRes = checkpanic commit;
                 }
         }
         var onRollbackFunc = isolated function(transactions:Info? info, error? cause, boolean willTry) {
@@ -217,7 +217,7 @@ function multipleTrxSequence(boolean abort1, boolean abort2, boolean fail1, bool
               panic err;
             }
         } else {
-            var commitRes = commit;
+            var commitRes = checkpanic commit;
         }
     }
     a += " -> end-1";
@@ -244,7 +244,7 @@ function multipleTrxSequence(boolean abort1, boolean abort2, boolean fail1, bool
                      panic err;
                    }
                 } else {
-                    var commitRes = commit;
+                    var commitRes = checkpanic commit;
                 }
         }
         var onRollbackFunc = isolated function(transactions:Info? info, error? cause, boolean willTry) {
@@ -267,7 +267,7 @@ function multipleTrxSequence(boolean abort1, boolean abort2, boolean fail1, bool
              panic err;
            }
         } else {
-            var commitRes = commit;
+            var commitRes = checkpanic commit;
         }
     }
     a += " -> end-2";
@@ -302,7 +302,7 @@ function testCustomRetryManager() returns error? {
             int bV = check trxError();
         } else {
             str += (" -> attempt "+ count1.toString());
-            var commitRes = commit;
+            var commitRes = checkpanic commit;
             str += " -> result commited -> trx1 end.";
         }
         int count2 = 0;
@@ -314,7 +314,7 @@ function testCustomRetryManager() returns error? {
                     int bV = check trxError();
                 } else {
                     str += (" -> attempt "+ count2.toString());
-                    var commitRes = commit;
+                    var commitRes = checkpanic commit;
                     str += " -> result commited -> trx2 end.";
                 }
         }
@@ -338,12 +338,12 @@ function testNestedTrxWithinRetryTrx() returns error? {
             int bV = check trxError();
         } else {
             str += (" -> attempt "+ count.toString());
-            var commitRes = commit;
+            var commitRes = checkpanic commit;
             str += " -> result commited -> trx1 end.";
         }
         transaction {
             str += " -> inside trx2 ";
-            var commitRes = commit;
+            var commitRes = checkpanic commit;
             str += " -> result commited -> trx2 end.";
         }
     }
@@ -367,11 +367,11 @@ function testNestedRetryTrxWithinTrx() returns error? {
                     int bV = check trxError();
                 } else {
                     str += (" -> attempt "+ count.toString());
-                    var commitRes = commit;
+                    var commitRes = checkpanic commit;
                     str += " -> result commited -> trx2 end.";
                 }
             }
-        var commitRes = commit;
+        var commitRes = checkpanic commit;
         str += " -> result commited -> trx1 end.";
     }
     test:assertEquals(str, "start -> inside trx1  -> inside trx2  "
@@ -392,12 +392,12 @@ function testNestedInnerReturn() returns string {
     string str = "start";
     retry transaction {
         str += " -> within trx 1";
-        var res1 = commit;
+        var res1 = checkpanic commit;
         retry transaction {
-            var res2 = commit;
+            var res2 = checkpanic commit;
             str += " -> within trx 2";
             retry transaction {
-                var res3 = commit;
+                var res3 = checkpanic commit;
                 str += " -> within trx 3";
                 return str;
             }
@@ -409,16 +409,16 @@ function testNestedMiddleReturn() returns string {
     string str = "start";
     retry transaction {
         str += " -> within trx 1";
-        var res1 = commit;
+        var res1 = checkpanic commit;
         retry transaction {
             int count = 1;
-            var res2 = commit;
+            var res2 = checkpanic commit;
             str += " -> within trx 2";
             if (count == 1) {
                 return str;
             }
             retry transaction {
-                var res3 = commit;
+                var res3 = checkpanic commit;
                 str += " -> within trx 3 -> should not reach here";
                 return str;
             }
@@ -440,6 +440,6 @@ function createUpdateDeleteTransaction(error? dbOperation) {
         } else {
             panic error("Expected an error");
         }
-        var ign = commit;
+        var ign = checkpanic commit;
     }
 }

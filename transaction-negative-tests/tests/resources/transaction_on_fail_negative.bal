@@ -27,7 +27,7 @@ function testUnreachableAfterFail() returns string {
    transaction {
      error err = error("custom error", message = "error value");
      str += "Before failure throw";
-     var res = commit;
+     var res = checkpanic commit;
      fail err;
      str += "After failure throw";
    }
@@ -42,7 +42,7 @@ function testIncompatibleErrorTypeOnFail() returns string {
    string str = "";
    transaction {
      str += "Before failure throw";
-     var res = commit;
+     var res = checkpanic commit;
      fail error ErrorTypeA(TYPE_A_ERROR_REASON, message = "Error Type A");
    }
    on fail ErrorTypeB e {
@@ -56,7 +56,7 @@ function testIgnoreReturnInOnFail() returns string {
    string str = "";
    transaction {
      str += "Before failure throw";
-     var res = commit;
+     var res = checkpanic commit;
      fail error ErrorTypeA(TYPE_A_ERROR_REASON, message = "Error Type A");
    }
    on fail ErrorTypeA e {
@@ -71,7 +71,7 @@ function testUnreachableInOnFail() returns string {
    string str = "";
    transaction {
      str += "Before failure throw";
-     var res = commit;
+     var res = checkpanic commit;
      fail error ErrorTypeA(TYPE_A_ERROR_REASON, message = "Error Type A");
    }
    on fail ErrorTypeA e {

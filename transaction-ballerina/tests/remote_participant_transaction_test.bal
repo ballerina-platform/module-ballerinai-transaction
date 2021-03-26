@@ -57,13 +57,13 @@ service / on new http:Listener(8889) {
         var payload =  req.getTextPayload();
         if (payload is string) {
             if (payload == "fail") {
-                var x = nestedTrxInRemoteFunction(1);
+                var x = checkpanic nestedTrxInRemoteFunction(1);
                 changeCode = true;
             } else if (payload == "panic") {
-                var y = trap nestedTrxInRemoteFunction(2);
+                var y = checkpanic nestedTrxInRemoteFunction(2);
                 changeCode = true;
             } else {
-                var z = nestedTrxInRemoteFunction(0);
+                var z = checkpanic nestedTrxInRemoteFunction(0);
             }
         }
 
@@ -83,7 +83,7 @@ service / on new http:Listener(8889) {
 
     transactional resource function get returnError(http:Caller caller, http:Request req) returns error? {
         S1 = S1 + " in-remote";
-        var payload =  req.getTextPayload();
+        var payload =  checkpanic req.getTextPayload();
 
         var b = trap blowUp2(2);
         int c = check b;
@@ -111,19 +111,16 @@ function nestedTrxInRemoteFunction(int j) returns error? {
                 S1 += " trx-2-fail";
                 int blowNum = check blowUp2(1);
             }
-            var a = commit;
-            if a is () {
-                S1 += " nested-trx-2-committed";
-            }
+            var a = checkpanic commit;
+            S1 += " nested-trx-2-committed";
         }
         if (j == 2) {
             S1 += " trx-1-panic";
             int|error blowNum = trap blowUp2(2);
         }
-        var b = commit;
-        if b is () {
-            S1 += " nested-trx-1-committed";
-        }
+        var b = checkpanic commit;
+        S1 += " nested-trx-1-committed";
+
     }
 }
 
@@ -176,10 +173,9 @@ function initiatorFunc(boolean throw1, boolean remote1, boolean blowRemote1) ret
         }
 
         S1 = S1 + " in-trx-lastline";
-        var commitResult = commit;
-        if commitResult is () {
-            S1 = S1 + " trx-committed";
-        }
+        var commitResult = checkpanic commit;
+        S1 = S1 + " trx-committed";
+
     }
     S1 = S1 + " after-trx";
     return S1;
@@ -210,10 +206,8 @@ function initiateNestedTransactionInRemote(string blow) returns @tainted string 
         } else {
             S1 += " remote call error: " + <@untainted> resp.message();
         }
-        var c = commit;
-        if c is () {
-            S1 += " trx-committed";
-        }
+        var c = checkpanic commit;
+        S1 += " trx-committed";
     }
     S1 = S1 + " after-trx";
     return S1;
@@ -244,10 +238,8 @@ function remoteErrorReturnInitiator() returns @tainted string {
         } else {
             S1 += " remote call error: " + <@untainted> resp.message();
         }
-        var c = commit;
-        if c is () {
-            S1 += " trx-committed";
-        }
+        var c = checkpanic commit;
+        S1 += " trx-committed";
     }
     S1 = S1 + " after-trx";
     return S1;
@@ -282,10 +274,8 @@ function callParticipantMultipleTimes() returns string {
             }
         }
         S1 += " in-trx-lastline";
-        var c = commit;
-        if c is () {
-            S1 += " trx-committed";
-        }
+        var c = checkpanic commit;
+        S1 += " trx-committed";
     }
 
     S1 = S1 + " after-trx";
@@ -375,7 +365,7 @@ service / on new http:Listener(8888) {
         string s = "in-remote-init";
         transaction {
             s += " in-trx";
-            var reqText = req.getTextPayload();
+            var reqText = checkpanic req.getTextPayload();
             var result = separateRMParticipant01 -> post("/hello/remoteResource", <@untainted> req);
             if (result is http:Response) {
                 s += " [remote-status:" + result.statusCode.toString() + "] ";
@@ -389,10 +379,8 @@ service / on new http:Listener(8888) {
                 s += " error-from-remote: " + result.message() + "desc: " + result.message();
             }
             s += localParticipant();
-            var c = commit;
-            if c is () {
-                s += " trx-committed";
-            }
+            var c = checkpanic commit;
+            s += " trx-committed";
         }
 
         var stt = res.setTextPayload(<@untainted> s);

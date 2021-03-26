@@ -30,7 +30,7 @@ function testInvalidTrxHandlers() returns string {
         transInfo = transactions:info();
         transactions:onRollback(onRollbackFunc);
         transactions:onCommit(onCommitFunc);
-        var commitRes = commit;
+        var commitRes = checkpanic commit;
     }
     ss += " endTrx";
     return ss;

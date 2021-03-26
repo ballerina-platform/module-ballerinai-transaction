@@ -38,7 +38,7 @@ function transactionalAnonymousFuncAssignment() {
             trxFunc2();
             trxFunc3();
         }
-        var ign = commit;
+        var ign = checkpanic commit;
     }
 
     test:assertEquals(str, "start-> within transactional function trxFunc1()" +

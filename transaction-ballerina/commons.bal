@@ -38,7 +38,7 @@ cache:Cache httpClientCache = new;
 time:Utc currentUtc = time:utcNow();
 time:Utc newTime = time:utcAddSeconds(currentUtc, 1);
 time:Civil time = time:utcToCivil(newTime);
-var result = task:scheduleJobRecurByFrequency(new Cleanup(), 60, startTime = time);
+var result = check task:scheduleJobRecurByFrequency(new Cleanup(), 60, startTime = time);
 
 class Cleanup {
     *task:Job;

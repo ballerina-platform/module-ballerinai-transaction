@@ -21,7 +21,7 @@ function trxWorkerTest1() {
     int res = 0;
     transaction {
         res = foo();
-        var s = commit;
+        var s = checkpanic commit;
     }
 
     test:assertEquals(res, 51);
