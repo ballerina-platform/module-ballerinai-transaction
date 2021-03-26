@@ -59,7 +59,7 @@ function cleanupTransactions() returns error? {
         //foreach var twopcTxn in participatedTransactions {
             final string participatedTxnId = getParticipatedTransactionId(twopcTxn.transactionId,
                 twopcTxn.transactionBlockId);
-            if (time:utcDiffSeconds(time:utcNow(), twopcTxn.createdTime) >= <time:Second>120) {
+            if (time:utcDiffSeconds(time:utcNow(), twopcTxn.createdTime) >= <time:Seconds>120) {
                 if (twopcTxn.state != TXN_STATE_ABORTED && twopcTxn.state != TXN_STATE_COMMITTED) {
                     if (twopcTxn.state != TXN_STATE_PREPARED) {
                         boolean prepareSuccessful =
@@ -85,7 +85,7 @@ function cleanupTransactions() returns error? {
                     }
                 }
             }
-            if (time:utcDiffSeconds(time:utcNow(), twopcTxn.createdTime) >= <time:Second> 600) {
+            if (time:utcDiffSeconds(time:utcNow(), twopcTxn.createdTime) >= <time:Seconds> 600) {
                 // We don't want dead transactions hanging around
                 removeParticipatedTransaction(participatedTxnId);
             }
@@ -99,7 +99,7 @@ function cleanupTransactions() returns error? {
             i += 1;
        //TODO:commenting due to a caching issue
        //foreach var twopcTxn in initiatedTransactions {
-            if (time:utcDiffSeconds(time:utcNow(), twopcTxn.createdTime) >= <time:Second>120) {
+            if (time:utcDiffSeconds(time:utcNow(), twopcTxn.createdTime) >= <time:Seconds>120) {
                 if (twopcTxn.state != TXN_STATE_ABORTED) {
                     // Commit the transaction since prepare hasn't been received
                     var result = twopcTxn.twoPhaseCommit();
@@ -114,7 +114,7 @@ function cleanupTransactions() returns error? {
                     }
                 }
             }
-            if (time:utcDiffSeconds(time:utcNow(), twopcTxn.createdTime) >= <time:Second> 600) {
+            if (time:utcDiffSeconds(time:utcNow(), twopcTxn.createdTime) >= <time:Seconds> 600) {
                 // We don't want dead transactions hanging around
                 removeInitiatedTransaction(twopcTxn.transactionId);
             }
