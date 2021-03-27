@@ -47,7 +47,7 @@ public class SetTransactionContext {
         String protocol = txDataStruct.get(TransactionConstants.CORDINATION_TYPE).toString();
         long retryNmbr = getRetryNumber(prevAttemptInfo);
         BMap<BString, Object> trxContext = ValueCreator.createRecordValue(TRANSACTION_PACKAGE_ID,
-                                                                           "Info");
+                                                                           "InfoInternal");
         BObject startTimeObj = ValueCreator.createObjectValue(env.getCurrentModule(),
                 "TimestampImpl");
         startTimeObj.addNativeData("timeValue", System.currentTimeMillis());
@@ -56,6 +56,7 @@ public class SetTransactionContext {
                 ValueCreator.createArrayValue(globalTransactionId.getBytes(Charset.defaultCharset())), retryNmbr,
                 prevAttemptInfo, startTimeObj};
         BMap<BString, Object> infoRecord = ValueCreator.createRecordValue(trxContext, trxContextData);
+        infoRecord.freezeDirect();
         TransactionLocalContext trxCtx = TransactionLocalContext
                 .createTransactionParticipantLocalCtx(globalTransactionId, url, protocol, infoRecord);
         trxCtx.beginTransactionBlock(transactionBlockId);
