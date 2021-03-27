@@ -59,7 +59,7 @@ function cleanupTransactions() returns error? {
         //foreach var twopcTxn in participatedTransactions {
             final string participatedTxnId = getParticipatedTransactionId(twopcTxn.transactionId,
                 twopcTxn.transactionBlockId);
-            if (time:utcDiffSeconds(time:utcNow(), twopcTxn.createdTime) >= <decimal>120) {
+            if (time:utcDiffSeconds(time:utcNow(), twopcTxn.createdTime) >= 120d) {
                 if (twopcTxn.state != TXN_STATE_ABORTED && twopcTxn.state != TXN_STATE_COMMITTED) {
                     if (twopcTxn.state != TXN_STATE_PREPARED) {
                         boolean prepareSuccessful =
