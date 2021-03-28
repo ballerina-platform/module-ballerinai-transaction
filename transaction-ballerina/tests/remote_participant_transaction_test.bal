@@ -58,12 +58,21 @@ service / on new http:Listener(8889) {
         if (payload is string) {
             if (payload == "fail") {
                 var x = nestedTrxInRemoteFunction(1);
+                if x is error {
+
+                }
                 changeCode = true;
             } else if (payload == "panic") {
                 var y = trap nestedTrxInRemoteFunction(2);
+                if y is error {
+
+                }
                 changeCode = true;
             } else {
                 var z = nestedTrxInRemoteFunction(0);
+                if z is error {
+
+                }
             }
         }
 
@@ -84,7 +93,9 @@ service / on new http:Listener(8889) {
     transactional resource function get returnError(http:Caller caller, http:Request req) returns error? {
         S1 = S1 + " in-remote";
         var payload =  req.getTextPayload();
+        if payload is error {
 
+        }
         var b = trap blowUp2(2);
         int c = check b;
 
@@ -177,6 +188,9 @@ function initiatorFunc(boolean throw1, boolean remote1, boolean blowRemote1) ret
 
         S1 = S1 + " in-trx-lastline";
         var commitResult = commit;
+        if commitResult is error {
+
+        }
         if commitResult is () {
             S1 = S1 + " trx-committed";
         }
@@ -211,6 +225,9 @@ function initiateNestedTransactionInRemote(string blow) returns @tainted string 
             S1 += " remote call error: " + <@untainted> resp.message();
         }
         var c = commit;
+        if c is error {
+
+        }
         if c is () {
             S1 += " trx-committed";
         }
@@ -245,6 +262,9 @@ function remoteErrorReturnInitiator() returns @tainted string {
             S1 += " remote call error: " + <@untainted> resp.message();
         }
         var c = commit;
+        if c is error {
+
+        }
         if c is () {
             S1 += " trx-committed";
         }
@@ -283,6 +303,9 @@ function callParticipantMultipleTimes() returns string {
         }
         S1 += " in-trx-lastline";
         var c = commit;
+        if c is error {
+
+        }
         if c is () {
             S1 += " trx-committed";
         }
@@ -376,6 +399,9 @@ service / on new http:Listener(8888) {
         transaction {
             s += " in-trx";
             var reqText = req.getTextPayload();
+            if reqText is error {
+
+            }
             var result = separateRMParticipant01 -> post("/hello/remoteResource", <@untainted> req);
             if (result is http:Response) {
                 s += " [remote-status:" + result.statusCode.toString() + "] ";
@@ -390,6 +416,9 @@ service / on new http:Listener(8888) {
             }
             s += localParticipant();
             var c = commit;
+            if c is error {
+
+            }
             if c is () {
                 s += " trx-committed";
             }

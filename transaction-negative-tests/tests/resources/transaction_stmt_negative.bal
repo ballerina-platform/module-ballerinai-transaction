@@ -39,7 +39,7 @@ transactional function txStmtWithinTransactionalScope(int i) returns (string) {
             a = a + " rollback";
             rollback;
         }
-        var res = commit;
+        var res = checkpanic commit;
         a = a + " endTrx";
     }
     var c = start testInvo(a);
@@ -52,7 +52,7 @@ function invocationsWithinTx(int i) returns (string) {
    transaction {
       a = a + " inTrx";
       var b = start testInvo(a);
-      var c = commit;
+      var c = checkpanic commit;
       var d = testTransactionalInvo(a);
    }
    return a;
@@ -66,13 +66,13 @@ function txWithMultiplePaths(int i)  {
         if(i == 3) {
             a = a + " inIf3";
             var b = testTransactionalInvo(a);
-            var o = commit;
+            var o = checkpanic commit;
         } else {
             a = a + " inElse";
             var b = testTransactionalInvo(a);
             rollback;
         }
-        var o = commit;
+        var o = checkpanic commit;
     }
 
     transaction {
@@ -80,13 +80,13 @@ function txWithMultiplePaths(int i)  {
         if(i == 3) {
             a = a + " inIf3";
             var b = testTransactionalInvo(a);
-            var o = commit;
+            var o = checkpanic commit;
         } else if (i == 5) {
             a = a + " inIf5";
             var b = testTransactionalInvo(a);
-            //var o = commit;
+            //var o = checkpanic commit;
         }
-        var o = commit;
+        var o = checkpanic commit;
     }
 }
 
@@ -115,7 +115,7 @@ function testTransactionRollback() {
         }
         rollback;
         i = i + 2;
-        var o = commit;
+        var o = checkpanic commit;
     }
 }
 
@@ -125,7 +125,7 @@ function testBreakWithinTransaction() returns (string) {
         i = i + 1;
         transaction {
             if (i == 2) {
-                var o = commit;
+                var o = checkpanic commit;
                 break;
             }
         }
@@ -135,7 +135,7 @@ function testBreakWithinTransaction() returns (string) {
             }
         }
     }
-    var o = commit;
+    var o = checkpanic commit;
     return "done";
 }
 
@@ -147,7 +147,7 @@ function testNextWithinTransaction() returns (string) {
             if (i == 2) {
                 continue;
             } else {
-                var o = commit;
+                var o = checkpanic commit;
             }
         }
     }
@@ -162,7 +162,7 @@ function testReturnWithinTransaction() returns (string) {
             if (i == 2) {
                 return "ff";
             } else {
-                var o = commit;
+                var o = checkpanic commit;
             }
         }
     }
@@ -179,7 +179,7 @@ function testInvalidDoneWithinTransaction() {
             workerTest = workerTest + " beforeDone";
             return;
         } else {
-            var o = commit;
+            var o = checkpanic commit;
         }
     }
     workerTest = workerTest + " beforeReturn";
@@ -194,7 +194,7 @@ function testReturnWithinMatchWithinTransaction() returns (string) {
         transaction {
             if (unionVar is string) {
                 if (i == 2) {
-                    var o = commit;
+                    var o = checkpanic commit;
                     return "ff";
                 } else {
                     return "ff";
@@ -203,7 +203,7 @@ function testReturnWithinMatchWithinTransaction() returns (string) {
                 if (i == 2) {
                     return "ff";
                 } else {
-                    var o = commit;
+                    var o = checkpanic commit;
                     return "ff";
                 }
             }
@@ -229,9 +229,9 @@ function testNestedTrxBlocks() returns (string) {
    retry(2) transaction {
         transaction {
             a += "nested block";
-            var commitResInner = commit;
+            var commitResInner = checkpanic commit;
         }
-        var commitResOuter = commit;
+        var commitResOuter = checkpanic commit;
     }
     return a;
 }
@@ -248,7 +248,7 @@ function testTrxHandlers() returns string {
     };
 
     transaction {
-        var commitRes = commit;
+        var commitRes = checkpanic commit;
         transactions:onRollback(onRollbackFunc);
         transactions:onCommit(onCommitFunc);
         boolean isRollbackOnly = transactions:getRollbackOnly();
@@ -268,7 +268,7 @@ function testWithinTrxMode() returns string {
         if (!transactional) {
             transInfo = transactions:info();
         }
-        var commitRes = commit;
+        var commitRes = checkpanic commit;
     }
     ss += " endTrx";
     return ss;
@@ -279,7 +279,7 @@ function testTransactionalInvoWithinMultiLevelFunc() returns string {
     transaction {
         ss = "trxStarted";
         ss = func1(ss);
-        var commitRes = commit;
+        var commitRes = checkpanic commit;
         ss += " -> trxEnded.";
     }
     return ss;
@@ -322,7 +322,7 @@ function testCommitWithinLoop() {
     int[] intArr = [1, 2, 3];
     transaction {
         foreach int i in intArr {
-            var commitRes = commit;
+            var commitRes = checkpanic commit;
         }
     }
 }
@@ -335,7 +335,7 @@ function testRollbackWithinLoop() {
                 rollback;
             }
         }
-        var commitRes = commit;
+        var commitRes = checkpanic commit;
     }
 }
 
@@ -347,7 +347,7 @@ function testReturnBeforeCommitInIf() returns int {
                 return 0;
             }
         }
-        var commitRes = commit;
+        var commitRes = checkpanic commit;
     }
     return 1;
 }

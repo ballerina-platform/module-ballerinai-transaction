@@ -171,7 +171,7 @@ function multipleTrxSequenceWithRetry(boolean abort1, boolean abort2, boolean fa
               panic err;
             }
         } else {
-            var commitRes = commit;
+            var commitRes = checkpanic commit;
         }
     }
     a += " end-1";
@@ -197,7 +197,7 @@ function multipleTrxSequenceWithRetry(boolean abort1, boolean abort2, boolean fa
              panic err;
            }
         } else {
-            var commitRes = commit;
+            var commitRes = checkpanic commit;
         }
     }
     a += " end-2";
@@ -242,7 +242,7 @@ function customRetryTrxManager() returns string|error {
             int bV = check trxErrorInRetry();
         } else {
             str += (" attempt "+ count.toString() + ":result returned end.");
-            var commitRes = commit;
+            var commitRes = checkpanic commit;
             return str;
         }
     }
@@ -283,7 +283,7 @@ function getPrevInfo() returns string|error {
             int bV = check trxErrorInRetry();
         } else {
             str += (" attempt "+ count.toString() + ":result returned end.");
-            var commitRes = commit;
+            var commitRes = checkpanic commit;
         }
     }
     return str;
@@ -308,10 +308,10 @@ function getPrevInfoInNested() returns string|error {
                     int bV = check trxErrorInRetry();
                 } else {
                     str += (" attempt "+ count.toString() + ":result returned end.");
-                    var commitRes = commit;
+                    var commitRes = checkpanic commit;
                 }
         }
-        var ign = commit;
+        var ign = checkpanic commit;
     }
     return str;
 }
