@@ -158,7 +158,7 @@ function commitFailWithPanicOutcome() returns error? {
             var c = check incrementCount(2);
         } else {
             setRollbackOnlyErrorForTrx();
-            var e = checkpanic commit;
+            var e = check commit;
         }
 
         if (transactional) {
