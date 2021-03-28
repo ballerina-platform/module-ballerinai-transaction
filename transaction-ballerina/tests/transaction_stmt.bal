@@ -577,7 +577,10 @@ string failureOutcomeStr = "start";
 @test:Config {
 }
 function testFailureOutcome () {
-    var res = checkpanic failureOutcomeAndRollback();
+    var res = failureOutcomeAndRollback();
+    if (res is error) {
+
+    }
     test:assertEquals("start -> failure outcome", failureOutcomeStr);
 }
 function failureOutcomeAndRollback() returns error? {
@@ -591,7 +594,10 @@ function failureOutcomeAndRollback() returns error? {
           failureOutcomeStr += " -> failure outcome";
           fail error("Custom error");
         }
-        var resCommit = checkpanic commit;
+        var resCommit = commit;
+        if (resCommit is error) {
+
+        }
     }
 }
 
@@ -599,7 +605,10 @@ string ignErrorStr = "start";
 @test:Config {
 }
 function testIgnoringErrorForRollback () {
-    var res = checkpanic ignoreErrorReturnForRollback();
+    var res = ignoreErrorReturnForRollback();
+    if res is error {
+
+    }
     test:assertEquals("start -> error return", ignErrorStr);
 }
 function ignoreErrorReturnForRollback() returns error? {
@@ -609,7 +618,10 @@ function ignoreErrorReturnForRollback() returns error? {
 
     transaction {
         transactions:onRollback(onRollbackFunc);
-        var resCommit = checkpanic commit;
+        var resCommit =  commit;
+        if (resCommit is error) {
+
+        }
         ignErrorStr += " -> error return";
         return error("Custom error");
     }
