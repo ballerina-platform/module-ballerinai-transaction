@@ -194,7 +194,7 @@ function testReturnWithinMatchWithinTransaction() returns (string) {
         transaction {
             if (unionVar is string) {
                 if (i == 2) {
-                    var o = commit;
+                    var o = checkpanic commit;
                     return "ff";
                 } else {
                     return "ff";
@@ -203,7 +203,7 @@ function testReturnWithinMatchWithinTransaction() returns (string) {
                 if (i == 2) {
                     return "ff";
                 } else {
-                    var o = commit;
+                    var o = checkpanic commit;
                     return "ff";
                 }
             }
@@ -229,9 +229,9 @@ function testNestedTrxBlocks() returns (string) {
    retry(2) transaction {
         transaction {
             a += "nested block";
-            var commitResInner = commit;
+            var commitResInner = checkpanic commit;
         }
-        var commitResOuter = commit;
+        var commitResOuter = checkpanic commit;
     }
     return a;
 }
@@ -248,7 +248,7 @@ function testTrxHandlers() returns string {
     };
 
     transaction {
-        var commitRes = commit;
+        var commitRes = checkpanic commit;
         transactions:onRollback(onRollbackFunc);
         transactions:onCommit(onCommitFunc);
         boolean isRollbackOnly = transactions:getRollbackOnly();
@@ -268,7 +268,7 @@ function testWithinTrxMode() returns string {
         if (!transactional) {
             transInfo = transactions:info();
         }
-        var commitRes = commit;
+        var commitRes = checkpanic commit;
     }
     ss += " endTrx";
     return ss;
@@ -279,7 +279,7 @@ function testTransactionalInvoWithinMultiLevelFunc() returns string {
     transaction {
         ss = "trxStarted";
         ss = func1(ss);
-        var commitRes = commit;
+        var commitRes = checkpanic commit;
         ss += " -> trxEnded.";
     }
     return ss;
@@ -322,7 +322,7 @@ function testCommitWithinLoop() {
     int[] intArr = [1, 2, 3];
     transaction {
         foreach int i in intArr {
-            var commitRes = commit;
+            var commitRes = checkpanic commit;
         }
     }
 }
@@ -335,7 +335,7 @@ function testRollbackWithinLoop() {
                 rollback;
             }
         }
-        var commitRes = commit;
+        var commitRes = checkpanic commit;
     }
 }
 
@@ -347,7 +347,7 @@ function testReturnBeforeCommitInIf() returns int {
                 return 0;
             }
         }
-        var commitRes = commit;
+        var commitRes = checkpanic commit;
     }
     return 1;
 }

@@ -43,17 +43,17 @@ public function testTransactionStatement() {
     "transactional scope is prohibited");
     validateLog(logLines[8], "ERROR", "transaction_stmt_negative.bal:(56:15,56:39)", "invoking transactional function " +
     "outside transactional scope is prohibited");
-    validateLog(logLines[9], "ERROR", "transaction_stmt_negative.bal:(75:17,75:23)", "commit not allowed here");
+    validateLog(logLines[9], "ERROR", "transaction_stmt_negative.bal:(75:28,75:34)", "commit not allowed here");
     validateLog(logLines[10], "ERROR", "transaction_stmt_negative.bal:(86:21,86:45)", "invoking transactional function " +
     "outside transactional scope is prohibited");
-    validateLog(logLines[11], "ERROR", "transaction_stmt_negative.bal:(89:17,89:23)", "commit not allowed here");
+    validateLog(logLines[11], "ERROR", "transaction_stmt_negative.bal:(89:28,89:34)", "commit not allowed here");
     validateLog(logLines[12], "ERROR", "transaction_stmt_negative.bal:(112:17,112:26)", "rollback not allowed here");
     validateLog(logLines[13], "ERROR", "transaction_stmt_negative.bal:(116:9,116:18)", "rollback not allowed here");
-    validateLog(logLines[14], "ERROR", "transaction_stmt_negative.bal:(118:17,118:23)", "commit not allowed here");
+    validateLog(logLines[14], "ERROR", "transaction_stmt_negative.bal:(118:28,118:34)", "commit not allowed here");
     validateLog(logLines[15], "ERROR", "transaction_stmt_negative.bal:(132:9,136:10)", "invalid transaction commit count");
     validateLog(logLines[16], "ERROR", "transaction_stmt_negative.bal:(134:17,134:23)", "break statement cannot be " +
     "used to exit from a transaction without a commit or a rollback statement");
-    validateLog(logLines[17], "ERROR", "transaction_stmt_negative.bal:(138:13,138:19)", "commit cannot be used outside a " +
+    validateLog(logLines[17], "ERROR", "transaction_stmt_negative.bal:(138:24,138:30)", "commit cannot be used outside a " +
     "transaction statement");
     validateLog(logLines[18], "ERROR", "transaction_stmt_negative.bal:(148:17,148:26)", "continue statement cannot be " +
     "used to exit from a transaction without a commit or a rollback statement");
@@ -81,7 +81,7 @@ public function testTransactionStatement() {
     "outside transactional scope is prohibited");
     validateLog(logLines[30], "ERROR", "transaction_stmt_negative.bal:(307:26,307:44)", "invoking transactional function " +
     "outside transactional scope is prohibited");
-    validateLog(logLines[31], "ERROR", "transaction_stmt_negative.bal:(325:29,325:35)", "commit not allowed here");
+    validateLog(logLines[31], "ERROR", "transaction_stmt_negative.bal:(325:40,325:46)", "commit not allowed here");
     validateLog(logLines[32], "ERROR", "transaction_stmt_negative.bal:(335:17,335:26)", "rollback not allowed here");
     validateLog(logLines[33], "ERROR", "transaction_stmt_negative.bal:(347:17,347:26)",
     "return statement cannot be used to exit from a transaction without a commit or a rollback statement");
@@ -93,10 +93,10 @@ public function testInvalidTrxHandlers() {
     string[] logLines = getLogLinesFromExecResult(execResult);
     test:assertEquals(logLines.length(), 6);
     validateLog(logLines[3], "ERROR", "transaction_handlers_negative.bal:(31:33,31:47)", "incompatible types: expected " +
-    "'isolated function (ballerina/lang.transaction:0.0.1:Info,error?,boolean) returns ()', " +
+    "'isolated function ((ballerina/lang.transaction:0.0.1:InfoInternal & readonly),error?,boolean) returns ()', " +
     "found 'function (boolean) returns ()'");
     validateLog(logLines[4], "ERROR", "transaction_handlers_negative.bal:(32:31,32:43)", "incompatible types: expected " +
-    "'isolated function (ballerina/lang.transaction:0.0.1:Info) returns ()', found 'function (string) returns ()'");
+    "'isolated function ((ballerina/lang.transaction:0.0.1:InfoInternal & readonly)) returns ()', found 'function (string) returns ()'");
 }
 
 @test:Config {}

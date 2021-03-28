@@ -15,7 +15,7 @@
 // under the License.
 import ballerina/lang.'transaction as transactions;
 
-function testInvalidTrxHandlers() returns string {
+function testInvalidTrxHandlers() returns string|error {
     string ss = "started";
     transactions:Info transInfo;
     var onRollbackFunc = function(boolean willTry) {
@@ -30,7 +30,7 @@ function testInvalidTrxHandlers() returns string {
         transInfo = transactions:info();
         transactions:onRollback(onRollbackFunc);
         transactions:onCommit(onCommitFunc);
-        var commitRes = checkpanic commit;
+        var commitRes = check commit;
     }
     ss += " endTrx";
     return ss;
