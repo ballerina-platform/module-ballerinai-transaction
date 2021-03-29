@@ -62,12 +62,12 @@ function actualCodeWithNestedTransactions(int failureCutOff, boolean requestRoll
                 rollback;
             } else {
                 a = a + " Commit";
-                var i = commit;
+                var i = checkpanic commit;
             }
             a = a + " endTrx";
             a = (a + " end");
         }
-        var ii = commit;
+        var ii = checkpanic commit;
     }
     return a;
 }
@@ -141,9 +141,9 @@ function testTrxHandlersWithNestedTransactions() {
             transactions:onRollback(onRollbackFunc);
             transactions:onCommit(onCommitFunc);
             trxfunctionForNestedTransactions();
-            var commitRes = commit;
+            var commitRes = checkpanic commit;
         }
-        var ii = commit;
+        var ii = checkpanic commit;
     }
     a += " endTrx";
     test:assertEquals(a, "started within transactional func endTrx");
@@ -163,9 +163,9 @@ function testTransactionInsideIfStmtWithNestedTransactions() {
             transaction {
                 int b = a + c;
                 a = b;
-                var commitRes = commit;
+                var commitRes = checkpanic commit;
             }
-            var ii = commit;
+            var ii = checkpanic commit;
         }
     }
     test:assertEquals(a, 18);
@@ -183,9 +183,9 @@ function testArrowFunctionInsideTransactionWithNestedTransactions() {
             int c = a + b;
             function (int, int) returns int arrow2 = (x, y) => x + y + a + b + c;
             a = arrow2(2, 2);
-            var commitRes = commit;
+            var commitRes = checkpanic commit;
         }
-        var ii = commit;
+        var ii = checkpanic commit;
     }
     test:assertEquals(a, 72);
 }
@@ -197,9 +197,9 @@ function testAssignmentToUninitializedVariableOfOuterScopeFromTrxBlockWithNested
     transaction {
         transaction {
             s = "init-in-transaction-block";
-            var commitRes = commit;
+            var commitRes = checkpanic commit;
         }
-        var ii = commit;
+        var ii = checkpanic commit;
     }
     test:assertEquals(s, "init-in-transaction-block");
 }
@@ -209,10 +209,10 @@ function testAssignmentToUninitializedVariableOfOuterScopeFromTrxBlockWithNested
 function testTrxReturnValWithNestedTransactions() {
     string str = "start";
     transaction {
-        var ii = commit;
+        var ii = checkpanic commit;
         transaction {
             str = str + " within transaction";
-            var commitRes = commit;
+            var commitRes = checkpanic commit;
             str = str + " end.";
             test:assertEquals(str, "start within transaction end.");
         }
@@ -229,46 +229,47 @@ function testInvokingTrxFuncForNestedTrx() {
 
 function funcWithTrxForNestedTrx(string str) returns string {
     transaction {
-        var ii = commit;
+        var ii = checkpanic commit;
         transaction {
             string res = str + " within transaction";
-            var commitRes = commit;
+            var commitRes = checkpanic commit;
             return res;
         }
     }
 }
 
-@test:Config {
-}
-function testTransactionLangLibForNestedTransactions() returns error? {
-    string str = "";
-    var rollbackFunc = isolated function (transactions:Info info, error? cause, boolean willRetry) {
-        if (cause is error) {
-            io:println("Rollback with error: " + cause.message());
-        }
-    };
-
-    transaction {
-        transaction {
-            readonly d = 123;
-            transactions:setData(d);
-            transactions:Info transInfo = transactions:info();
-            transactions:Info? newTransInfo = transactions:getInfo(transInfo.xid);
-            if(newTransInfo is transactions:Info) {
-                test:assertEquals(transInfo.xid === newTransInfo.xid, true);
-            } else {
-                panic error AssertionErrorInNestedTrx(ASSERTION_ERROR_REASON_IN_NESTED_TRX,
-                message = "unexpected output from getInfo");
-            }
-            transactions:onRollback(rollbackFunc);
-            str += "In Trx";
-            test:assertEquals(d === transactions:getData(), true);
-            check commit;
-            str += " commit";
-        }
-        check commit;
-    }
-}
+//TODO: Enable this test once #29671 fixed
+//@test:Config {
+//}
+//function testTransactionLangLibForNestedTransactions() returns error? {
+//    string str = "";
+//    var rollbackFunc = isolated function (transactions:Info info, error? cause, boolean willRetry) {
+//        if (cause is error) {
+//            io:println("Rollback with error: " + cause.message());
+//        }
+//    };
+//
+//    transaction {
+//        transaction {
+//            readonly d = 123;
+//            transactions:setData(d);
+//            transactions:Info transInfo = transactions:info();
+//            transactions:Info? newTransInfo = transactions:getInfo(transInfo.xid);
+//            if(newTransInfo is transactions:Info) {
+//                test:assertEquals(transInfo.xid === newTransInfo.xid, true);
+//            } else {
+//                panic error AssertionErrorInNestedTrx(ASSERTION_ERROR_REASON_IN_NESTED_TRX,
+//                message = "unexpected output from getInfo");
+//            }
+//            transactions:onRollback(rollbackFunc);
+//            str += "In Trx";
+//            test:assertEquals(d === transactions:getData(), true);
+//            check commit;
+//            str += " commit";
+//        }
+//        check commit;
+//    }
+//}
 
 type AssertionErrorInNestedTrx error;
 
@@ -291,13 +292,13 @@ function testWithinTrxModeWithNestedTransactions() {
             if (transactional) {
                 ss = ss + " -> strand in transactional mode";
             }
-            var commitRes = commit;
+            var commitRes = checkpanic commit;
             if (!transactional) {
                 ss = ss + " -> strand in non-transactional mode";
             }
             ss += " -> trxEnded.";
         }
-        var ii = commit;
+        var ii = checkpanic commit;
     }
     test:assertEquals(ss, "trxStarted -> within invoked function "
              + "-> strand in transactional mode -> invoked function returned -> strand in transactional mode"
@@ -324,14 +325,14 @@ function testUnreachableCodeWithNestedTransactions() {
         transaction {
             ss = "trxStarted";
             transactions:onCommit(onCommitFunc);
-            var commitRes = commit;
+            var commitRes = checkpanic commit;
             if (transactional) {
                 //only reached when commit fails
                 ss = ss + " -> strand in transactional mode";
             }
             ss += " -> trxEnded.";
         }
-        var ii = commit;
+        var ii = checkpanic commit;
     }
     test:assertEquals(ss, "trxStarted -> trxEnded.");
 }
@@ -345,21 +346,21 @@ function testMultipleTrxReturnValWithNestedTransactions() {
     transaction {
         i += 1;
         str += " -> within transaction 1";
-        var commitRes1 = commit;
+        var commitRes1 = checkpanic commit;
         if(i >= 3) {
             result = str;
         }
         transaction {
             i += 1;
             str += " -> within transaction 2";
-            var commitRes2 = commit;
+            var commitRes2 = checkpanic commit;
             if(i >= 3) {
                 result = str;
             }
             transaction {
                 i += 1;
                 str += " -> within transaction 3";
-                var commitRes3 = commit;
+                var commitRes3 = checkpanic commit;
                 str += " -> returned.";
                 if(i >= 3) {
                     result = str;
@@ -384,12 +385,12 @@ function testNestedInnerReturnWithNestedTransactions() returns string {
     string str = "start";
     transaction {
         str += " -> within trx 1";
-        var res1 = commit;
+        var res1 = checkpanic commit;
         transaction {
-            var res2 = commit;
+            var res2 = checkpanic commit;
             str += " -> within trx 2";
             transaction {
-                var res3 = commit;
+                var res3 = checkpanic commit;
                 str += " -> within trx 3";
                 return str;
             }
@@ -401,16 +402,16 @@ function testNestedMiddleReturnWithNestedTransactions() returns string {
     string str = "start";
     transaction {
         str += " -> within trx 1";
-        var res1 = commit;
+        var res1 = checkpanic commit;
         transaction {
             int count = 1;
-            var res2 = commit;
+            var res2 = checkpanic commit;
             str += " -> within trx 2";
             if (count == 1) {
                 return str;
             }
             transaction {
-                var res3 = commit;
+                var res3 = checkpanic commit;
                 str += " -> within trx 3 -> should not reach here";
                 return str;
             }
@@ -440,11 +441,11 @@ function nestedTrxWithRollbackHandlers() {
 
      transaction {
          transactions:onRollback(onRollbackFunc1);
-            var commitRes1 = commit;
+            var commitRes1 = checkpanic commit;
             transaction {
                 transactions:onRollback(onRollbackFunc2);
                 int bV = blowUpInNestedTransactions();
-                var commitRes2 = commit;
+                var commitRes2 = checkpanic commit;
             }
      }
 }

@@ -49,7 +49,7 @@ public client class FooClient {
 function testTransactionalServices() {
     transaction {
         var response = stClient->foo();
-        var x = commit;
+        var x = checkpanic commit;
         if (response is http:Response) {
             test:assertEquals(response.statusCode, 200, msg = "Found expected output");
         } else if (response is error) {
