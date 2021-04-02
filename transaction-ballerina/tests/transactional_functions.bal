@@ -14,26 +14,27 @@
 // specific language governing permissions and limitations
 // under the License.
 import ballerina/test;
+import ballerina/lang.'transaction as trx;
 
 @test:Config {}
 function transactionalAnonymousFuncAssignment() {
     string str = "start";
-    transactional function () trxFunc1 = transactional function ()  {
-       str += "-> within transactional function trxFunc1()";
-    };
+    transactional function () trxFunc1 = transactional function() {
+                                             str += "-> within transactional function trxFunc1()";
+                                         };
 
-    transactional function() trxFunc2 = function () {
-        str += "-> within transactional function trxFunc2()";
-    };
+    transactional function () trxFunc2 = function() {
+                                             str += "-> within transactional function trxFunc2()";
+                                         };
 
-    any foo = transactional function () {
-        str += "-> within transactional function trxFunc3()";
-    };
+    any foo = transactional function() {
+                  str += "-> within transactional function trxFunc3()";
+              };
 
-    transactional function () trxFunc3 = <transactional function ()> foo;
+    transactional function () trxFunc3 = <transactional function ()>foo;
 
     transaction {
-        if(transactional) {
+        if (transactional) {
             trxFunc1();
             trxFunc2();
             trxFunc3();
@@ -41,6 +42,121 @@ function transactionalAnonymousFuncAssignment() {
         var ign = checkpanic commit;
     }
 
-    test:assertEquals(str, "start-> within transactional function trxFunc1()" +
-    "-> within transactional function trxFunc2()-> within transactional function trxFunc3()");
+    test:assertEquals(str, "start-> within transactional function trxFunc1()"
+    + "-> within transactional function trxFunc2()-> within transactional function trxFunc3()");
+}
+
+isolated string outputCommit = "start";
+isolated string outputRollback = "start";
+
+@test:Config {}
+function testTransactionalFunctionWithHandlersCommit() {
+    var onRollbackFunc = isolated function(trx:Info? info, error? cause, boolean willTry) {
+                             lock {
+                                 outputCommit += " -> trxAborted";
+                             }
+                         };
+
+    var onCommitFunc1 = isolated function(trx:Info? info) {
+                            lock {
+                                outputCommit += " -> trxCommited1";
+                            }
+                        };
+
+    var onCommitFunc2 = isolated function(trx:Info? info) {
+                            lock {
+                                outputCommit += " -> trxCommited2";
+                            }
+                        };
+
+    transactional function () trxFunc1 = transactional function() {
+                                             lock {
+                                                 outputCommit += "-> within transactional function trxFunc1()";
+                                             }
+                                             trx:onCommit(onCommitFunc1);
+                                             trx:onRollback(onRollbackFunc);
+                                         };
+
+    transactional function () trxFunc2 = transactional function() {
+                                             lock {
+                                                 outputCommit += "-> within transactional function trxFunc2()";
+                                             }
+                                             trx:onCommit(onCommitFunc2);
+                                             trx:onRollback(onRollbackFunc);
+                                         };
+
+    transaction {
+        if (transactional) {
+            trxFunc1();
+            trxFunc2();
+        }
+        var ign = checkpanic commit;
+        lock {
+            outputCommit += " -> trx ended";
+        }
+    }
+
+    lock {
+        test:assertEquals(outputCommit, "start-> within transactional function trxFunc1()"
+        + "-> within transactional function trxFunc2() -> trxCommited2 -> trxCommited1 -> trx ended");
+        outputCommit = "";
+    }
+}
+
+@test:Config {}
+function testTransactionalFunctionWithHandlersRollback() {
+    var onRollbackFunc1 = isolated function(trx:Info? info, error? cause, boolean willTry) {
+                              lock {
+                                  outputRollback += " -> trxAborted1";
+                              }
+                          };
+
+    var onRollbackFunc2 = isolated function(trx:Info? info, error? cause, boolean willTry) {
+                              lock {
+                                  outputRollback += " -> trxAborted2";
+                              }
+                          };
+
+    var onCommitFunc = isolated function(trx:Info? info) {
+                           lock {
+                               outputRollback += " -> trxCommited";
+                           }
+                       };
+
+    transactional function () trxFunc1 = transactional function() {
+                                             lock {
+                                                 outputRollback += "-> within transactional function trxFunc1()";
+                                             }
+                                             trx:onCommit(onCommitFunc);
+                                             trx:onRollback(onRollbackFunc1);
+                                         };
+
+    transactional function () trxFunc2 = transactional function() {
+                                             lock {
+                                                 outputRollback += "-> within transactional function trxFunc2()";
+                                             }
+                                             trx:onCommit(onCommitFunc);
+                                             trx:onRollback(onRollbackFunc2);
+                                         };
+
+    transaction {
+        if (transactional) {
+            trxFunc1();
+            trxFunc2();
+        }
+        if 1 == 1 {
+            rollback;
+        } else {
+            var ign = checkpanic commit;
+        }
+        lock {
+            outputRollback += " -> trx ended";
+        }
+    }
+
+    lock {
+        test:assertEquals(outputRollback, "start-> within transactional function trxFunc1()"
+        + "-> within transactional function trxFunc2() -> trxAborted2 -> trxAborted1 -> trx ended");
+        outputRollback = "";
+    }
 }
