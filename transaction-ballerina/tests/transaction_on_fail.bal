@@ -37,11 +37,11 @@ function testReturnValInTrx() returns string {
     string str = "start";
     transaction {
         str = str + " -> within transaction1";
-        var ii = commit;
+        var ii = checkpanic commit;
         error err = error("custom error", message = "error value");
         transaction {
             str = str + " -> within transaction2";
-            var commitRes = commit;
+            var commitRes = checkpanic commit;
         }
         int res2 = check getErrorForOnFail();
     } on fail error e {
@@ -76,10 +76,10 @@ function testNestedTrxWithLessOnFails() returns string {
       str += "-> Before error 1 is thrown";
       transaction {
           str += " -> Before error 2 is thrown";
-          var resCommit2 = commit;
+          var resCommit2 = checkpanic commit;
           int res2 =  check getErrorForOnFail();
       }
-      var resCommit1 = commit;
+      var resCommit1 = checkpanic commit;
    }
    on fail error e1 {
        str += " -> Error caught !";
@@ -117,11 +117,11 @@ function testJumpingToOnFail() {
       str += "-> Before error 1 is thrown";
       transaction {
           str += " -> Before error 2 is thrown";
-          var resCommit2 = commit;
+          var resCommit2 = checkpanic commit;
           int res2 =  check getErrorForOnFail();
       }
       str += "-> Should not reach here!";
-      var resCommit1 = commit;
+      var resCommit1 = checkpanic commit;
    }
    on fail error e1 {
        str += " -> Error caught! ";
@@ -154,16 +154,16 @@ function testJumpingMultiLevelToOnFail() {
               transactions:onRollback(onRollbackFunc3);
               str += " -> Before error 2 is thrown";
               int res3 =  check getErrorForOnFail();
-              var resCommit3 = commit;
+              var resCommit3 = checkpanic commit;
           } on fail var e {
                str += " -> Error caught in inner onfail";
                fail e;
           }
           str += "-> Should not reach here!";
-          var resCommit2 = commit;
+          var resCommit2 = checkpanic commit;
       }
       str += "-> Should not reach here!";
-      var resCommit1 = commit;
+      var resCommit1 = checkpanic commit;
    }
    on fail error e1 {
        str += " -> Error caught in outter onfail";
