@@ -57,3 +57,56 @@ function testTransactionalServices() {
         }
     }
 }
+
+isolated string output = "start";
+
+var onRollbackFuncInsideClient = isolated function(trx:Info? info, error? cause, boolean willTry) {
+                         lock {
+                             outputCommit += " -> trxAborted inside client";
+                         }
+                     };
+
+var onCommitFuncInsideClient = isolated function(trx:Info? info) {
+                        lock {
+                            outputCommit += " -> trxCommited inside client";
+                        }
+                    };
+
+public client class BarClient {
+
+    public http:Client httpClient;
+
+    public function init(int port) {
+        self.httpClient = checkpanic new("http://localhost:9090");
+    }
+
+    transactional remote function foo() returns @tainted any|error {
+        trx:onCommit(onCommitFunc);
+        trx:onRollback(onCommitFunc);
+        return self.httpClient->get("/echo/message");
+    }
+}
+
+BarClient barClient = new(9090);
+
+@test:Config {}
+function testHandlersWithinTransactionalClient() {
+    transaction {
+        lock {
+            outputCommit += " -> within trx block";
+        }
+        var response = barClient->foo();
+        var x = checkpanic commit;
+        if (response is http:Response) {
+            test:assertEquals(response.statusCode, 200, msg = "Found expected output");
+        } else if (response is error) {
+            test:assertFail(msg = "Found unexpected output type: " + response.message());
+        }
+        lock {
+                outputCommit += " -> trx ended";
+        }
+    }
+    lock {
+        test:assertEquals("start -> within trx block -> trxCommited inside client -> trx ended", outputCommit);
+    }
+}
