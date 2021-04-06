@@ -16,6 +16,7 @@
 
 import ballerina/http;
 import ballerina/test;
+import ballerina/lang.'transaction as trx;
 
 listener http:Listener serviceTestEP = new(9090);
 FooClient stClient = new(9090);
@@ -58,17 +59,17 @@ function testTransactionalServices() {
     }
 }
 
-isolated string output = "start";
+isolated string handlerClientOutput = "start";
 
 var onRollbackFuncInsideClient = isolated function(trx:Info? info, error? cause, boolean willTry) {
                          lock {
-                             outputCommit += " -> trxAborted inside client";
+                             handlerClientOutput += " -> trxAborted inside client";
                          }
                      };
 
 var onCommitFuncInsideClient = isolated function(trx:Info? info) {
                         lock {
-                            outputCommit += " -> trxCommited inside client";
+                            handlerClientOutput += " -> trxCommited inside client";
                         }
                     };
 
@@ -81,8 +82,8 @@ public client class BarClient {
     }
 
     transactional remote function foo() returns @tainted any|error {
-        trx:onCommit(onCommitFunc);
-        trx:onRollback(onCommitFunc);
+        trx:onCommit(onCommitFuncInsideClient);
+        trx:onRollback(onRollbackFuncInsideClient);
         return self.httpClient->get("/echo/message");
     }
 }
@@ -93,7 +94,7 @@ BarClient barClient = new(9090);
 function testHandlersWithinTransactionalClient() {
     transaction {
         lock {
-            outputCommit += " -> within trx block";
+            handlerClientOutput += " -> within trx block";
         }
         var response = barClient->foo();
         var x = checkpanic commit;
@@ -103,10 +104,10 @@ function testHandlersWithinTransactionalClient() {
             test:assertFail(msg = "Found unexpected output type: " + response.message());
         }
         lock {
-                outputCommit += " -> trx ended";
+                handlerClientOutput += " -> trx ended";
         }
     }
     lock {
-        test:assertEquals("start -> within trx block -> trxCommited inside client -> trx ended", outputCommit);
+        test:assertEquals(handlerClientOutput, "start -> within trx block -> trxCommited inside client -> trx ended");
     }
 }
