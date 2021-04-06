@@ -152,7 +152,7 @@ function beginLocalParticipant(string transactionBlockId, function () returns an
     }
 }
 
-# Handles the trahsaction remote participant function.
+# Handles the transaction remote participant function.
 # Transaction remote participant function will be desugared to following method.
 #
 # + transactionBlockId - ID of the transaction block.
@@ -275,21 +275,17 @@ transactional function endTransaction(string transactionId, string transactionBl
 
     // Only the initiator can end the transaction. Here we check whether the entity trying to end the transaction is
     // an initiator or just a local participant
-    if (!participatedTransactions.hasKey(participatedTxnId)) {
-        var initiatedTxn = initiatedTransactions[transactionId];
-        if (initiatedTxn is ()) {
-            return "";
-        } else {
-            if (initiatedTxn.state == TXN_STATE_ABORTED) {
-                return initiatedTxn.abortInitiatorTransaction();
-            } else {
-                string|lang_trx:Error ret = initiatedTxn.twoPhaseCommit();
-                removeInitiatedTransaction(transactionId);
-                return ret;
-            }
-        }
+    var initiatedTxn = initiatedTransactions[transactionId];
+    if (initiatedTxn is ()) {
+        return "";
     } else {
-        return "";  // Nothing to do on endTransaction if you are a participant
+        if (initiatedTxn.state == TXN_STATE_ABORTED) {
+            return initiatedTxn.abortInitiatorTransaction();
+        } else {
+            string|lang_trx:Error ret = initiatedTxn.twoPhaseCommit();
+            removeInitiatedTransaction(transactionId);
+            return ret;
+        }
     }
 }
 
