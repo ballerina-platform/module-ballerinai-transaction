@@ -1,34 +1,41 @@
 [[dependency]]
 org = "ballerina"
 name = "io"
-version = "@stdlib.io.version@"
+version = "0.6.0-alpha7"
 
 [[dependency]]
 org = "ballerina"
 name = "log"
-version = "@stdlib.log.version@"
+version = "1.1.0-alpha7"
 
 [[dependency]]
 org = "ballerina"
 name = "http"
-version = "@stdlib.http.version@"
+version = "1.1.0-alpha7"
 
 [[dependency]]
 org = "ballerina"
 name = "cache"
-version = "@stdlib.cache.version@"
+version = "2.1.0-alpha7"
 
 [[dependency]]
 org = "ballerina"
 name = "time"
-version = "@stdlib.time.version@"
+version = "2.0.0-alpha8"
 
 [[dependency]]
 org = "ballerina"
 name = "uuid"
-version = "@stdlib.uuid.version@"
+version = "0.10.0-alpha7"
 
 [[dependency]]
 org = "ballerina"
 name = "task"
-version = "@stdlib.task.version@"
+version = "2.0.0-alpha8"
+
+[[dependency]]
+org = "ballerina"
+name = "test"
+version = "0.0.0"
+
+
