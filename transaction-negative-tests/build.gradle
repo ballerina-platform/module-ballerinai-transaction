@@ -91,8 +91,9 @@ def snapshotVersion = "-SNAPSHOT"
 def tomlVersion = project.version.replace("${snapshotVersion}", "")
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
 def ballerinaDependencyFile = new File("$project.projectDir/Dependencies.toml")
-def originalConfig = ballerinaConfigFile.text
 def configTOMLFile = new File("$project.projectDir/tests/Config.toml")
+def originalConfig = ballerinaConfigFile.text
+def originalDependencies = ballerinaDependencyFile.text
 def initialTOMLcontent = configTOMLFile.text
 
 task updateTomlVerions {
@@ -119,6 +120,7 @@ task revertTomlFile {
     doLast {
         ballerinaConfigFile.text = originalConfig
         configTOMLFile.text = initialTOMLcontent
+        ballerinaDependencyFile.text = originalDependencies
     }
 }
 
