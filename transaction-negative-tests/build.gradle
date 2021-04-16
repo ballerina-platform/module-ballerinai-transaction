@@ -87,8 +87,7 @@ task copyToLib(type: Copy) {
     from configurations.externalJars
 }
 
-def snapshotVersion = "-SNAPSHOT"
-def tomlVersion = project.version.replace("${snapshotVersion}", "")
+def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
 def ballerinaDependencyFile = new File("$project.projectDir/Dependencies.toml")
 def configTOMLFile = new File("$project.projectDir/tests/Config.toml")
@@ -96,13 +95,27 @@ def originalConfig = ballerinaConfigFile.text
 def originalDependencies = ballerinaDependencyFile.text
 def initialTOMLcontent = configTOMLFile.text
 
+def stripBallerinaExtensionVersion(String extVersion) {
+    if (extVersion.matches(project.ext.timestampedVersionRegex)) {
+        def splitVersion = extVersion.split('-');
+        if (splitVersion.length > 3) {
+            def strippedValues = splitVersion[0..-4]
+            return strippedValues.join('-')
+        } else {
+            return extVersion
+        }
+    } else {
+        return extVersion.replace("${project.ext.snapshotVersion}", "")
+    }
+}
+
 task updateTomlVerions {
     doLast {
         def stdlibNativeIoVersion = project.stdlibIoVersion
 
-        def stdlibDependentIoVersion = project.stdlibIoVersion.replace("${snapshotVersion}", "")
-        def stdlibDependentRegexVersion = project.stdlibRegexVersion.replace("${snapshotVersion}", "")
-        def stdlibDependentOsVersion = project.stdlibOsVersion.replace("${snapshotVersion}", "")
+        def stdlibDependentIoVersion = stripBallerinaExtensionVersion(project.stdlibIoVersion)
+        def stdlibDependentRegexVersion = stripBallerinaExtensionVersion(project.stdlibRegexVersion)
+        def stdlibDependentOsVersion = stripBallerinaExtensionVersion(project.stdlibOsVersion)
 
         def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
