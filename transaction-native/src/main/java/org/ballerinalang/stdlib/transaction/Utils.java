@@ -22,9 +22,12 @@ package org.ballerinalang.stdlib.transaction;
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
+import io.ballerina.runtime.api.utils.JsonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BFunctionPointer;
 import io.ballerina.runtime.api.values.BMap;
+import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.transactions.TransactionConstants;
 import io.ballerina.runtime.transactions.TransactionLocalContext;
@@ -36,10 +39,13 @@ import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Map;
 
 import static io.ballerina.runtime.api.constants.RuntimeConstants.GLOBAL_TRANSACTION_ID;
+import static io.ballerina.runtime.api.constants.RuntimeConstants.TRANSACTION_INFO;
 import static io.ballerina.runtime.api.constants.RuntimeConstants.TRANSACTION_URL;
 import static io.ballerina.runtime.transactions.TransactionConstants.DEFAULT_COORDINATION_TYPE;
 import static io.ballerina.runtime.transactions.TransactionConstants.TRANSACTION_PACKAGE_ID;
@@ -99,10 +105,14 @@ public class Utils {
             // We have no business here. This is a no-op.
             throw ErrorCreator.createError(StringUtils.fromString("No transaction is available to participate"));
         }
+        String trxJsonString = env.getStrandLocal(TRANSACTION_INFO).toString();
+        BArray infoArr = (BArray) JsonUtils.parse(trxJsonString);
+        Map infoRec = createInfoRecord(env, infoArr, 0);
+        BMap info = createInfoRecord(env, infoRec);
 
         // Create transaction context and store in the strand.
         TransactionLocalContext transactionLocalContext = TransactionLocalContext
-                .create(gTransactionId, env.getStrandLocal(TRANSACTION_URL).toString(), DEFAULT_COORDINATION_TYPE);
+                .create(gTransactionId, env.getStrandLocal(TRANSACTION_URL).toString(), DEFAULT_COORDINATION_TYPE, info);
         TransactionResourceManager.getInstance().setCurrentTransactionContext(transactionLocalContext);
 
         // Register committed and aborted function handler if exists.
@@ -116,6 +126,58 @@ public class Utils {
                 transactionBlockId.getValue(), transactionLocalContext.getProtocol(), transactionLocalContext.getURL()
         };
         return ValueCreator.createRecordValue(trxContext, trxContextData);
+    }
+
+    static Map createInfoRecord(Environment env, BArray infoArr, int j) {
+        BMap info = (BMap) infoArr.get(j);
+        Map<String, Object> infoUpdateMap = new HashMap<>();
+        String xid = info.get(StringUtils.fromString("xid")).toString();
+        byte[] xidArray = xid.getBytes(StandardCharsets.UTF_8);
+        infoUpdateMap.put("xid", xidArray);
+        infoUpdateMap.put(TransactionConstants.RETRY_NUMBER.getValue(), Integer.parseInt(info.get(TransactionConstants.RETRY_NUMBER).toString()));
+        int startTimeInt = Integer.parseInt(info.get(TransactionConstants.START_TIME).toString());
+        infoUpdateMap.put(TransactionConstants.START_TIME.getValue(), createTimeStampObject(env, startTimeInt));
+        if (infoArr.getLength() - 1  > j) {
+            infoUpdateMap.put("prevAttempt", createInfoRecord(env, infoArr, j++));
+        }
+        return infoUpdateMap;
+    }
+
+    static BObject createTimeStampObject(Environment env, int startTime) {
+        BObject startTimeObj = ValueCreator.createObjectValue(env.getCurrentModule(),
+                "TimestampImpl");
+        startTimeObj.addNativeData("timeValue", startTime);
+        return startTimeObj;
+    }
+
+    static BMap createInfoRecord(Environment env, Map infoMap) {
+        BMap<BString, Object> infoInternal = ValueCreator.createRecordValue(TRANSACTION_PACKAGE_ID,
+                "InfoInternal");
+        Object[] infoData = new Object[]{
+                ValueCreator.createArrayValue((byte[]) infoMap.get("xid")),
+                infoMap.get(TransactionConstants.RETRY_NUMBER.getValue()),
+                infoMap.get("prevAttempt"), infoMap.get(TransactionConstants.START_TIME.getValue())};
+        BMap<BString, Object> infoRecord = ValueCreator.createRecordValue(infoInternal, infoData);
+        infoRecord.freezeDirect();
+        return infoRecord;
+    }
+
+    public static void createTrxContextFromGlobalID(Environment env) {
+        String gTransactionId = (String) env.getStrandLocal(GLOBAL_TRANSACTION_ID);
+        if (gTransactionId == null) {
+            // No transaction available to participate,
+            // We have no business here. This is a no-op.
+            throw ErrorCreator.createError(StringUtils.fromString("No transaction is available to participate"));
+        }
+        String trxJsonString = env.getStrandLocal(TRANSACTION_INFO).toString();
+        BArray infoArr = (BArray) JsonUtils.parse(trxJsonString);
+        Map infoRec = createInfoRecord(env, infoArr, 0);
+        BMap info = createInfoRecord(env, infoRec);
+
+        // Create transaction context and store in the strand.
+        TransactionLocalContext transactionLocalContext = TransactionLocalContext
+                .create(gTransactionId, env.getStrandLocal(TRANSACTION_URL).toString(), DEFAULT_COORDINATION_TYPE, info);
+        TransactionResourceManager.getInstance().setCurrentTransactionContext(transactionLocalContext);
     }
 
     public static Object registerLocalParticipant(Environment env, BString transactionBlockId,
