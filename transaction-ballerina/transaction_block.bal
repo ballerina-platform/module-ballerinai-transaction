@@ -393,5 +393,5 @@ function notifyResourceManagerOnAbort(string transactionBlockId) = @java:Method 
 #
 function createTrxContextFromGlobalID() = @java:Method {
     'class: "org.ballerinalang.stdlib.transaction.Utils",
-    name: "createContextFromGlobal"
+    name: "createTrxContextFromGlobalID"
 } external;
