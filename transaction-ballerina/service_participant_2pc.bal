@@ -32,6 +32,9 @@ service object {} participant2pcService = service object {
         consumes:["application/json"]
     }
     resource function post [string transactionBlockId]/prepare(http:Caller conn, http:Request req) {
+        if !transactional {
+            createContextFromGlobal();
+        }
         json jsonPayload = <json> checkpanic req.getJsonPayload();
         PrepareRequest prepareReq = <PrepareRequest> checkpanic jsonPayload.fromJsonWithType(PrepareRequest);
         http:Response res = new;
@@ -91,6 +94,9 @@ service object {} participant2pcService = service object {
         consumes:["application/json"]
     }
     resource function post [string transactionBlockId]/notify(http:Caller conn, http:Request req) {
+        if !transactional {
+            createContextFromGlobal();
+        }
         http:Response res = new;
         json jsonPayload = <json> checkpanic req.getJsonPayload();
         NotifyRequest notifyReq = <NotifyRequest> checkpanic jsonPayload.fromJsonWithType(NotifyRequest);
