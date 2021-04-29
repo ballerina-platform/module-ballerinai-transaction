@@ -101,10 +101,11 @@ public class Utils {
     }
 
     public static Object registerRemoteParticipant(Environment env, BString transactionBlockId) {
+        TransactionResourceManager transactionResourceManager = TransactionResourceManager.getInstance();
         TransactionLocalContext transactionLocalContext = recreateTrxContext(env);
+        transactionResourceManager.setCurrentTransactionContext(transactionLocalContext);
 
         // Register committed and aborted function handler if exists.
-        TransactionResourceManager transactionResourceManager = TransactionResourceManager.getInstance();
         transactionResourceManager.registerParticipation(transactionLocalContext.getGlobalTransactionId(),
                 transactionBlockId.getValue());
         BMap<BString, Object> trxContext = ValueCreator.createRecordValue(env.getCurrentModule(),
@@ -117,7 +118,8 @@ public class Utils {
     }
 
     public static void createTrxContextFromGlobalID(Environment env) {
-        recreateTrxContext(env);
+        TransactionLocalContext transactionLocalContext = recreateTrxContext(env);
+        TransactionResourceManager.getInstance().setCurrentTransactionContext(transactionLocalContext);
     }
 
     private static TransactionLocalContext recreateTrxContext(Environment env) {
@@ -134,7 +136,6 @@ public class Utils {
         // Create transaction context and store in the strand.
         TransactionLocalContext transactionLocalContext = TransactionLocalContext.create(gTransactionId,
                 env.getStrandLocal(TRANSACTION_URL).toString(), DEFAULT_COORDINATION_TYPE, infoRecord);
-        TransactionResourceManager.getInstance().setCurrentTransactionContext(transactionLocalContext);
         return transactionLocalContext;
     }
 
