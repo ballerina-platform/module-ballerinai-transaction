@@ -59,7 +59,8 @@ import static io.ballerina.runtime.transactions.TransactionConstants.TRANSACTION
 
 public class Utils {
     private static final String STRUCT_TYPE_TRANSACTION_CONTEXT = "TransactionContext";
-    private static final String STRUCT_TYPE_TRANSACTION_INFO = "InfoInternal";
+    private static final String STRUCT_TYPE_TRANSACTION_INFO = "Info";
+    private static final String STRUCT_TYPE_TRANSACTION_INFO_INTERNAL = "InfoInternal";
     private static final String STRUCT_TYPE_TIMESTAMP = "TimestampImpl";
 
     public static void notifyResourceManagerOnAbort(BString transactionBlockId) {
@@ -163,7 +164,7 @@ public class Utils {
     private static BMap recreateInfoRecord(Environment env, BArray infoArr) {
         Map infoMap = reorderInfoRecord(env, infoArr, 0);
         BMap<BString, Object> infoInternal = ValueCreator.createRecordValue(TRANSACTION_PACKAGE_ID,
-                STRUCT_TYPE_TRANSACTION_INFO);
+                STRUCT_TYPE_TRANSACTION_INFO_INTERNAL);
         Object[] infoData = new Object[]{
                 ValueCreator.createArrayValue((byte[]) infoMap.get(TransactionConstants.GLOBAL_TRX_ID.getValue())),
                 infoMap.get(TransactionConstants.RETRY_NUMBER.getValue()),
@@ -204,7 +205,7 @@ public class Utils {
         String protocol = txDataStruct.get(TransactionConstants.CORDINATION_TYPE).toString();
         long retryNmbr = getRetryNumber(prevAttemptInfo);
         BMap<BString, Object> trxContext = ValueCreator.createRecordValue(TRANSACTION_PACKAGE_ID,
-                STRUCT_TYPE_TIMESTAMP);
+                STRUCT_TYPE_TRANSACTION_INFO);
         Object[] trxContextData = new Object[]{
                 ValueCreator.createArrayValue(globalTransactionId.getBytes(Charset.defaultCharset())), retryNmbr,
                 System.currentTimeMillis(), prevAttemptInfo
