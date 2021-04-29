@@ -59,7 +59,8 @@ import static io.ballerina.runtime.transactions.TransactionConstants.TRANSACTION
 
 public class Utils {
     private static final String STRUCT_TYPE_TRANSACTION_CONTEXT = "TransactionContext";
-    private static final String STRUCT_TYPE_TRANSACTION_INFO = "Info";
+    private static final String STRUCT_TYPE_TRANSACTION_INFO = "InfoInternal";
+    private static final String STRUCT_TYPE_TIMESTAMP = "TimestampImpl";
 
     public static void notifyResourceManagerOnAbort(BString transactionBlockId) {
         TransactionLocalContext transactionLocalContext =
@@ -99,21 +100,7 @@ public class Utils {
     }
 
     public static Object registerRemoteParticipant(Environment env, BString transactionBlockId) {
-        String gTransactionId = (String) env.getStrandLocal(GLOBAL_TRANSACTION_ID);
-        if (gTransactionId == null) {
-            // No transaction available to participate,
-            // We have no business here. This is a no-op.
-            throw ErrorCreator.createError(StringUtils.fromString("No transaction is available to participate"));
-        }
-        String trxJsonString = env.getStrandLocal(TRANSACTION_INFO).toString();
-        BArray infoArr = (BArray) JsonUtils.parse(trxJsonString);
-        Map infoRec = createInfoRecord(env, infoArr, 0);
-        BMap info = createInfoRecord(env, infoRec);
-
-        // Create transaction context and store in the strand.
-        TransactionLocalContext transactionLocalContext = TransactionLocalContext
-                .create(gTransactionId, env.getStrandLocal(TRANSACTION_URL).toString(), DEFAULT_COORDINATION_TYPE, info);
-        TransactionResourceManager.getInstance().setCurrentTransactionContext(transactionLocalContext);
+        TransactionLocalContext transactionLocalContext = recreateTrxContext(env);
 
         // Register committed and aborted function handler if exists.
         TransactionResourceManager transactionResourceManager = TransactionResourceManager.getInstance();
@@ -128,41 +115,11 @@ public class Utils {
         return ValueCreator.createRecordValue(trxContext, trxContextData);
     }
 
-    static Map createInfoRecord(Environment env, BArray infoArr, int j) {
-        BMap info = (BMap) infoArr.get(j);
-        Map<String, Object> infoUpdateMap = new HashMap<>();
-        String xid = info.get(StringUtils.fromString("xid")).toString();
-        byte[] xidArray = xid.getBytes(StandardCharsets.UTF_8);
-        infoUpdateMap.put("xid", xidArray);
-        infoUpdateMap.put(TransactionConstants.RETRY_NUMBER.getValue(), Integer.parseInt(info.get(TransactionConstants.RETRY_NUMBER).toString()));
-        int startTimeInt = Integer.parseInt(info.get(TransactionConstants.START_TIME).toString());
-        infoUpdateMap.put(TransactionConstants.START_TIME.getValue(), createTimeStampObject(env, startTimeInt));
-        if (infoArr.getLength() - 1  > j) {
-            infoUpdateMap.put("prevAttempt", createInfoRecord(env, infoArr, j++));
-        }
-        return infoUpdateMap;
-    }
-
-    static BObject createTimeStampObject(Environment env, int startTime) {
-        BObject startTimeObj = ValueCreator.createObjectValue(env.getCurrentModule(),
-                "TimestampImpl");
-        startTimeObj.addNativeData("timeValue", startTime);
-        return startTimeObj;
-    }
-
-    static BMap createInfoRecord(Environment env, Map infoMap) {
-        BMap<BString, Object> infoInternal = ValueCreator.createRecordValue(TRANSACTION_PACKAGE_ID,
-                "InfoInternal");
-        Object[] infoData = new Object[]{
-                ValueCreator.createArrayValue((byte[]) infoMap.get("xid")),
-                infoMap.get(TransactionConstants.RETRY_NUMBER.getValue()),
-                infoMap.get("prevAttempt"), infoMap.get(TransactionConstants.START_TIME.getValue())};
-        BMap<BString, Object> infoRecord = ValueCreator.createRecordValue(infoInternal, infoData);
-        infoRecord.freezeDirect();
-        return infoRecord;
-    }
-
     public static void createTrxContextFromGlobalID(Environment env) {
+        recreateTrxContext(env);
+    }
+
+    private static TransactionLocalContext recreateTrxContext(Environment env) {
         String gTransactionId = (String) env.getStrandLocal(GLOBAL_TRANSACTION_ID);
         if (gTransactionId == null) {
             // No transaction available to participate,
@@ -171,13 +128,50 @@ public class Utils {
         }
         String trxJsonString = env.getStrandLocal(TRANSACTION_INFO).toString();
         BArray infoArr = (BArray) JsonUtils.parse(trxJsonString);
-        Map infoRec = createInfoRecord(env, infoArr, 0);
-        BMap info = createInfoRecord(env, infoRec);
+        BMap infoRecord = recreateInfoRecord(env, infoArr);
 
         // Create transaction context and store in the strand.
-        TransactionLocalContext transactionLocalContext = TransactionLocalContext
-                .create(gTransactionId, env.getStrandLocal(TRANSACTION_URL).toString(), DEFAULT_COORDINATION_TYPE, info);
+        TransactionLocalContext transactionLocalContext = TransactionLocalContext.create(gTransactionId,
+                env.getStrandLocal(TRANSACTION_URL).toString(), DEFAULT_COORDINATION_TYPE, infoRecord);
         TransactionResourceManager.getInstance().setCurrentTransactionContext(transactionLocalContext);
+        return transactionLocalContext;
+    }
+
+    private static Map reorderInfoRecord(Environment env, BArray infoArr, int j) {
+        BMap info = (BMap) infoArr.get(j);
+        Map<String, Object> infoUpdateMap = new HashMap<>();
+        String xid = info.get(TransactionConstants.GLOBAL_TRX_ID).toString();
+        byte[] xidArray = xid.getBytes(StandardCharsets.UTF_8);
+        infoUpdateMap.put(TransactionConstants.GLOBAL_TRX_ID.getValue(), xidArray);
+        infoUpdateMap.put(TransactionConstants.RETRY_NUMBER.getValue(),
+                Integer.parseInt(info.get(TransactionConstants.RETRY_NUMBER).toString()));
+        int startTimeInt = Integer.parseInt(info.get(TransactionConstants.START_TIME).toString());
+        infoUpdateMap.put(TransactionConstants.START_TIME.getValue(), createTimeStampObject(env, startTimeInt));
+        if (infoArr.getLength() - 1  > j) {
+            infoUpdateMap.put(TransactionConstants.PREVIOUS_ATTEMPT.getValue(), reorderInfoRecord(env, infoArr, j++));
+        }
+        return infoUpdateMap;
+    }
+
+    private static BObject createTimeStampObject(Environment env, int startTime) {
+        BObject startTimeObj = ValueCreator.createObjectValue(env.getCurrentModule(),
+                STRUCT_TYPE_TIMESTAMP);
+        startTimeObj.addNativeData(TransactionConstants.TIMESTAMP_OBJECT_VALUE_FIELD, startTime);
+        return startTimeObj;
+    }
+
+    private static BMap recreateInfoRecord(Environment env, BArray infoArr) {
+        Map infoMap = reorderInfoRecord(env, infoArr, 0);
+        BMap<BString, Object> infoInternal = ValueCreator.createRecordValue(TRANSACTION_PACKAGE_ID,
+                STRUCT_TYPE_TRANSACTION_INFO);
+        Object[] infoData = new Object[]{
+                ValueCreator.createArrayValue((byte[]) infoMap.get(TransactionConstants.GLOBAL_TRX_ID.getValue())),
+                infoMap.get(TransactionConstants.RETRY_NUMBER.getValue()),
+                infoMap.get(TransactionConstants.PREVIOUS_ATTEMPT.getValue()),
+                infoMap.get(TransactionConstants.START_TIME.getValue())};
+        BMap<BString, Object> infoRecord = ValueCreator.createRecordValue(infoInternal, infoData);
+        infoRecord.freezeDirect();
+        return infoRecord;
     }
 
     public static Object registerLocalParticipant(Environment env, BString transactionBlockId,
@@ -210,7 +204,7 @@ public class Utils {
         String protocol = txDataStruct.get(TransactionConstants.CORDINATION_TYPE).toString();
         long retryNmbr = getRetryNumber(prevAttemptInfo);
         BMap<BString, Object> trxContext = ValueCreator.createRecordValue(TRANSACTION_PACKAGE_ID,
-                                                                                   STRUCT_TYPE_TRANSACTION_INFO);
+                STRUCT_TYPE_TIMESTAMP);
         Object[] trxContextData = new Object[]{
                 ValueCreator.createArrayValue(globalTransactionId.getBytes(Charset.defaultCharset())), retryNmbr,
                 System.currentTimeMillis(), prevAttemptInfo
