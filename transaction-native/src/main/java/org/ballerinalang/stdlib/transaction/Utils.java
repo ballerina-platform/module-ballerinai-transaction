@@ -127,8 +127,11 @@ public class Utils {
             throw ErrorCreator.createError(StringUtils.fromString("No transaction is available to participate"));
         }
         String trxJsonString = env.getStrandLocal(TRANSACTION_INFO).toString();
-        BArray infoArr = (BArray) JsonUtils.parse(trxJsonString);
-        BMap infoRecord = recreateInfoRecord(env, infoArr);
+        BMap infoRecord = null;
+        if (!trxJsonString.isEmpty()) {
+            BArray infoArr = (BArray) JsonUtils.parse(trxJsonString);
+            infoRecord = recreateInfoRecord(env, infoArr);
+        }
 
         // Create transaction context and store in the strand.
         TransactionLocalContext transactionLocalContext = TransactionLocalContext.create(gTransactionId,
