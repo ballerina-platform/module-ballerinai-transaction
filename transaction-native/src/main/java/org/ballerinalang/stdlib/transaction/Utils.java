@@ -22,9 +22,12 @@ package org.ballerinalang.stdlib.transaction;
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
+import io.ballerina.runtime.api.utils.JsonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BFunctionPointer;
 import io.ballerina.runtime.api.values.BMap;
+import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.transactions.TransactionConstants;
 import io.ballerina.runtime.transactions.TransactionLocalContext;
@@ -36,10 +39,13 @@ import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Map;
 
 import static io.ballerina.runtime.api.constants.RuntimeConstants.GLOBAL_TRANSACTION_ID;
+import static io.ballerina.runtime.api.constants.RuntimeConstants.TRANSACTION_INFO;
 import static io.ballerina.runtime.api.constants.RuntimeConstants.TRANSACTION_URL;
 import static io.ballerina.runtime.transactions.TransactionConstants.DEFAULT_COORDINATION_TYPE;
 import static io.ballerina.runtime.transactions.TransactionConstants.TRANSACTION_PACKAGE_ID;
@@ -54,6 +60,8 @@ import static io.ballerina.runtime.transactions.TransactionConstants.TRANSACTION
 public class Utils {
     private static final String STRUCT_TYPE_TRANSACTION_CONTEXT = "TransactionContext";
     private static final String STRUCT_TYPE_TRANSACTION_INFO = "Info";
+    private static final String STRUCT_TYPE_TRANSACTION_INFO_INTERNAL = "InfoInternal";
+    private static final String STRUCT_TYPE_TIMESTAMP = "TimestampImpl";
 
     public static void notifyResourceManagerOnAbort(BString transactionBlockId) {
         TransactionLocalContext transactionLocalContext =
@@ -93,20 +101,11 @@ public class Utils {
     }
 
     public static Object registerRemoteParticipant(Environment env, BString transactionBlockId) {
-        String gTransactionId = (String) env.getStrandLocal(GLOBAL_TRANSACTION_ID);
-        if (gTransactionId == null) {
-            // No transaction available to participate,
-            // We have no business here. This is a no-op.
-            throw ErrorCreator.createError(StringUtils.fromString("No transaction is available to participate"));
-        }
-
-        // Create transaction context and store in the strand.
-        TransactionLocalContext transactionLocalContext = TransactionLocalContext
-                .create(gTransactionId, env.getStrandLocal(TRANSACTION_URL).toString(), DEFAULT_COORDINATION_TYPE);
-        TransactionResourceManager.getInstance().setCurrentTransactionContext(transactionLocalContext);
+        TransactionResourceManager transactionResourceManager = TransactionResourceManager.getInstance();
+        TransactionLocalContext transactionLocalContext = recreateTrxContext(env);
+        transactionResourceManager.setCurrentTransactionContext(transactionLocalContext);
 
         // Register committed and aborted function handler if exists.
-        TransactionResourceManager transactionResourceManager = TransactionResourceManager.getInstance();
         transactionResourceManager.registerParticipation(transactionLocalContext.getGlobalTransactionId(),
                 transactionBlockId.getValue());
         BMap<BString, Object> trxContext = ValueCreator.createRecordValue(env.getCurrentModule(),
@@ -116,6 +115,68 @@ public class Utils {
                 transactionBlockId.getValue(), transactionLocalContext.getProtocol(), transactionLocalContext.getURL()
         };
         return ValueCreator.createRecordValue(trxContext, trxContextData);
+    }
+
+    public static void createTrxContextFromGlobalID(Environment env) {
+        TransactionLocalContext transactionLocalContext = recreateTrxContext(env);
+        TransactionResourceManager.getInstance().setCurrentTransactionContext(transactionLocalContext);
+    }
+
+    private static TransactionLocalContext recreateTrxContext(Environment env) {
+        String gTransactionId = (String) env.getStrandLocal(GLOBAL_TRANSACTION_ID);
+        if (gTransactionId == null) {
+            // No transaction available to participate,
+            // We have no business here. This is a no-op.
+            throw ErrorCreator.createError(StringUtils.fromString("No transaction is available to participate"));
+        }
+        String trxJsonString = env.getStrandLocal(TRANSACTION_INFO).toString();
+        BMap infoRecord = null;
+        if (!trxJsonString.isEmpty()) {
+            BArray infoArr = (BArray) JsonUtils.parse(trxJsonString);
+            infoRecord = recreateInfoRecord(env, infoArr);
+        }
+
+        // Create transaction context and store in the strand.
+        TransactionLocalContext transactionLocalContext = TransactionLocalContext.create(gTransactionId,
+                env.getStrandLocal(TRANSACTION_URL).toString(), DEFAULT_COORDINATION_TYPE, infoRecord);
+        return transactionLocalContext;
+    }
+
+    private static Map reorderInfoRecord(Environment env, BArray infoArr, int j) {
+        BMap info = (BMap) infoArr.get(j);
+        Map<String, Object> infoUpdateMap = new HashMap<>();
+        String xid = info.get(TransactionConstants.GLOBAL_TRX_ID).toString();
+        byte[] xidArray = xid.getBytes(StandardCharsets.UTF_8);
+        infoUpdateMap.put(TransactionConstants.GLOBAL_TRX_ID.getValue(), xidArray);
+        infoUpdateMap.put(TransactionConstants.RETRY_NUMBER.getValue(),
+                Integer.parseInt(info.get(TransactionConstants.RETRY_NUMBER).toString()));
+        int startTimeInt = Integer.parseInt(info.get(TransactionConstants.START_TIME).toString());
+        infoUpdateMap.put(TransactionConstants.START_TIME.getValue(), createTimeStampObject(env, startTimeInt));
+        if (infoArr.getLength() - 1  > j) {
+            infoUpdateMap.put(TransactionConstants.PREVIOUS_ATTEMPT.getValue(), reorderInfoRecord(env, infoArr, j++));
+        }
+        return infoUpdateMap;
+    }
+
+    private static BObject createTimeStampObject(Environment env, int startTime) {
+        BObject startTimeObj = ValueCreator.createObjectValue(env.getCurrentModule(),
+                STRUCT_TYPE_TIMESTAMP);
+        startTimeObj.addNativeData(TransactionConstants.TIMESTAMP_OBJECT_VALUE_FIELD, startTime);
+        return startTimeObj;
+    }
+
+    private static BMap recreateInfoRecord(Environment env, BArray infoArr) {
+        Map infoMap = reorderInfoRecord(env, infoArr, 0);
+        BMap<BString, Object> infoInternal = ValueCreator.createRecordValue(TRANSACTION_PACKAGE_ID,
+                STRUCT_TYPE_TRANSACTION_INFO_INTERNAL);
+        Object[] infoData = new Object[]{
+                ValueCreator.createArrayValue((byte[]) infoMap.get(TransactionConstants.GLOBAL_TRX_ID.getValue())),
+                infoMap.get(TransactionConstants.RETRY_NUMBER.getValue()),
+                infoMap.get(TransactionConstants.PREVIOUS_ATTEMPT.getValue()),
+                infoMap.get(TransactionConstants.START_TIME.getValue())};
+        BMap<BString, Object> infoRecord = ValueCreator.createRecordValue(infoInternal, infoData);
+        infoRecord.freezeDirect();
+        return infoRecord;
     }
 
     public static Object registerLocalParticipant(Environment env, BString transactionBlockId,
@@ -148,7 +209,7 @@ public class Utils {
         String protocol = txDataStruct.get(TransactionConstants.CORDINATION_TYPE).toString();
         long retryNmbr = getRetryNumber(prevAttemptInfo);
         BMap<BString, Object> trxContext = ValueCreator.createRecordValue(TRANSACTION_PACKAGE_ID,
-                                                                                   STRUCT_TYPE_TRANSACTION_INFO);
+                STRUCT_TYPE_TRANSACTION_INFO);
         Object[] trxContextData = new Object[]{
                 ValueCreator.createArrayValue(globalTransactionId.getBytes(Charset.defaultCharset())), retryNmbr,
                 System.currentTimeMillis(), prevAttemptInfo
