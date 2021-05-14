@@ -93,10 +93,9 @@ public function testInvalidTrxHandlers() {
     string[] logLines = getLogLinesFromExecResult(execResult);
     test:assertEquals(logLines.length(), 6);
     validateLog(logLines[3], "ERROR", "transaction_handlers_negative.bal:(31:33,31:47)", "incompatible types: expected " +
-    "'isolated function ((ballerina/lang.transaction:0.0.1:InfoInternal & readonly),error?,boolean) returns ()', " +
-    "found 'function (boolean) returns ()'");
+    "'isolated function (Info,error?,boolean) returns ()', found 'function (boolean) returns ()'");
     validateLog(logLines[4], "ERROR", "transaction_handlers_negative.bal:(32:31,32:43)", "incompatible types: expected " +
-    "'isolated function ((ballerina/lang.transaction:0.0.1:InfoInternal & readonly)) returns ()', found 'function (string) returns ()'");
+    "'isolated function (Info) returns ()', found 'function (string) returns ()'");
 }
 
 @test:Config {}
