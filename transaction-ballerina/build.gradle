@@ -165,7 +165,7 @@ task ballerinaTest {
     }
 
     def distributionBinPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bin"
-    def testParams = "--code-coverage --includes=ballerinai.*:org.ballerinalang.stdlib.transaction.*"
+    def testParams = "--code-coverage --jacoco-xml --includes=ballerinai.transaction.*:org.ballerinalang.stdlib.transaction.*"
     
     doLast {
         exec {
@@ -203,7 +203,7 @@ task ballerinaBuild {
         }
 
         if (graph.hasTask(":${packageName}-ballerina:test")) {
-            testParams = "--code-coverage --includes=ballerinai.*:org.ballerinalang.stdlib.transaction.*"
+            testParams = "--code-coverage --jacoco-xml --includes=ballerinai.transaction.*:org.ballerinalang.stdlib.transaction.*"
         } else {
             testParams = "--skip-tests"
         }
