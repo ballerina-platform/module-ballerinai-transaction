@@ -62,7 +62,7 @@ ballerina{
     packageOrganization = packageOrg
     module = packageName
     langVersion = ballerinaLangVersion
-    testCoverageParam = "--code-coverage --includes=ballerinai.*:org.ballerinalang.stdlib.transaction.*"
+    testCoverageParam = "--code-coverage --jacoco-xml --includes=ballerinai.transaction.*:org.ballerinalang.stdlib.transaction."
 }
 
 task updateTomlVersions {
