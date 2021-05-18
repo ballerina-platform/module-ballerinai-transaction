@@ -14,48 +14,34 @@
  * limitations under the License.
  *
  */
-
-import org.apache.tools.ant.taskdefs.condition.Os
+buildscript {
+    repositories {
+        maven {
+            url = 'https://maven.pkg.github.com/ballerina-platform/plugin-gradle'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+    }
+    dependencies {
+        classpath "io.ballerina:plugin-gradle:${project.ballerinaGradlePluginVersion}"
+    }
+}
 
 description = 'Ballerina - Transaction Ballerina Generator'
 
-configurations {
-    jbalTools
-}
-
-dependencies {
-    compile group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
-    jbalTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
-        transitive = false
-    }
-    compile project(':transaction-native')
-}
-
-clean {
-    delete "$project.projectDir/target"
-}
-
-jar {
-    manifest {
-        attributes('Implementation-Title': project.name,
-                'Implementation-Version': project.version)
-    }
-}
-
 def packageName = "transaction"
 def packageOrg = "ballerinai"
-def platform = "java11"
 def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
 def ballerinaDependencyFile = new File("$project.projectDir/Dependencies.toml")
-def artifactCacheParent = file("$project.projectDir/build/cache_parent/")
-def artifactLibParent = file("$project.projectDir/build/lib_parent/")
 def originalConfig = ballerinaConfigFile.text
 def originalDependencies = ballerinaDependencyFile.text
 
 def stripBallerinaExtensionVersion(String extVersion) {
     if (extVersion.matches(project.ext.timestampedVersionRegex)) {
-        def splitVersion = extVersion.split('-');
+        def splitVersion = extVersion.split('-')
         if (splitVersion.length > 3) {
             def strippedValues = splitVersion[0..-4]
             return strippedValues.join('-')
@@ -67,41 +53,16 @@ def stripBallerinaExtensionVersion(String extVersion) {
     }
 }
 
-task unpackJballerinaTools(type: Copy) {
-    configurations.jbalTools.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-        from zipTree(artifact.getFile())
-        into new File("${buildDir}/target/extracted-distributions", "jballerina-tools-zip")
-    }
+apply plugin: 'io.ballerina.plugin'
+
+ballerina {
+    packageOrganization = packageOrg
+    module = packageName
+    langVersion = ballerinaLangVersion
+    testCoverageParam = "--code-coverage --jacoco-xml --includes=ballerinai.transaction.*:org.ballerinalang.stdlib.transaction.*"
 }
 
-task unpackStdLibs() {
-    doLast {
-        configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-            copy {
-                from project.zipTree(artifact.getFile())
-                into new File("${buildDir}/target/extracted-distributions", artifact.name + "-zip")
-            }
-        }
-    }
-}
-
-task copyStdlibs(type: Copy) {
-    def ballerinaDist = "build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
-    into ballerinaDist
-
-    /* Standard Libraries */
-    configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-        def artifactExtractedPath = "${buildDir}/target/extracted-distributions/" + artifact.name + "-zip"
-        into("repo/bala") {
-            from "${artifactExtractedPath}/bala/"
-        }
-        into("repo/cache") {
-            from "${artifactExtractedPath}/cache"
-        }
-    }
-}
-
-task updateTomlVerions {
+task updateTomlFiles {
     doLast {
         def stdlibDependentIoVersion = stripBallerinaExtensionVersion(project.stdlibIoVersion)
         def stdlibDependentUuidVersion = stripBallerinaExtensionVersion(project.stdlibUuidVersion)
@@ -126,128 +87,11 @@ task updateTomlVerions {
     }
 }
 
-task revertTomlFile {
+task revertTomlFiles {
     doLast {
         ballerinaConfigFile.text = originalConfig
         ballerinaDependencyFile.text = originalDependencies
     }
-}
-
-def getDebugParams() {
-    def debugParams = ""
-    def balJavaDebugParam = ""
-
-    if (project.hasProperty("debug")) {
-        debugParams = "--debug ${project.findProperty("debug")}"
-    }
-    if (project.hasProperty("balJavaDebug")) {
-        balJavaDebugParam = "BAL_JAVA_DEBUG=${project.findProperty("balJavaDebug")}"
-    }
-
-    return [debugParams, balJavaDebugParam]
-}
-
-task ballerinaTest {
-    dependsOn(":transaction-native:build")
-    dependsOn(unpackJballerinaTools)
-    dependsOn(updateTomlVerions)
-    finalizedBy(revertTomlFile)
-
-    def (debugParams , balJavaDebugParam) = getDebugParams()
-    def groupParams = ""
-    def disableGroups = ""
-
-    if (project.hasProperty("groups")) {
-        groupParams = "--groups ${project.findProperty("groups")}"
-    }
-    if (project.hasProperty("disable")) {
-        disableGroups = "--disable-groups ${project.findProperty("disable")}"
-    }
-
-    def distributionBinPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bin"
-    def testParams = "--code-coverage --jacoco-xml --includes=ballerinai.transaction.*:org.ballerinalang.stdlib.transaction.*"
-    
-    doLast {
-        exec {
-            workingDir project.projectDir
-            environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
-            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "${balJavaDebugParam} ${distributionBinPath}/bal.bat test ${testParams} ${groupParams} ${disableGroups} ${debugParams} && exit %%ERRORLEVEL%%"
-            } else {
-                commandLine 'sh', '-c', "${balJavaDebugParam} ${distributionBinPath}/bal test ${testParams} ${groupParams} ${disableGroups} ${debugParams}"
-            }
-        }
-    }
-}
-
-test {
-    dependsOn(ballerinaTest)
-}
-
-task ballerinaBuild {
-    dependsOn(":transaction-native:build")
-    dependsOn(unpackJballerinaTools)
-    dependsOn(updateTomlVerions)
-    finalizedBy(revertTomlFile)
-    dependsOn(test)
-    inputs.dir file(project.projectDir)
-
-    def (debugParams , balJavaDebugParam) = getDebugParams()
-    def testParams = ""
-
-    gradle.taskGraph.whenReady { graph ->
-        if (graph.hasTask(":${packageName}-ballerina:build") || graph.hasTask(":${packageName}-ballerina:publishToMavenLocal")) {
-            ballerinaTest.enabled = false
-        } else {
-            ballerinaTest.enabled = true
-        }
-
-        if (graph.hasTask(":${packageName}-ballerina:test")) {
-            testParams = "--code-coverage --jacoco-xml --includes=ballerinai.transaction.*:org.ballerinalang.stdlib.transaction.*"
-        } else {
-            testParams = "--skip-tests"
-        }
-    }
-
-    def distributionBinPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bin"
-
-    doLast {
-        // Build and populate caches
-        exec {
-            workingDir project.projectDir
-            environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
-            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "${balJavaDebugParam} ${distributionBinPath}/bal.bat build ${testParams} ${debugParams} -c && exit %%ERRORLEVEL%%"
-            } else {
-                commandLine 'sh', '-c', "${balJavaDebugParam} ${distributionBinPath}/bal build ${testParams} ${debugParams} -c"
-            }
-        }
-
-        // extract bala file to artifact cache directory
-        file("$project.projectDir/target/bala").eachFileMatch(~/.*.bala/) { balaFile ->
-            copy {
-                from zipTree(balaFile)
-                into file("$artifactCacheParent/bala/${packageOrg}/${packageName}/${tomlVersion}/${platform}")
-            }
-        }
-
-        copy {
-            from file("$project.projectDir/target/cache")
-            exclude '**/*-testable.jar'
-            exclude '**/tests_cache/'
-            into file("$artifactCacheParent/cache/")
-        }
-
-        ballerinaConfigFile.text = originalConfig
-    }
-
-    outputs.dir artifactCacheParent
-    outputs.dir artifactLibParent
-}
-
-task createArtifactZip(type: Zip) {
-    destinationDirectory = file("$buildDir/distributions")
-    from ballerinaBuild
 }
 
 publishing {
@@ -269,9 +113,11 @@ publishing {
     }
 }
 
-ballerinaBuild.dependsOn ":transaction-native:build"
-unpackStdLibs.dependsOn unpackJballerinaTools
-copyStdlibs.dependsOn unpackStdLibs
-updateTomlVerions.dependsOn copyStdlibs
-ballerinaBuild.dependsOn updateTomlVerions
-build.dependsOn ballerinaBuild
+updateTomlFiles.dependsOn copyStdlibs
+
+build.dependsOn ":transaction-native:build"
+test.dependsOn ":transaction-native:build"
+
+publishToMavenLocal.dependsOn build
+publish.dependsOn build
+

@@ -17,6 +17,8 @@
 
 import org.apache.tools.ant.taskdefs.condition.Os
 
+apply plugin: 'java'
+
 description = 'Ballerina - Transactions Negative Tests'
 
 configurations {
