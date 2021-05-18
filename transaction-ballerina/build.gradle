@@ -62,7 +62,7 @@ ballerina {
     testCoverageParam = "--code-coverage --jacoco-xml --includes=ballerinai.transaction.*:org.ballerinalang.stdlib.transaction.*"
 }
 
-task updateTomlVersions {
+task updateTomlFiles {
     doLast {
         def stdlibDependentIoVersion = stripBallerinaExtensionVersion(project.stdlibIoVersion)
         def stdlibDependentUuidVersion = stripBallerinaExtensionVersion(project.stdlibUuidVersion)
@@ -87,7 +87,7 @@ task updateTomlVersions {
     }
 }
 
-task revertTomlFile {
+task revertTomlFiles {
     doLast {
         ballerinaConfigFile.text = originalConfig
         ballerinaDependencyFile.text = originalDependencies
@@ -113,10 +113,10 @@ publishing {
     }
 }
 
+updateTomlFiles.dependsOn copyStdlibs
+
 build.dependsOn ":transaction-native:build"
 test.dependsOn ":transaction-native:build"
-
-updateTomlVersions.dependsOn copyStdlibs
 
 publishToMavenLocal.dependsOn build
 publish.dependsOn build
