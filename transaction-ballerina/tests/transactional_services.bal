@@ -40,7 +40,7 @@ public client class FooClient {
     }
 
     transactional remote function foo() returns @tainted any|error {
-        return self.httpClient->get("/echo/message");
+        return self.httpClient->get("/echo/message", targetType = http:Response);
     }
 }
 
@@ -82,7 +82,7 @@ public client class BarClient {
     transactional remote function foo() returns @tainted any|error {
         trx:onCommit(onCommitFuncInsideClient);
         trx:onRollback(onRollbackFuncInsideClient);
-        return self.httpClient->get("/echo/message");
+        return self.httpClient->get("/echo/message", targetType = http:Response);
     }
 }
 
@@ -166,7 +166,7 @@ public client class ClientWithHandlers {
     transactional remote function foo() returns @tainted any|error {
         trx:onCommit(onCommitFuncInsideClient2);
         trx:onRollback(onRollbacFuncInsideClient2);
-        return self.httpClient->get("/echoWithHandler/message");
+        return self.httpClient->get("/echoWithHandler/message", targetType = http:Response);
     }
 }
 
