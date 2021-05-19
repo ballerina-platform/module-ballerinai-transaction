@@ -178,7 +178,7 @@ class TwoPhaseCommitTransaction {
                 panic error lang_trx:Error("Unexpected nil found");
             }
 
-            [(PrepareResult|error)?, Participant] r = wait f;
+            [(PrepareResult|error)?, Participant] r = checkpanic wait f;
             var [result, participant] = r;
             string participantId = participant.participantId;
             if (result is PrepareResult) {

@@ -129,7 +129,7 @@ function testNewStrandWithTransactionalFunc() returns error? {
     transaction {
         str += "trx started";
         var o = start testTransactionalInvo(ss);
-        str += wait o;
+        str += checkpanic wait o;
         check commit;
         str += " -> trx end";
     }
@@ -452,7 +452,7 @@ function testInvokeRemoteTransactionalMethodInTransactionalScope() {
 function testAsyncReturn() {
     transaction {
         var x = start getInt();
-        int f = wait x;
+        int f = checkpanic wait x;
         var y = checkpanic commit;
         test:assertEquals(f, 10);
     }
