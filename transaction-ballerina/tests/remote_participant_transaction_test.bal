@@ -23,13 +23,13 @@ string S1 = "";
 boolean thrown1 = false;
 boolean remoteExecuted = false;
 
-http:Client separateRMParticipant01 =  checkpanic new("http://localhost:8890");
+http:Client separateRMParticipant01 = checkpanic new ("http://localhost:8890");
 
 service / on new http:Listener(8889) {
     transactional resource function post sayHello(http:Caller caller, http:Request req) {
         S1 += " in-remote";
         boolean remoteBlown = false;
-        var payload =  req.getTextPayload();
+        var payload = req.getTextPayload();
         if (payload is string) {
             if (payload == "blowUp") {
                 int|error blowNum = trap blowUp2(2);
@@ -54,7 +54,7 @@ service / on new http:Listener(8889) {
     transactional resource function post nestedTrx(http:Caller caller, http:Request req) {
         S1 += " in-remote";
         boolean changeCode = false;
-        var payload =  req.getTextPayload();
+        var payload = req.getTextPayload();
         if (payload is string) {
             if (payload == "fail") {
                 var x = nestedTrxInRemoteFunction(1);
@@ -92,7 +92,7 @@ service / on new http:Listener(8889) {
 
     transactional resource function get returnError(http:Caller caller, http:Request req) returns error? {
         S1 = S1 + " in-remote";
-        var payload =  req.getTextPayload();
+        var payload = req.getTextPayload();
         if payload is error {
 
         }
@@ -138,7 +138,7 @@ function nestedTrxInRemoteFunction(int j) returns error? {
     }
 }
 
-function blowUp2(int i)  returns int|error {
+function blowUp2(int i) returns int|error {
     if (i == 1) {
         return error errors:Retriable("TransactionError");
     } else if (i == 2) {
@@ -154,7 +154,7 @@ function initGlobalVar() {
 }
 
 function initiatorFunc(boolean throw1, boolean remote1, boolean blowRemote1) returns string|error {
-    http:Client participantEP = checkpanic new("http://localhost:8889/sayHello");
+    http:Client participantEP = checkpanic new ("http://localhost:8889/sayHello");
     initGlobalVar();
     S1 = "";
     retry transaction {
@@ -170,7 +170,7 @@ function initiatorFunc(boolean throw1, boolean remote1, boolean blowRemote1) ret
                 } else {
                     var payload = resp.getTextPayload();
                     if (payload is string) {
-                        S1 = S1 + " <" + <@untainted>  payload + ">";
+                        S1 = S1 + " <" + <@untainted>payload + ">";
                     } else {
                         log:printError(payload.message());
                     }
@@ -200,7 +200,7 @@ function initiatorFunc(boolean throw1, boolean remote1, boolean blowRemote1) ret
 }
 
 function initiateNestedTransactionInRemote(string blow) returns @tainted string {
-    http:Client remoteEp = checkpanic new("http://localhost:8889/nestedTrx");
+    http:Client remoteEp = checkpanic new ("http://localhost:8889/nestedTrx");
     S1 = "";
     transaction {
         S1 += " in-trx-block";
@@ -210,19 +210,19 @@ function initiateNestedTransactionInRemote(string blow) returns @tainted string 
                 S1 += " remote1-excepted";
                 var payload = resp.getTextPayload();
                 if (payload is string) {
-                    S1 += ":[" + <@untainted>  payload + "]";
+                    S1 += ":[" + <@untainted>payload + "]";
                 }
             } else {
                 var text = resp.getTextPayload();
                 if (text is string) {
-                    S1 += " <" + <@untainted>  text + ">";
+                    S1 += " <" + <@untainted>text + ">";
                 } else {
-                    S1 += " error-in-remote-response " + <@untainted> text.message();
+                    S1 += " error-in-remote-response " + <@untainted>text.message();
                     log:printError(text.message());
                 }
             }
         } else {
-            S1 += " remote call error: " + <@untainted> resp.message();
+            S1 += " remote call error: " + <@untainted>resp.message();
         }
         var c = commit;
         if c is error {
@@ -237,7 +237,7 @@ function initiateNestedTransactionInRemote(string blow) returns @tainted string 
 }
 
 function remoteErrorReturnInitiator() returns @tainted string {
-    http:Client remoteEp = checkpanic new("http://localhost:8889");
+    http:Client remoteEp = checkpanic new ("http://localhost:8889");
     S1 = "";
     transaction {
         S1 += " in initiator-trx";
@@ -247,19 +247,19 @@ function remoteErrorReturnInitiator() returns @tainted string {
                 S1 += " remote1-excepted";
                 var payload = resp.getTextPayload();
                 if (payload is string) {
-                    S1 += ":[" + <@untainted> payload + "]";
+                    S1 += ":[" + <@untainted>payload + "]";
                 }
             } else {
                 var text = resp.getTextPayload();
                 if (text is string) {
-                    S1 += " <" + <@untainted> text + ">";
+                    S1 += " <" + <@untainted>text + ">";
                 } else {
-                    S1 += " error-in-remote-response " + <@untainted> text.message();
+                    S1 += " error-in-remote-response " + <@untainted>text.message();
                     log:printError(text.message());
                 }
             }
         } else {
-            S1 += " remote call error: " + <@untainted> resp.message();
+            S1 += " remote call error: " + <@untainted>resp.message();
         }
         var c = commit;
         if c is error {
@@ -278,20 +278,20 @@ transactional function localParticipant() returns string {
 }
 
 function callParticipantMultipleTimes() returns string {
-    http:Client participantEP = checkpanic new("http://localhost:8889/sayHello");
+    http:Client participantEP = checkpanic new ("http://localhost:8889/sayHello");
     S1 = "";
     int i = 1;
     transaction {
         while (i < 5) {
             i += 1;
-            http:Response|error resp = participantEP->post("","");
+            http:Response|error resp = participantEP->post("", "");
             if (resp is http:Response) {
                 if (resp.statusCode == 500) {
                     S1 = S1 + " remote error";
                 } else {
                     var payload = resp.getTextPayload();
                     if (payload is string) {
-                        S1 += " <" + <@untainted>  payload + ">";
+                        S1 += " <" + <@untainted>payload + ">";
                         S1 += localParticipant();
                     } else {
                         log:printError(payload.message());
@@ -316,38 +316,38 @@ function callParticipantMultipleTimes() returns string {
 }
 
 service / on new http:Listener(8888) {
-    resource function post remoteParticipantTransactionSuccessTest(http:Caller caller,
+    resource function post remoteParticipantTransactionSuccessTest(http:Caller caller, 
     http:Request req) {
         string|error result = initiatorFunc(false, true, false);
         http:Response res = new;
         res.setPayload(result is error ? result.toString() : result.toString());
         var r = caller->respond(res);
         if (r is error) {
-            log:printError("Error sending response: " + (result is error ? result.toString() : result.toString()),
+            log:printError("Error sending response: " + (result is error ? result.toString() : result.toString()), 
             'error = r);
         }
     }
 
-    resource function post remoteParticipantTransactionFailSuccessTest(http:Caller caller,
+    resource function post remoteParticipantTransactionFailSuccessTest(http:Caller caller, 
     http:Request req) {
         string|error result = initiatorFunc(true, true, false);
         http:Response res = new;
         res.setPayload(result is error ? result.toString() : result.toString());
         var r = caller->respond(res);
         if (r is error) {
-            log:printError("Error sending response: " + (result is error ? result.toString() : result.toString()),
+            log:printError("Error sending response: " + (result is error ? result.toString() : result.toString()), 
             'error = r);
         }
     }
 
-    resource function post remoteParticipantTransactionPanicInRemote(http:Caller caller,
+    resource function post remoteParticipantTransactionPanicInRemote(http:Caller caller, 
     http:Request req) {
         string|error result = initiatorFunc(false, true, true);
         http:Response res = new;
         res.setPayload(result is error ? result.toString() : result.toString());
         var r = caller->respond(res);
         if (r is error) {
-            log:printError("Error sending response: " + (result is error ? result.toString() : result.toString()),
+            log:printError("Error sending response: " + (result is error ? result.toString() : result.toString()), 
             'error = r);
         }
     }
@@ -355,7 +355,7 @@ service / on new http:Listener(8888) {
     resource function post remoteParticipantStartNestedTransaction(http:Caller caller, http:Request req) {
         string result = initiateNestedTransactionInRemote("nestedInRemote");
         http:Response res = new;
-        res.setPayload(<@untainted> result);
+        res.setPayload(<@untainted>result);
         var r = caller->respond(res);
         if (r is error) {
             log:printError("Error sending response: " + result, 'error = r);
@@ -365,7 +365,7 @@ service / on new http:Listener(8888) {
     resource function post remoteParticipantFailInNestedTransaction(http:Caller caller, http:Request req) {
         string result = initiateNestedTransactionInRemote("fail");
         http:Response res = new;
-        res.setPayload(<@untainted> result);
+        res.setPayload(<@untainted>result);
         var r = caller->respond(res);
         if (r is error) {
             log:printError("Error sending response: " + result, 'error = r);
@@ -375,7 +375,7 @@ service / on new http:Listener(8888) {
     resource function post remoteParticipantPanicInNestedTransaction(http:Caller caller, http:Request req) {
         string result = initiateNestedTransactionInRemote("panic");
         http:Response res = new;
-        res.setPayload(<@untainted> result);
+        res.setPayload(<@untainted>result);
         var r = caller->respond(res);
         if (r is error) {
             log:printError("Error sending response: " + result, 'error = r);
@@ -385,7 +385,7 @@ service / on new http:Listener(8888) {
     resource function post remoteParticipantReturnsError(http:Caller caller, http:Request req) {
         string result = remoteErrorReturnInitiator();
         http:Response res = new;
-        res.setPayload(<@untainted> result);
+        res.setPayload(<@untainted>result);
         var r = caller->respond(res);
         if (r is error) {
             log:printError("Error sending response: " + result, 'error = r);
@@ -402,7 +402,7 @@ service / on new http:Listener(8888) {
             if reqText is error {
 
             }
-            http:Response|error result = separateRMParticipant01 -> post("/hello/remoteResource", <@untainted> req);
+            http:Response|error result = separateRMParticipant01->post("/hello/remoteResource", <@untainted>req);
             if (result is http:Response) {
                 s += " [remote-status:" + result.statusCode.toString() + "] ";
                 var p = result.getTextPayload();
@@ -424,7 +424,7 @@ service / on new http:Listener(8888) {
             }
         }
 
-        var stt = res.setTextPayload(<@untainted> s);
+        var stt = res.setTextPayload(<@untainted>s);
         checkpanic ep->respond(res);
     }
 
@@ -441,126 +441,126 @@ service / on new http:Listener(8888) {
 
 @test:Config {}
 function testRemoteParticipantTransactionSuccess() {
-    http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantTransactionSuccessTest");
+    http:Client participantEP = checkpanic new ("http://localhost:8888/remoteParticipantTransactionSuccessTest");
     http:Request req = new;
     http:Response|error response = participantEP->post("", req);
     if (response is http:Response) {
         test:assertEquals(response.statusCode, 200, msg = "Response code mismatched");
-        test:assertEquals(response.getTextPayload(),
+        test:assertEquals(response.getTextPayload(), 
         " in-trx-block in-remote <payload-from-remote> in-trx-lastline trx-committed after-trx");
     }
 }
 
 @test:Config {}
 function testRemoteParticipantTransactionFailSuccess() {
-    http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantTransactionFailSuccessTest");
+    http:Client participantEP = checkpanic new ("http://localhost:8888/remoteParticipantTransactionFailSuccessTest");
     http:Request req = new;
     http:Response|error response = participantEP->post("", req);
     if (response is http:Response) {
         test:assertEquals(response.statusCode, 200, msg = "Response code mismatched");
-        test:assertEquals(response.getTextPayload(),
+        test:assertEquals(response.getTextPayload(), 
         " in-trx-block in-remote <payload-from-remote> throw-1 in-trx-block in-trx-lastline trx-committed after-trx");
     }
 }
 
 @test:Config {}
 function testRemoteParticipantTransactionExceptionInRemote() {
-    http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantTransactionPanicInRemote");
+    http:Client participantEP = checkpanic new ("http://localhost:8888/remoteParticipantTransactionPanicInRemote");
     http:Request req = new;
     http:Response|error response = participantEP->post("", req);
     if (response is http:Response) {
         test:assertEquals(response.statusCode, 200, msg = "Response code mismatched");
-        test:assertEquals(response.getTextPayload(),
+        test:assertEquals(response.getTextPayload(), 
         " in-trx-block in-remote remote1-blown in-trx-lastline trx-committed after-trx");
     }
 }
 
 @test:Config {}
 function testRemoteParticipantStartNestedTransaction() {
-    http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantStartNestedTransaction");
+    http:Client participantEP = checkpanic new ("http://localhost:8888/remoteParticipantStartNestedTransaction");
     http:Request req = new;
     http:Response|error response = participantEP->post("", req);
     if (response is http:Response) {
         test:assertEquals(response.statusCode, 200, msg = "Response code mismatched");
-        test:assertEquals(response.getTextPayload(),
-        " in-trx-block in-remote in-nested-trx-1 in-nested-trx-2 nested-trx-2-committed nested-trx-1-committed " +
+        test:assertEquals(response.getTextPayload(), 
+        " in-trx-block in-remote in-nested-trx-1 in-nested-trx-2 nested-trx-2-committed nested-trx-1-committed " + 
         "<payload-from-remote> trx-committed after-trx");
     }
 }
 
 @test:Config {}
 function testRemoteParticipantFailInNestedTransaction() {
-    http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantFailInNestedTransaction");
+    http:Client participantEP = checkpanic new ("http://localhost:8888/remoteParticipantFailInNestedTransaction");
     http:Request req = new;
     http:Response|error response = participantEP->post("", req);
     if (response is http:Response) {
         test:assertEquals(response.statusCode, 200, msg = "Response code mismatched");
-        test:assertEquals(response.getTextPayload(), " in-trx-block in-remote in-nested-trx-1 " +
-        "in-nested-trx-2 trx-2-fail in-nested-trx-2 trx-2-fail in-nested-trx-2 trx-2-fail " +
+        test:assertEquals(response.getTextPayload(), " in-trx-block in-remote in-nested-trx-1 " + 
+        "in-nested-trx-2 trx-2-fail in-nested-trx-2 trx-2-fail in-nested-trx-2 trx-2-fail " + 
         "remote1-excepted:[transactionError] trx-committed after-trx");
     }
 }
 
 @test:Config {}
 function testRemoteParticipantPanicInNestedTransaction() {
-    http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantPanicInNestedTransaction");
+    http:Client participantEP = checkpanic new ("http://localhost:8888/remoteParticipantPanicInNestedTransaction");
     http:Request req = new;
     http:Response|error response = participantEP->post("", req);
     if (response is http:Response) {
         test:assertEquals(response.statusCode, 200, msg = "Response code mismatched");
-        test:assertEquals(response.getTextPayload(), " in-trx-block in-remote in-nested-trx-1 " +
-        "in-nested-trx-2 nested-trx-2-committed trx-1-panic nested-trx-1-committed " +
+        test:assertEquals(response.getTextPayload(), " in-trx-block in-remote in-nested-trx-1 " + 
+        "in-nested-trx-2 nested-trx-2-committed trx-1-panic nested-trx-1-committed " + 
         "remote1-excepted:[transactionError] trx-committed after-trx");
     }
 }
 
 @test:Config {}
 function testRemoteParticipantReturnsError() {
-    http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantReturnsError");
+    http:Client participantEP = checkpanic new ("http://localhost:8888/remoteParticipantReturnsError");
     http:Request req = new;
     http:Response|error response = participantEP->post("", req);
     if (response is http:Response) {
         test:assertEquals(response.statusCode, 200, msg = "Response code mismatched");
-        test:assertEquals(response.getTextPayload(), " in initiator-trx in-remote " +
+        test:assertEquals(response.getTextPayload(), " in initiator-trx in-remote " + 
         "remote1-excepted:[TransactionError] trx-committed after-trx");
     }
 }
 
 @test:Config {}
 function testRemoteParticipantSeperateResourceManagerSuccess() {
-    http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantSeperateResourceManager");
+    http:Client participantEP = checkpanic new ("http://localhost:8888/remoteParticipantSeperateResourceManager");
     http:Request req = new;
     http:Response|error response = participantEP->post("", req);
     if (response is http:Response) {
         test:assertEquals(response.statusCode, 200, msg = "Response code mismatched");
-        test:assertEquals(response.getTextPayload(), "in-remote-init in-trx [remote-status:200]  " +
+        test:assertEquals(response.getTextPayload(), "in-remote-init in-trx [remote-status:200]  " + 
         "in-remote payload-from-remote from-init-local-participant trx-committed");
     }
 }
 
 @test:Config {}
 function testRemoteParticipantSeperateResourceManagerRemoteFail() {
-    http:Client participantEP = checkpanic new("http://localhost:8888/remoteParticipantSeperateResourceManager");
+    http:Client participantEP = checkpanic new ("http://localhost:8888/remoteParticipantSeperateResourceManager");
     http:Request req = new;
     req.setPayload("blowUp");
     http:Response|error response = participantEP->post("", req);
     if (response is http:Response) {
         test:assertEquals(response.statusCode, 200, msg = "Response code mismatched");
-        test:assertEquals(response.getTextPayload(), "in-remote-init in-trx [remote-status:500] " +
+        test:assertEquals(response.getTextPayload(), "in-remote-init in-trx [remote-status:500] " + 
         "TransactionError from-init-local-participant trx-committed");
     }
 }
 
 @test:Config {}
 function testparticipantMultipleExecution() {
-    http:Client participantEP = checkpanic new("http://localhost:8888/participantMultipleExecution");
+    http:Client participantEP = checkpanic new ("http://localhost:8888/participantMultipleExecution");
     http:Request req = new;
     http:Response|error response = participantEP->post("", req);
     if (response is http:Response) {
         test:assertEquals(response.statusCode, 200, msg = "Response code mismatched");
-        test:assertEquals(response.getTextPayload(), " in-remote <payload-from-remote> from-init-local-participant" +
-        " in-remote <payload-from-remote> from-init-local-participant in-remote <payload-from-remote> " +
-        "from-init-local-participant in-remote <payload-from-remote> from-init-local-participant in-trx-lastline" +
+        test:assertEquals(response.getTextPayload(), " in-remote <payload-from-remote> from-init-local-participant" + 
+        " in-remote <payload-from-remote> from-init-local-participant in-remote <payload-from-remote> " + 
+        "from-init-local-participant in-remote <payload-from-remote> from-init-local-participant in-trx-lastline" + 
         " trx-committed after-trx");
     }
 }
