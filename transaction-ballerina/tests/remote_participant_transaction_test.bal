@@ -165,21 +165,18 @@ function initiatorFunc(boolean throw1, boolean remote1, boolean blowRemote1) ret
             http:Response|error resp = participantEP->post("", blowOrNot);
 
             if (resp is http:Response) {
-                var payload = resp.getTextPayload();
-                if (payload is string) {
-                    S1 = S1 + " <" + <@untainted>payload + ">";
+                if (resp.statusCode == 500) {
+                    S1 = S1 + " remote1-blown";
                 } else {
-                    log:printError(payload.message());
-                }
-            } else {
-                if (resp is http:RemoteServerError) { //5XX responses
-                    int statusCode = resp.detail().statusCode;
-                    if (statusCode == 500) {
-                        S1 = S1 + " remote1-blown";
+                    var payload = resp.getTextPayload();
+                    if (payload is string) {
+                        S1 = S1 + " <" + <@untainted>payload + ">";
                     } else {
-                        log:printError(resp.message());
+                        log:printError(payload.message());
                     }
                 }
+            } else {
+                log:printError(resp.message());
             }
         }
 
@@ -209,27 +206,23 @@ function initiateNestedTransactionInRemote(string blow) returns @tainted string 
         S1 += " in-trx-block";
         http:Response|error resp = remoteEp->post("", blow);
         if (resp is http:Response) {
-            var text = resp.getTextPayload();
-            if (text is string) {
-                S1 += " <" + <@untainted>text + ">";
-            } else {
-                S1 += " error-in-remote-response " + <@untainted>text.message();
-                log:printError(text.message());
-            }
-        } else {
-            if (resp is http:RemoteServerError) { //5XX responses
-                int statusCode = resp.detail().statusCode;
-                if (statusCode == 500) {
-                    S1 += " remote1-excepted";
-                    var payload = resp.detail().body;
-                    if (payload is string) {
-                        S1 += ":[" + <@untainted>payload + "]";
-                    }
+            if (resp.statusCode == 500) {
+                S1 += " remote1-excepted";
+                var payload = resp.getTextPayload();
+                if (payload is string) {
+                    S1 += ":[" + <@untainted>payload + "]";
                 }
             } else {
-                S1 += " remote call error: " + <@untainted>resp.message();
+                var text = resp.getTextPayload();
+                if (text is string) {
+                    S1 += " <" + <@untainted>text + ">";
+                } else {
+                    S1 += " error-in-remote-response " + <@untainted>text.message();
+                    log:printError(text.message());
+                }
             }
-
+        } else {
+            S1 += " remote call error: " + <@untainted>resp.message();
         }
         var c = commit;
         if c is error {
@@ -250,27 +243,23 @@ function remoteErrorReturnInitiator() returns @tainted string {
         S1 += " in initiator-trx";
         http:Response|error resp = remoteEp->get("/returnError");
         if (resp is http:Response) {
-            var text = resp.getTextPayload();
-            if (text is string) {
-                S1 += " <" + <@untainted>text + ">";
-            } else {
-                S1 += " error-in-remote-response " + <@untainted>text.message();
-                log:printError(text.message());
-            }
-        } else {
-            if (resp is http:RemoteServerError) { //5XX responses
-                int statusCode = resp.detail().statusCode;
-                if (statusCode == 500) {
-                    S1 += " remote1-excepted";
-                    var payload = resp.detail().body;
-                    if (payload is string) {
-                        S1 += ":[" + <@untainted>payload + "]";
-                    }
+            if (resp.statusCode == 500) {
+                S1 += " remote1-excepted";
+                var payload = resp.getTextPayload();
+                if (payload is string) {
+                    S1 += ":[" + <@untainted>payload + "]";
                 }
             } else {
-                S1 += " remote call error: " + <@untainted>resp.message();
+                var text = resp.getTextPayload();
+                if (text is string) {
+                    S1 += " <" + <@untainted>text + ">";
+                } else {
+                    S1 += " error-in-remote-response " + <@untainted>text.message();
+                    log:printError(text.message());
+                }
             }
-
+        } else {
+            S1 += " remote call error: " + <@untainted>resp.message();
         }
         var c = commit;
         if c is error {
@@ -297,22 +286,19 @@ function callParticipantMultipleTimes() returns string {
             i += 1;
             http:Response|error resp = participantEP->post("", "");
             if (resp is http:Response) {
-                var payload = resp.getTextPayload();
-                if (payload is string) {
-                    S1 += " <" + <@untainted>payload + ">";
-                    S1 += localParticipant();
+                if (resp.statusCode == 500) {
+                    S1 = S1 + " remote error";
                 } else {
-                    log:printError(payload.message());
-                }
-            } else {
-                if (resp is http:RemoteServerError) { //5XX responses
-                    int statusCode = resp.detail().statusCode;
-                    if (statusCode == 500) {
-                        S1 = S1 + " remote error";
+                    var payload = resp.getTextPayload();
+                    if (payload is string) {
+                        S1 += " <" + <@untainted>payload + ">";
+                        S1 += localParticipant();
                     } else {
-                        log:printError(resp.message());
+                        log:printError(payload.message());
                     }
                 }
+            } else {
+                log:printError(resp.message());
             }
         }
         S1 += " in-trx-lastline";
@@ -330,38 +316,38 @@ function callParticipantMultipleTimes() returns string {
 }
 
 service / on new http:Listener(8888) {
-    resource function post remoteParticipantTransactionSuccessTest(http:Caller caller,
+    resource function post remoteParticipantTransactionSuccessTest(http:Caller caller, 
     http:Request req) {
         string|error result = initiatorFunc(false, true, false);
         http:Response res = new;
         res.setPayload(result is error ? result.toString() : result.toString());
         var r = caller->respond(res);
         if (r is error) {
-            log:printError("Error sending response: " + (result is error ? result.toString() : result.toString()),
+            log:printError("Error sending response: " + (result is error ? result.toString() : result.toString()), 
             'error = r);
         }
     }
 
-    resource function post remoteParticipantTransactionFailSuccessTest(http:Caller caller,
+    resource function post remoteParticipantTransactionFailSuccessTest(http:Caller caller, 
     http:Request req) {
         string|error result = initiatorFunc(true, true, false);
         http:Response res = new;
         res.setPayload(result is error ? result.toString() : result.toString());
         var r = caller->respond(res);
         if (r is error) {
-            log:printError("Error sending response: " + (result is error ? result.toString() : result.toString()),
+            log:printError("Error sending response: " + (result is error ? result.toString() : result.toString()), 
             'error = r);
         }
     }
 
-    resource function post remoteParticipantTransactionPanicInRemote(http:Caller caller,
+    resource function post remoteParticipantTransactionPanicInRemote(http:Caller caller, 
     http:Request req) {
         string|error result = initiatorFunc(false, true, true);
         http:Response res = new;
         res.setPayload(result is error ? result.toString() : result.toString());
         var r = caller->respond(res);
         if (r is error) {
-            log:printError("Error sending response: " + (result is error ? result.toString() : result.toString()),
+            log:printError("Error sending response: " + (result is error ? result.toString() : result.toString()), 
             'error = r);
         }
     }
@@ -412,6 +398,10 @@ service / on new http:Listener(8888) {
         string s = "in-remote-init";
         transaction {
             s += " in-trx";
+            var reqText = req.getTextPayload();
+            if reqText is error {
+
+            }
             http:Response|error result = separateRMParticipant01->post("/hello/remoteResource", <@untainted>req);
             if (result is http:Response) {
                 s += " [remote-status:" + result.statusCode.toString() + "] ";
@@ -422,14 +412,7 @@ service / on new http:Listener(8888) {
                     s += " error-getTextPayload";
                 }
             } else {
-                if (result is http:RemoteServerError) {
-                    int statusCode = result.detail().statusCode;
-                    string errorDetail = <string> result.detail().body;
-                    s += " [remote-status:" + statusCode.toString() + "] " + errorDetail;
-                } else {
-                    s += " error-from-remote: " + result.message() + "desc: " + result.message();
-                }
-
+                s += " error-from-remote: " + result.message() + "desc: " + result.message();
             }
             s += localParticipant();
             var c = commit;
@@ -463,7 +446,7 @@ function testRemoteParticipantTransactionSuccess() {
     http:Response|error response = participantEP->post("", req);
     if (response is http:Response) {
         test:assertEquals(response.statusCode, 200, msg = "Response code mismatched");
-        test:assertEquals(response.getTextPayload(),
+        test:assertEquals(response.getTextPayload(), 
         " in-trx-block in-remote <payload-from-remote> in-trx-lastline trx-committed after-trx");
     }
 }
@@ -475,7 +458,7 @@ function testRemoteParticipantTransactionFailSuccess() {
     http:Response|error response = participantEP->post("", req);
     if (response is http:Response) {
         test:assertEquals(response.statusCode, 200, msg = "Response code mismatched");
-        test:assertEquals(response.getTextPayload(),
+        test:assertEquals(response.getTextPayload(), 
         " in-trx-block in-remote <payload-from-remote> throw-1 in-trx-block in-trx-lastline trx-committed after-trx");
     }
 }
@@ -487,7 +470,7 @@ function testRemoteParticipantTransactionExceptionInRemote() {
     http:Response|error response = participantEP->post("", req);
     if (response is http:Response) {
         test:assertEquals(response.statusCode, 200, msg = "Response code mismatched");
-        test:assertEquals(response.getTextPayload(),
+        test:assertEquals(response.getTextPayload(), 
         " in-trx-block in-remote remote1-blown in-trx-lastline trx-committed after-trx");
     }
 }
@@ -499,8 +482,8 @@ function testRemoteParticipantStartNestedTransaction() {
     http:Response|error response = participantEP->post("", req);
     if (response is http:Response) {
         test:assertEquals(response.statusCode, 200, msg = "Response code mismatched");
-        test:assertEquals(response.getTextPayload(),
-        " in-trx-block in-remote in-nested-trx-1 in-nested-trx-2 nested-trx-2-committed nested-trx-1-committed " +
+        test:assertEquals(response.getTextPayload(), 
+        " in-trx-block in-remote in-nested-trx-1 in-nested-trx-2 nested-trx-2-committed nested-trx-1-committed " + 
         "<payload-from-remote> trx-committed after-trx");
     }
 }
@@ -512,8 +495,8 @@ function testRemoteParticipantFailInNestedTransaction() {
     http:Response|error response = participantEP->post("", req);
     if (response is http:Response) {
         test:assertEquals(response.statusCode, 200, msg = "Response code mismatched");
-        test:assertEquals(response.getTextPayload(), " in-trx-block in-remote in-nested-trx-1 " +
-        "in-nested-trx-2 trx-2-fail in-nested-trx-2 trx-2-fail in-nested-trx-2 trx-2-fail " +
+        test:assertEquals(response.getTextPayload(), " in-trx-block in-remote in-nested-trx-1 " + 
+        "in-nested-trx-2 trx-2-fail in-nested-trx-2 trx-2-fail in-nested-trx-2 trx-2-fail " + 
         "remote1-excepted:[transactionError] trx-committed after-trx");
     }
 }
@@ -525,8 +508,8 @@ function testRemoteParticipantPanicInNestedTransaction() {
     http:Response|error response = participantEP->post("", req);
     if (response is http:Response) {
         test:assertEquals(response.statusCode, 200, msg = "Response code mismatched");
-        test:assertEquals(response.getTextPayload(), " in-trx-block in-remote in-nested-trx-1 " +
-        "in-nested-trx-2 nested-trx-2-committed trx-1-panic nested-trx-1-committed " +
+        test:assertEquals(response.getTextPayload(), " in-trx-block in-remote in-nested-trx-1 " + 
+        "in-nested-trx-2 nested-trx-2-committed trx-1-panic nested-trx-1-committed " + 
         "remote1-excepted:[transactionError] trx-committed after-trx");
     }
 }
@@ -538,7 +521,7 @@ function testRemoteParticipantReturnsError() {
     http:Response|error response = participantEP->post("", req);
     if (response is http:Response) {
         test:assertEquals(response.statusCode, 200, msg = "Response code mismatched");
-        test:assertEquals(response.getTextPayload(), " in initiator-trx in-remote " +
+        test:assertEquals(response.getTextPayload(), " in initiator-trx in-remote " + 
         "remote1-excepted:[TransactionError] trx-committed after-trx");
     }
 }
@@ -550,7 +533,7 @@ function testRemoteParticipantSeperateResourceManagerSuccess() {
     http:Response|error response = participantEP->post("", req);
     if (response is http:Response) {
         test:assertEquals(response.statusCode, 200, msg = "Response code mismatched");
-        test:assertEquals(response.getTextPayload(), "in-remote-init in-trx [remote-status:200]  " +
+        test:assertEquals(response.getTextPayload(), "in-remote-init in-trx [remote-status:200]  " + 
         "in-remote payload-from-remote from-init-local-participant trx-committed");
     }
 }
@@ -563,7 +546,7 @@ function testRemoteParticipantSeperateResourceManagerRemoteFail() {
     http:Response|error response = participantEP->post("", req);
     if (response is http:Response) {
         test:assertEquals(response.statusCode, 200, msg = "Response code mismatched");
-        test:assertEquals(response.getTextPayload(), "in-remote-init in-trx [remote-status:500] " +
+        test:assertEquals(response.getTextPayload(), "in-remote-init in-trx [remote-status:500] " + 
         "TransactionError from-init-local-participant trx-committed");
     }
 }
@@ -575,9 +558,9 @@ function testparticipantMultipleExecution() {
     http:Response|error response = participantEP->post("", req);
     if (response is http:Response) {
         test:assertEquals(response.statusCode, 200, msg = "Response code mismatched");
-        test:assertEquals(response.getTextPayload(), " in-remote <payload-from-remote> from-init-local-participant" +
-        " in-remote <payload-from-remote> from-init-local-participant in-remote <payload-from-remote> " +
-        "from-init-local-participant in-remote <payload-from-remote> from-init-local-participant in-trx-lastline" +
+        test:assertEquals(response.getTextPayload(), " in-remote <payload-from-remote> from-init-local-participant" + 
+        " in-remote <payload-from-remote> from-init-local-participant in-remote <payload-from-remote> " + 
+        "from-init-local-participant in-remote <payload-from-remote> from-init-local-participant in-trx-lastline" + 
         " trx-committed after-trx");
     }
 }
