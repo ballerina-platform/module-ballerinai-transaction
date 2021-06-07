@@ -33,6 +33,6 @@ jobs:
           publishUser: ${{ secrets.BALLERINA_BOT_USERNAME }}
           publishPAT: ${{ secrets.BALLERINA_BOT_TOKEN }}
         run: |
-          ./gradlew publish
+          ./gradlew publish -PpublishToCentral=false
       - name: Generate Codecov Report
         uses: codecov/codecov-action@v1
