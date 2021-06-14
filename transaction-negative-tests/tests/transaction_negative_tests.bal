@@ -32,7 +32,7 @@ const string TRANSACTIONAL_FUNC_FILE = "tests/resources/transactional_functions_
 public function testTransactionStatement() {
     Process|error execResult = exec(bal_exec_path, {}, (), "run",TRX_STATEMENT_FILE);
     string[] logLines = getLogLinesFromExecResult(execResult);
-    test:assertEquals(logLines.length(), 34);
+    test:assertEquals(logLines.length(), 35);
     validateLog(logLines[2], "ERROR", "transaction_stmt_negative.bal:(21:5,29:6)", "invalid transaction commit count");
     validateLog(logLines[3], "ERROR", "transaction_stmt_negative.bal:(27:9,27:18)", "rollback not allowed here");
     validateLog(logLines[4], "ERROR", "transaction_stmt_negative.bal:(36:5,44:6)", "transaction statement cannot " +
@@ -85,6 +85,7 @@ public function testTransactionStatement() {
     validateLog(logLines[31], "ERROR", "transaction_stmt_negative.bal:(335:17,335:26)", "rollback not allowed here");
     validateLog(logLines[32], "ERROR", "transaction_stmt_negative.bal:(347:17,347:26)",
     "return statement cannot be used to exit from a transaction without a commit or a rollback statement");
+    validateLog(logLines[33], "ERROR", "transaction_stmt_negative.bal:(361:13,361:22)", "unreachable code");
 }
 
 @test:Config {}

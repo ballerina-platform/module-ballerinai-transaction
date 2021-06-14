@@ -351,3 +351,14 @@ function testReturnBeforeCommitInIf() returns int {
     }
     return 1;
 }
+
+function checkRollbackRechability() returns error? {
+    transaction {
+        if(5 == 5) {
+            error? res = commit;
+        } else {
+            fail error("");
+            rollback;    // not reachable
+        }
+    }
+}
