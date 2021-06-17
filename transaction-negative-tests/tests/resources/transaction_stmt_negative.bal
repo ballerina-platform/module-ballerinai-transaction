@@ -119,40 +119,40 @@ function testTransactionRollback() {
     }
 }
 
-function testBreakWithinTransaction() returns (string) {
-    int i = 0;
-    while (i < 5) {
-        i = i + 1;
-        transaction {
-            if (i == 2) {
-                var o = checkpanic commit;
-                break;
-            }
-        }
-        transaction {
-            if (i == 4) {
-                break;
-            }
-        }
-    }
-    var o = checkpanic commit;
-    return "done";
-}
+//function testBreakWithinTransaction() returns (string) {
+//    int i = 0;
+//    while (i < 5) {
+//        i = i + 1;
+//        transaction {
+//            if (i == 2) {
+//                var o = checkpanic commit;
+//                break;
+//            }
+//        }
+//        transaction {
+//            if (i == 4) {
+//                break;
+//            }
+//        }
+//    }
+//    var o = checkpanic commit;
+//    return "done";
+//}
 
-function testNextWithinTransaction() returns (string) {
-    int i = 0;
-    while (i < 5) {
-        i = i + 1;
-        transaction {
-            if (i == 2) {
-                continue;
-            } else {
-                var o = checkpanic commit;
-            }
-        }
-    }
-    return "done";
-}
+//function testNextWithinTransaction() returns (string) {
+//    int i = 0;
+//    while (i < 5) {
+//        i = i + 1;
+//        transaction {
+//            if (i == 2) {
+//                continue;
+//            } else {
+//                var o = checkpanic commit;
+//            }
+//        }
+//    }
+//    return "done";
+//}
 
 function testReturnWithinTransaction() returns (string) {
     int i = 0;
