@@ -697,3 +697,24 @@ function testForeachInTrx() {
     }
     test:assertEquals(str, "start -> 1 -> 2 -> 3");
 }
+
+@test:Config {
+}
+function testBreakWithinTransactionToOuterLoop() {
+    string str = "";
+    foreach int digit in 1 ... 5 {
+        transaction {
+            error? e = commit;
+            if (digit < 4) {
+                str += "Loop continued with digit: " + digit.toString() + " ->";
+                continue;
+            } else {
+                str += "Loop broke with digit: " + digit.toString();
+                break;
+            }
+        }
+        str += "-> should not reach here!";
+    }
+    test:assertEquals(str, "Loop continued with digit: 1 ->Loop continued with digit: 2 " +
+    "->Loop continued with digit: 3 ->Loop broke with digit: 4");
+}
