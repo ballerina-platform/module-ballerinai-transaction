@@ -31,7 +31,7 @@ dependencies {
     jbalTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
         transitive = false
     }
-    externalJars (group: 'org.ballerinalang', name: 'io-native', version: "${stdlibIoVersion}") {
+    externalJars (group: 'io.ballerina.stdlib', name: 'io-native', version: "${stdlibIoVersion}") {
         transitive = false
     }
     compile project(':transaction-native')
