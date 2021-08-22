@@ -33,8 +33,9 @@ import java.util.Date;
 public class ToString {
 
     public static BString toString(BObject m) {
-        Long timeValue = (Long) m.getNativeData("timeValue");
-        Date date = new Date(timeValue);
+        //TODO: Sometimes the timeValue is Integer sometimes it is a Long. it should be a Long always. Need to fix
+        Number timeValue = (Number) m.getNativeData("timeValue");
+        Date date = new Date(timeValue.longValue());
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS");
         String dateAsString = simpleDateFormat.format(date);
         return StringUtils.fromString(dateAsString);
