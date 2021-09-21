@@ -1,4 +1,4 @@
 ignore:
   - "transaction-test-utils/"
   - "transaction-negative-tests/"
-
+  - "transaction-test-utils"
