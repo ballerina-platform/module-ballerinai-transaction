@@ -1,14 +1,14 @@
 [[dependency]]
 org = "ballerina"
 name = "io"
-version = "1.0.0"
+version = "@stdlib.io.version@"
 
 [[dependency]]
 org = "ballerina"
 name = "regex"
-version = "1.0.0"
+version = "@stdlib.regex.version@"
 
 [[dependency]]
 org = "ballerina"
 name = "os"
-version = "1.0.0"
+version = "@stdlib.os.version@"
