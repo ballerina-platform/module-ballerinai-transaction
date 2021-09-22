@@ -6,4 +6,5 @@ ignore:
   - "transaction-test-utils/"
   - "transaction-ballerina/service_*.bal"
   - "transaction-ballerina/connector_*.bal"
+  - "transaction-ballerina/2pc_remote*.bal"
 

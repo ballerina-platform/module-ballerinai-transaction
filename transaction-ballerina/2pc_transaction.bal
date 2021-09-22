@@ -277,26 +277,6 @@ class TwoPhaseCommitTransaction {
         return ret;
     }
 
-    # The participant should notify the initiator that it aborted. This function is called by the participant.
-    # The initiator is remote.
-    #
-    # + return - An empty string or an error is returned when transaction abortion is successful or unsccuessful
-    #            respectively
-    function abortLocalParticipantTransaction() returns string|error {
-        string|error ret = "";
-        boolean successful = abortResourceManagers(self.transactionId, self.transactionBlockId);
-        final string participatedTxnId = getParticipatedTransactionId(self.transactionId, self.transactionBlockId);
-        if (successful) {
-            self.state = TXN_STATE_ABORTED;
-            log:printDebug("Local participant aborted transaction: " + participatedTxnId);
-        } else {
-            string msg = "Aborting local resource managers failed for transaction:" + participatedTxnId;
-            log:printError(msg);
-            ret = error lang_trx:Error(msg);
-        }
-        return ret;
-    }
-
     function removeParticipant(string participantId, string failedMessage) {
         var removed = trap self.participants.remove(participantId);
         if (removed is error) {
