@@ -3,4 +3,6 @@ ignore:
   - "transaction-negative-tests/"
   - "transaction-native/src/main/java/org/ballerinalang/stdlib/transaction/Utils.java"
   - "transaction-test-utils/"
+  - "transaction-ballerina/service_*.bal"
+  - "transaction-ballerina/connector_*.bal"
 

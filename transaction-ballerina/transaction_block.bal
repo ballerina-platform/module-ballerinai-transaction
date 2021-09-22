@@ -18,146 +18,10 @@ import ballerina/jballerina.java;
 import ballerina/lang.'transaction as lang_trx;
 import ballerina/log;
 
-# Handles the transaction initiator block.
-# Transaction initiator block will be desugared to following method.
-#
-# + transactionBlockId - ID of the transaction block. Each transaction block in a process has a unique ID.
-# + rMax - Max retry count.
-# + trxFunc - Transaction main block function.
-# + retryFunc - On retry block function.
-# + committedFunc - Committed function.
-# + abortedFunc - Abort function.
-# # Deprecated
-@deprecated
-transactional function beginTransactionInitiator(string transactionBlockId, int rMax, function () returns int trxFunc,
-                                   function () retryFunc, function () committedFunc, function () abortedFunc) {
-    boolean isTrxSuccess = false;
-    int rCnt = 1;
-    if (rMax < 0) {
-        panic error lang_trx:Error("invalid retry count");
-    }
-    // If global tx enabled, it is managed via transaction coordinator.Otherwise it is managed locally
-    // without any interaction with the transaction coordinator.
-    //if (isNestedTransaction()) {
-    //    // Starting a transaction within already infected transaction.
-    //    panic TransactionError("dynamically nested transactions are not allowed");
-    //}
-    TransactionContext|error txnContext;
-    string transactionId = "";
-    int|error trxResult = -1;
-    error? abortResult = ();
-    error? committedResult = ();
-    error? retryResult = ();
-    error? rollbackResult = ();
-
-    while (true) {
-        txnContext =  beginTransaction((), transactionBlockId, "", TWO_PHASE_COMMIT);
-        if (txnContext is error) {
-            panic txnContext;
-        } else {
-            transactionId = txnContext.transactionId;
-            setTransactionContext(txnContext);
-        }
-        trxResult = trap trxFunc();
-        if (trxResult is int) {
-            // If transaction result == 0, means it is successful.
-            if (trxResult == 0) {
-                // We need to check any failures in transaction context. This will handle cases where transaction
-                // code will not panic still we need to fail the transaction. ex sql transactions
-                boolean isFailed = getAndClearFailure();
-                if (!isFailed) {
-                    var endSuccess = trap endTransaction(transactionId, transactionBlockId);
-                    if (endSuccess is string) {
-                        if (endSuccess == OUTCOME_COMMITTED) {
-                            isTrxSuccess = true;
-                            break;
-                        }
-                    }
-                }
-            }
-            // If transaction result == -1, means it was aborted.
-            if (trxResult == -1) { // abort
-                abortResult = trap abortTransaction(transactionId, transactionBlockId);
-                break;
-            }
-        } else {
-            log:printDebug(trxResult.message());
-        }
-        rCnt = rCnt + 1;
-        // retry
-        if (rCnt <= rMax) {
-            rollbackResult = trap rollbackTransaction(transactionBlockId);
-            if (rollbackResult is error) {
-                log:printDebug(rollbackResult.message());
-            }
-            retryResult = trap retryFunc();
-            if (retryResult is error) {
-                log:printDebug(retryResult.message());
-            }
-        } else {
-            break;
-        }
-    }
-    if (isTrxSuccess) {
-        committedResult = trap committedFunc();
-        if (committedResult is error) {
-            log:printDebug(committedResult.message());
-        }
-    } else {
-        abortResult = trap handleAbortTransaction(transactionId, transactionBlockId, abortedFunc);
-        if (abortResult is error) {
-            log:printDebug(abortResult.message());
-        }
-    }
-    cleanupTransactionContext(transactionBlockId);
-    // Rethrowing the  panic error captured in transaction block.
-    if (trxResult is error) {
-        panic trxResult;
-    }
-}
-
-# Handles the trahsaction local participant function.
-# Transaction local participant function will be desugared to following method.
-#
-# + transactionBlockId - ID of the transaction block.
-# + trxFunc - Participant logic.
-# + committedFunc - Committed function.
-# + abortedFunc - Abort function.
-# + return - Return value of the participant.
-# # Deprecated
-@deprecated
-function beginLocalParticipant(string transactionBlockId, function () returns any|error trxFunc,
-                               function (string trxId) committedFunc, function (string trxId) abortedFunc) returns
-                               any|error|() {
-    TransactionContext? txnContext = registerLocalParticipant(transactionBlockId, committedFunc, abortedFunc);
-    if (txnContext is ()) {
-        return <any|error|()>trxFunc();
-    } else {
-        TransactionContext|error returnContext = beginTransaction(txnContext.transactionId, transactionBlockId,
-            txnContext.registerAtURL, txnContext.coordinationType);
-        if (returnContext is error) {
-            notifyLocalParticipantOnFailure();
-            panic returnContext;
-        } else {
-            final string trxId = returnContext.transactionId;
-            log:printDebug("participant registered: " + trxId);
-        }
-        var result = trap transactionParticipantWrapper(trxFunc);
-        if (result is error) {
-            notifyLocalParticipantOnFailure();
-            panic result;
-        } else {
-            return result.data;
-        }
-    }
-}
-
 # Handles the transaction remote participant function.
 # Transaction remote participant function will be desugared to following method.
 #
 # + transactionBlockId - ID of the transaction block.
-# # Deprecated
-@deprecated
 function beginRemoteParticipant(string transactionBlockId) {
     TransactionContext? txnContext = registerRemoteParticipant(transactionBlockId);
     if (txnContext is ()) {
@@ -173,25 +37,6 @@ function beginRemoteParticipant(string transactionBlockId) {
             setTransactionContext(returnContext);
             log:printDebug("participant registered: " + trxId);
         }
-        //var result = trap transactionParticipantWrapper(trxFunc);
-        //if (result is error) {
-        //    notifyRemoteParticipantOnFailure();
-        //    panic result;
-        //} else {
-        //    return result.data;
-        //}
-    }
-}
-
-function handleAbortTransaction(string transactionId, string transactionBlockId, function () abortedFunc) {
-    var result = trap abortTransaction(transactionId, transactionBlockId);
-    notifyResourceManagerOnAbort(transactionBlockId);
-    var abortResult = trap abortedFunc();
-    if (result is error) {
-        panic result;
-    }
-    if (abortResult is error) {
-        panic abortResult;
     }
 }
 
@@ -287,71 +132,6 @@ transactional function endTransaction(string transactionId, string transactionBl
     }
 }
 
-# Checks whether this instance is an initiator. Returns true if initiator.
-#
-# + transactionId - Globally unique transaction ID.
-# + transactionBlockId - ID of the transaction block. Each transaction block in a process has a unique ID.
-# + return - true or false representing whether this instance is an intiator or not.
-# # Deprecated
-@deprecated
-function isInitiator(string transactionId, string transactionBlockId) returns boolean {
-    if (initiatedTransactions.hasKey(transactionId)) {
-        string participatedTxnId = getParticipatedTransactionId(transactionId, transactionBlockId);
-        if (!participatedTransactions.hasKey(participatedTxnId)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-# Wrapper function used to seperate panic and return error after calling participant function.
-#getAvailablePort
-# + trxFunc - Participant logic.
-# + return - Return value of the participant.
-# # Deprecated
-@deprecated
-function transactionParticipantWrapper(function () returns any|error trxFunc) returns ParticipantFunctionResult {
-    any|error|() resultData = trxFunc();
-    ParticipantFunctionResult result =  {data : resultData};
-    return result;
-}
-
-# Get the current transaction id. This function is useful for user code to save state against a transaction ID,
-# so that when the `oncommit` or `onabort` functions registered for a transaction can retrieve that state using the
-# transaction  that is passed in to those functions.
-#
-# + return - A string representing the ID of the current transaction.
-# # Deprecated
-@deprecated
-public function getCurrentTransactionId() returns string = @java:Method {
-    'class: "org.ballerinalang.stdlib.transaction.Utils",
-    name: "getCurrentTransactionId"
-} external;
-
-# Checks whether the transaction is nested.
-#
-# + return - true or false representing whether the transaction is nested.
-# # Deprecated
-@deprecated
-function isNestedTransaction() returns boolean = @java:Method {
-    'class: "org.ballerinalang.stdlib.transaction.Utils",
-    name: "isNestedTransaction"
-} external;
-
-# Register local participant. Functions with participant annotations will be desugered to below functions.
-#
-# + transactionBlockId - ID of the transaction block. Each transaction block in a process has a unique ID.
-# + committedFunc - Function pointer for commit function for participant.
-# + abortedFunc -  Function pointer for abort function for participant.
-# + return - Transaction context.
-# # Deprecated
-@deprecated
-function registerLocalParticipant(string transactionBlockId, function (string trxId) committedFunc,
-                                  function (string trxId) abortedFunc) returns TransactionContext? = @java:Method {
-    'class: "org.ballerinalang.stdlib.transaction.Utils",
-    name: "registerLocalParticipant"
-} external;
-
 # Register remote participant. Functions with participant annotations will be desugered to below functions.
 #
 # + transactionBlockId - ID of the transaction block. Each transaction block in a process has a unique ID.
@@ -363,30 +143,12 @@ function registerRemoteParticipant(string transactionBlockId) returns  Transacti
     name: "registerRemoteParticipant"
 } external;
 
-# Notify the transaction resource manager on local participant failture.
-# # Deprecated
-@deprecated
-function notifyLocalParticipantOnFailure() = @java:Method {
-    'class: "org.ballerinalang.stdlib.transaction.Utils",
-    name: "notifyLocalParticipantOnFailure"
-} external;
-
 # Notify the transaction resource manager on remote participant failture.
 # # Deprecated
 @deprecated
 function notifyRemoteParticipantOnFailure() = @java:Method {
     'class: "org.ballerinalang.stdlib.transaction.Utils",
     name: "notifyRemoteParticipantOnFailure"
-} external;
-
-# Notify the transaction resource manager on abort.
-#
-# + transactionBlockId - ID of the transaction block.
-# # Deprecated
-@deprecated
-function notifyResourceManagerOnAbort(string transactionBlockId) = @java:Method {
-    'class: "org.ballerinalang.stdlib.transaction.Utils",
-    name: "notifyResourceManagerOnAbort"
 } external;
 
 # Creates a transaction context from global participant
