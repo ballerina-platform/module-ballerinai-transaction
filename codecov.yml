@@ -1,4 +1,6 @@
 ignore:
   - "transaction-test-utils/"
   - "transaction-negative-tests/"
+  - "transaction-native/src/main/java/org/ballerinalang/stdlib/transaction/Utils.java"
+  - "transaction-test-utils/"
 
