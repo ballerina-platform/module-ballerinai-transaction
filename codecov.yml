@@ -8,3 +8,12 @@ ignore:
   - "transaction-ballerina/connector_*.bal"
   - "transaction-ballerina/2pc_remote*.bal"
 
+coverage:
+  precision: 2
+  round: down
+  range: "60...80"
+  status:
+    project:
+      default:
+        target: 80
+
