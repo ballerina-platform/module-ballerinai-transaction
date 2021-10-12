@@ -197,11 +197,6 @@ function uuid() returns string = @java:Method {
     name: "uuid"
 } external;
 
-function timeNow() returns int = @java:Method {
-    'class: "org.ballerinalang.stdlib.transaction.CurrentTime",
-    name: "timeNow"
-} external;
-
 function getRollbackOnlyError() returns lang_trx:Error? = @java:Method {
     'class: "org.ballerinalang.stdlib.transaction.GetRollbackOnlyError",
     name: "getRollbackOnlyError"

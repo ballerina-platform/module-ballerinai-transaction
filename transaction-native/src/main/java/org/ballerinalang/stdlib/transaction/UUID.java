@@ -27,7 +27,6 @@ import io.ballerina.runtime.api.values.BString;
  * @since Swan Lake
  */
 public class UUID {
-
     public static BString uuid() {
         return StringUtils.fromString(java.util.UUID.randomUUID().toString());
     }
