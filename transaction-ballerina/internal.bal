@@ -145,7 +145,6 @@ function rollbackTransaction(string transactionBlockId, error? err = (), boolean
 # Notify transaction abort.
 #
 # + transactionBlockId - ID of the transaction block.
-# + err - The cause of the abort.
 function notifyAbort(string transactionBlockId) = @java:Method {
     'class: "org.ballerinalang.stdlib.transaction.NotifyAbortTransaction",
     name: "notifyAbort"
