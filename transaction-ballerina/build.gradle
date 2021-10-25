@@ -35,11 +35,9 @@ description = 'Ballerina - Transaction Ballerina Generator'
 
 def packageName = "transaction"
 def packageOrg = "ballerinai"
-def tomlVersion = "1.0.16"
-def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
-def ballerinaDependencyFile = new File("$project.projectDir/Dependencies.toml")
-def originalConfig = ballerinaConfigFile.text
-def originalDependencies = ballerinaDependencyFile.text
+def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
+def ballerinaTomlFilePlaceHolder = new File("${project.rootDir}/build-config/resources/Ballerina.toml")
+def ballerinaTomlFile = new File("$project.projectDir/Ballerina.toml")
 
 def stripBallerinaExtensionVersion(String extVersion) {
     if (extVersion.matches(project.ext.timestampedVersionRegex)) {
@@ -61,32 +59,13 @@ ballerina {
     packageOrganization = packageOrg
     module = packageName
     langVersion = ballerinaLangVersion
-    testCoverageParam = "--code-coverage --coverage-format=xml --includes=ballerinai.transaction.*:org.ballerinalang.stdlib.transaction.*"
-    customTomlVersion = "0.0.0"
 }
 
 task updateTomlFiles {
     doLast {
-        def stdlibDependentIoVersion = stripBallerinaExtensionVersion(project.stdlibIoVersion)
-        def stdlibDependentUuidVersion = stripBallerinaExtensionVersion(project.stdlibUuidVersion)
-        def stdlibDependentCacheVersion = stripBallerinaExtensionVersion(project.stdlibCacheVersion)
-        def stdlibDependentTaskVersion = stripBallerinaExtensionVersion(project.stdlibTaskVersion)
-        def stdlibDependentTimeVersion = stripBallerinaExtensionVersion(project.stdlibTimeVersion)
-        def stdlibDependentHttpVersion = stripBallerinaExtensionVersion(project.stdlibHttpVersion)
-        def stdlibDependentLogVersion = stripBallerinaExtensionVersion(project.stdlibLogVersion)
-
-        def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
-        newConfig = newConfig.replace("@toml.version@", tomlVersion)
-        ballerinaConfigFile.text = newConfig
-
-        def newDependencyConfig = ballerinaDependencyFile.text.replace("@stdlib.io.version@", stdlibDependentIoVersion)
-        newDependencyConfig = newDependencyConfig.replace("@stdlib.cache.version@", stdlibDependentCacheVersion)
-        newDependencyConfig = newDependencyConfig.replace("@stdlib.task.version@", stdlibDependentTaskVersion)
-        newDependencyConfig = newDependencyConfig.replace("@stdlib.time.version@", stdlibDependentTimeVersion)
-        newDependencyConfig = newDependencyConfig.replace("@stdlib.http.version@", stdlibDependentHttpVersion)
-        newDependencyConfig = newDependencyConfig.replace("@stdlib.log.version@", stdlibDependentLogVersion)
-        newDependencyConfig = newDependencyConfig.replace("@stdlib.uuid.version@", stdlibDependentUuidVersion)
-        ballerinaDependencyFile.text = newDependencyConfig
+        def newBallerinaToml = ballerinaTomlFilePlaceHolder.text.replace("@project.version@", project.version)
+        newBallerinaToml = newBallerinaToml.replace("@toml.version@", tomlVersion)
+        ballerinaTomlFile.text = newBallerinaToml
     }
 }
 
@@ -124,9 +103,10 @@ publishing {
 
 updateTomlFiles.dependsOn copyStdlibs
 
-build.dependsOn ":transaction-native:build"
-test.dependsOn ":transaction-native:build"
+build.dependsOn ":${packageName}-native:build"
+build.dependsOn ":${packageName}-test-utils:build"
+test.dependsOn ":${packageName}-native:build"
+test.dependsOn ":${packageName}-test-utils:build"
 
 publishToMavenLocal.dependsOn build
 publish.dependsOn build
-
