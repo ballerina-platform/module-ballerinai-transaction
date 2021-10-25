@@ -78,11 +78,8 @@ function actualRetryTrxCode(int failureCutOff, boolean requestRollback, boolean 
     return a;
 }
 
-function trxErrorInRetry()  returns int|error {
-    if (5 == 5) {
-        return error errors:Retriable("TransactionError");
-    }
-    return 5;
+function trxErrorInRetry() returns int|error {
+    return error errors:Retriable("TransactionError");
 }
 
 function blowUpInRetry() {

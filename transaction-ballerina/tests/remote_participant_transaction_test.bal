@@ -136,6 +136,7 @@ function nestedTrxInRemoteFunction(int j) returns error? {
             S1 += " nested-trx-1-committed";
         }
     }
+    return;
 }
 
 function blowUp2(int i) returns int|error {

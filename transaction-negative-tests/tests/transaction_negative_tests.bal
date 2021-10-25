@@ -85,7 +85,7 @@ public function testTransactionStatement() {
     validateLog(logLines[31], "ERROR", "transaction_stmt_negative.bal:(335:17,335:26)", "rollback not allowed here");
     validateLog(logLines[32], "ERROR", "transaction_stmt_negative.bal:(347:17,347:26)",
     "return statement cannot be used to exit from a transaction without a commit or a rollback statement");
-    validateLog(logLines[33], "ERROR", "transaction_stmt_negative.bal:(361:13,361:22)", "unreachable code");
+    validateLog(logLines[33], "ERROR", "transaction_stmt_negative.bal:(362:13,362:22)", "unreachable code");
 }
 
 @test:Config {}

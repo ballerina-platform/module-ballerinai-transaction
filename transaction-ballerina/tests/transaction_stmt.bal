@@ -77,11 +77,8 @@ function actualCode(int failureCutOff, boolean requestRollback) returns (string)
 }
 
 function blowUp()  returns int {
-    if (5 == 5) {
-        error err = error("TransactionError");
-        panic err;
-    }
-    return 5;
+    error err = error("TransactionError");
+    panic err;
 }
 
 function testLocalTransaction1(int i) returns int|error {
@@ -117,6 +114,7 @@ function testMultipleTrxBlocks() returns error? {
     int j = check testLocalTransaction2(i);
 
     test:assertEquals(4, j);
+    return;
 }
 
 string ss = "";
@@ -135,6 +133,7 @@ function testNewStrandWithTransactionalFunc() returns error? {
     }
 
     test:assertEquals("trx started -> transactional call -> trx end", str);
+    return;
 }
 
 transactional function testTransactionalInvo(string str) returns string {
@@ -263,6 +262,8 @@ function testTransactionLangLib() returns error? {
         check commit;
         str += " commit";
     }
+
+    return;
 }
 
 type AssertionError error;
@@ -378,6 +379,8 @@ function rollbackWithBlockFailure() returns error? {
         var o = checkpanic commit;
         str += " -> trx end";
     }
+
+    return;
 }
 
 function getError(boolean err) returns error? {
@@ -385,6 +388,7 @@ function getError(boolean err) returns error? {
        error er = error("Custom Error");
        return er;
     }
+    return;
 }
 
 @test:Config {
@@ -416,6 +420,7 @@ function rollbackWithCommitFailure() returns error? {
     }
     str += "-> transaction block exited.";
     test:assertEquals(str, "trx started-> transaction block exited.");
+    return;
 }
 
 transactional function setRollbackOnlyError() {
@@ -571,6 +576,8 @@ function jumpMultiLevelsAndReturn() returns error? {
       output += "-> Should not reach here!";
       var resCommit1 = checkpanic commit;
    }
+
+   return;
 }
 
 string failureOutcomeStr = "start";
@@ -590,7 +597,8 @@ function failureOutcomeAndRollback() returns error? {
 
     transaction {
         transactions:onRollback(onRollbackFunc);
-        if(5 == 5) {
+        int? a = 5;
+        if a is int {
           failureOutcomeStr += " -> failure outcome";
           fail error("Custom error");
         }
@@ -599,6 +607,8 @@ function failureOutcomeAndRollback() returns error? {
 
         }
     }
+
+    return;
 }
 
 string ignErrorStr = "start";
@@ -661,6 +671,7 @@ function testRuntimeSleepWithCommit() returns error? {
         handlerOutput += "-> trx ended";
         test:assertEquals(handlerOutput, "started-> trx commited-> trx ended");
     }
+    return;
 }
 
 @test:Config {
@@ -672,7 +683,8 @@ function testRuntimeSleepWithRollback() returns error? {
         }
         transactions:onRollback(onRollbackFunc);
         transactions:onCommit(onCommitFunc);
-        if(1==1) {
+        int? a = 1;
+        if a is int {
             rollback error("Custom Error");
         } else {
             check commit;
@@ -682,6 +694,7 @@ function testRuntimeSleepWithRollback() returns error? {
         handlerOutput += "-> trx ended";
         test:assertEquals(handlerOutput, "started-> trx aborted-> trx ended");
     }
+    return;
 }
 
 @test:Config {
