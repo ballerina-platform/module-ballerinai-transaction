@@ -1,8 +1,0 @@
-[package]
-org = "ballerinai"
-name = "transaction"
-version = "1.0.16"
-distribution = "slbeta3"
-
-[[platform.java11.dependency]]
-path = "../transaction-native/build/libs/transaction-native-@project.version@.jar"
