@@ -91,11 +91,8 @@ function runActualCode(int failureCutOff, boolean requestRollback, boolean doPan
     return a;
 }
 
-function trxError()  returns int|error {
-    if (5 == 5) {
-        return error errors:Retriable("TransactionError");
-    }
-    return 5;
+function trxError() returns int|error {
+    return error errors:Retriable("TransactionError");
 }
 
 function explode() {
@@ -323,6 +320,7 @@ function testCustomRetryManager() returns error? {
           + "-> inside trx1  -> attempt 2:error, -> inside trx1  -> attempt 3 -> result commited -> trx1 end. "
           + "-> inside trx2  -> attempt 1:error, -> inside trx2  -> attempt 2:error, -> inside trx2  "
           + "-> attempt 3 -> result commited -> trx2 end.");
+    return;
 }
 
 @test:Config {
@@ -350,6 +348,7 @@ function testNestedTrxWithinRetryTrx() returns error? {
     test:assertEquals(str, "start -> inside trx1  -> attempt 1:error, "
                + "-> inside trx1  -> attempt 2:error, -> inside trx1  -> attempt 3 -> result commited "
                + "-> trx1 end. -> inside trx2  -> result commited -> trx2 end.");
+    return;
 }
 
 @test:Config {
@@ -377,6 +376,7 @@ function testNestedRetryTrxWithinTrx() returns error? {
     test:assertEquals(str, "start -> inside trx1  -> inside trx2  "
                   + "-> attempt 1:error, -> inside trx2  -> attempt 2:error, -> inside trx2  -> attempt 3 "
                   + "-> result commited -> trx2 end. -> result commited -> trx1 end.");
+    return;
 }
 
 @test:Config {

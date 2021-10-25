@@ -31,15 +31,20 @@ public class ABC {
 
     public isolated function 'start() returns error? {
         self.startCount += 1;
+        return;
     }
     public isolated function gracefulStop() returns error? {
+        return;
     }
     public isolated function immediateStop() returns error? {
+        return;
     }
     public isolated function detach(service object {} s) returns error? {
+        return;
     }
     public isolated function attach(service object {} s, string[]|string? name = ()) returns error? {
         self.attachCount += 1;
+        return;
     }
 
     public function init() {

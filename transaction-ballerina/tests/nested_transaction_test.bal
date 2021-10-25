@@ -72,12 +72,9 @@ function actualCodeWithNestedTransactions(int failureCutOff, boolean requestRoll
     return a;
 }
 
-function blowUpInNestedTransactions()  returns int {
-    if (5 == 5) {
+function blowUpInNestedTransactions() returns int {
         error err = error("TransactionError");
         panic err;
-    }
-    return 5;
 }
 
 function testLocalTransactionWithNestedTransactions1(int i) returns int|error {
@@ -119,6 +116,7 @@ function testMultipleTrxBlocksWithNestedTransactions() returns error? {
     int j = check testLocalTransactionWithNestedTransactions2(i);
 
     test:assertEquals(j, 4);
+    return;
 }
 
 string a = "";
@@ -268,6 +266,8 @@ function testTransactionLangLibForNestedTransactions() returns error? {
         }
         check commit;
     }
+
+    return;
 }
 
 type AssertionErrorInNestedTrx error;

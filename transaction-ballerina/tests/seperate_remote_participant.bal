@@ -39,10 +39,7 @@ service /hello on new http:Listener(8890) {
     }
 }
 
-function blowUp3()  returns int {
-    if (5 == 5) {
+function blowUp3() returns int {
         error err = error("TransactionError");
         panic err;
-    }
-    return 5;
 }
