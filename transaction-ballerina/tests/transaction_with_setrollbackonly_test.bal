@@ -44,6 +44,7 @@ function setRollbackOnly() returns error? {
     }
     str += " -> Trx exited";
     test:assertEquals("In Trx -> Trx exited", str);
+    return;
 }
 
 transactional function setRollbackOnlyErrorInTrx() {

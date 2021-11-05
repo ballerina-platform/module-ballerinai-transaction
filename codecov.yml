@@ -1,4 +1,19 @@
 ignore:
   - "transaction-test-utils/"
   - "transaction-negative-tests/"
+  - "transaction-native/src/main/java/org/ballerinalang/stdlib/transaction/Utils.java"
+  - "transaction-native/src/main/java/org/ballerinalang/stdlib/transaction/GetHostAddress.java"
+  - "transaction-test-utils/"
+  - "transaction-ballerina/service_*.bal"
+  - "transaction-ballerina/connector_*.bal"
+  - "transaction-ballerina/2pc_remote*.bal"
+
+coverage:
+  precision: 2
+  round: down
+  range: "60...80"
+  status:
+    project:
+      default:
+        target: 80
 

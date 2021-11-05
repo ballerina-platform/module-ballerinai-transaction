@@ -33,7 +33,7 @@ description = 'Ballerina - Transaction Ballerina Generator'
 
 def packageName = "transaction"
 def packageOrg = "ballerinai"
-def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
+def tomlVersion = "0.0.0"
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
 def ballerinaDependencyFile = new File("$project.projectDir/Dependencies.toml")
 def originalConfig = ballerinaConfigFile.text
@@ -60,6 +60,7 @@ ballerina {
     module = packageName
     langVersion = ballerinaLangVersion
     testCoverageParam = "--code-coverage --coverage-format=xml --includes=ballerinai.transaction.*:org.ballerinalang.stdlib.transaction.*"
+    customTomlVersion = "0.0.0"
 }
 
 task updateTomlFiles {
@@ -120,4 +121,3 @@ test.dependsOn ":transaction-native:build"
 
 publishToMavenLocal.dependsOn build
 publish.dependsOn build
-

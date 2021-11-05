@@ -39,6 +39,7 @@ function testCommitSuccessWithSuccessOutcome() returns error? {
     }
     str += "-> exit trx block";
     test:assertEquals(str, "trx started -> trx started -> exit trx block");
+    return;
 }
 
 @test:Config {
@@ -58,6 +59,7 @@ function testCommitSuccessWithNoRetryFailOutcome() returns error? {
         check commit;
     }
     test:assertEquals(err.message().toString(), "Error in block statement");
+    return;
 }
 
 @test:Config {
@@ -112,6 +114,7 @@ function testCommitFailWithUnusualSuccessOutcome() returns error? {
     }
     str += " -> exit transaction block.";
     test:assertEquals("trx started -> trx started -> commit failed -> exit transaction block.", str);
+    return;
 }
 
 @test:Config {
@@ -171,6 +174,8 @@ function commitFailWithPanicOutcome() returns error? {
             panic error("Panic due to failed commit");
         }
     }
+
+    return;
 }
 
 @test:Config {
@@ -204,6 +209,7 @@ function testRollbackWithSuccessOutcome() returns error? {
     }
     str += "-> exit transaction block.";
     test:assertEquals(str, "trx started -> trx started -> end of trx block -> exit transaction block.");
+    return;
 }
 
 @test:Config {
@@ -324,6 +330,7 @@ function testPanicFromRollbackWithUnusualSuccessOutcome() returns error? {
     }
     str += "-> exit transaction block.";
     test:assertEquals(str, "trx started -> trx started -> exit transaction block.");
+    return;
 }
 
 @test:Config {
@@ -352,6 +359,7 @@ function testPanicFromCommitWithUnusualSuccessOutcome() returns error? {
     str += "-> exit transaction block.";
     test:assertEquals("trx started -> trx started -> panic from commit -> end of trx block -> exit transaction block.",
     str);
+    return;
 }
 
 @test:Config {
@@ -423,6 +431,7 @@ function panicFromRollbackWithPanicOutcome() returns error? {
         }
     }
     str += "-> exit transaction block.";
+    return;
 }
 
 @test:Config {
@@ -450,6 +459,7 @@ function panicFromCommitWithPanicOutcome() returns error? {
         str += "-> end of trx block ";
     }
     str += "-> exit transaction block.";
+    return;
 }
 
 @test:Config {
@@ -527,11 +537,12 @@ function noCommitOrRollbackPerformedWithRollbackAndPanicOutcome() returns error?
         str += "-> end of trx block ";
     }
     str += "-> exit transaction block.";
+    return;
 }
 
 @test:Config {
 }
-function testCommitSuccessWithSuccessOutcomeInNestedRetry() returns error? {
+function testCommitSuccessWithSuccessOutcomeInNestedRetry() {
     var result = nestedRetryFunc(false, false);
     test:assertEquals(result, "trx started -> trx started -> trx started -> nested retry ->" +
         " nested retry -> nested retry -> exit trx block");
@@ -555,7 +566,7 @@ function commitSuccessWithPanicOutcomeInNestedRetry() {
 
 @test:Config {
 }
-function testCommitFailWithUnusualSuccessOutcomeInNestedRetry() returns error? {
+function testCommitFailWithUnusualSuccessOutcomeInNestedRetry() {
     var result = nestedRetryFunc(false, true);
     test:assertEquals(result, "trx started -> trx started -> trx started -> nested retry -> nested retry" +
     " -> nested retry -> exit trx block");

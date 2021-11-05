@@ -26,10 +26,10 @@ description = 'Ballerina - Transaction Java Test Utils'
 dependencies {
     checkstyle project(':build-config:checkstyle')
     checkstyle "com.puppycrawl.tools:checkstyle:${puppycrawlCheckstyleVersion}"
-    compile group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
-    compile group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
-    compile group: 'io.ballerina.stdlib', name: 'io-native', version: "${stdlibIoVersion}"
-    compile group: 'org.slf4j', name: 'slf4j-jdk14', version: "${slf4jVersion}"
+    compileOnly group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
+    compileOnly group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
+    compileOnly group: 'io.ballerina.stdlib', name: 'io-native', version: "${stdlibIoVersion}"
+    compileOnly group: 'org.slf4j', name: 'slf4j-jdk14', version: "${slf4jVersion}"
 }
 
 checkstyle {

@@ -145,7 +145,6 @@ function rollbackTransaction(string transactionBlockId, error? err = (), boolean
 # Notify transaction abort.
 #
 # + transactionBlockId - ID of the transaction block.
-# + err - The cause of the abort.
 function notifyAbort(string transactionBlockId) = @java:Method {
     'class: "org.ballerinalang.stdlib.transaction.NotifyAbortTransaction",
     name: "notifyAbort"
@@ -195,11 +194,6 @@ function getHostAddress() returns string = @java:Method {
 function uuid() returns string = @java:Method {
     'class: "org.ballerinalang.stdlib.transaction.UUID",
     name: "uuid"
-} external;
-
-function timeNow() returns int = @java:Method {
-    'class: "org.ballerinalang.stdlib.transaction.CurrentTime",
-    name: "timeNow"
 } external;
 
 function getRollbackOnlyError() returns lang_trx:Error? = @java:Method {

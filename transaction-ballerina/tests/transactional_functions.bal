@@ -144,7 +144,8 @@ function testTransactionalFunctionWithHandlersRollback() {
             trxFunc1();
             trxFunc2();
         }
-        if 1 == 1 {
+        int? a = 1;
+        if a is int {
             rollback;
         } else {
             var ign = checkpanic commit;

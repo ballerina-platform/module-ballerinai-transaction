@@ -202,7 +202,8 @@ function testRollbackWithinTransactionalService() {
             handlerServiceOutput += "-> within trx block";
         }
         var response = handlerClient->foo();
-        if (1 == 1) {
+        int? a = 1;
+        if a is int {
             rollback;
         } else {
             var x = checkpanic commit;
