@@ -1,4 +1,0 @@
-# This file is to test the configuration of coordinatorHost, coordinatorPort
-[transaction_tests]
-coordinatorHost = "20000"
-coordinatorPort = "5342"
