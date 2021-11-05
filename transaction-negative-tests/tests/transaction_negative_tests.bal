@@ -112,7 +112,6 @@ public function testTransactionWithSetRollbackOnly() {
 public function testTransactionOnFail() {
     Process|error execResult = exec(bal_exec_path, {}, (), "run", TRX_ON_FAIL_FILE);
     string[] logLines = getLogLinesFromExecResult(execResult);
-    io:println(logLines);
     test:assertEquals(logLines.length(), 16);
 
     validateLog(logLines[3], "ERROR", "transaction_on_fail_negative.bal:(32:6,32:35)", "unreachable code");
