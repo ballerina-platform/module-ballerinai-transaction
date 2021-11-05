@@ -14,6 +14,8 @@
  * limitations under the License.
  *
  */
+import org.apache.tools.ant.taskdefs.condition.Os
+
 buildscript {
     repositories {
         maven {
@@ -33,7 +35,7 @@ description = 'Ballerina - Transaction Ballerina Generator'
 
 def packageName = "transaction"
 def packageOrg = "ballerinai"
-def tomlVersion = "0.0.0"
+def tomlVersion = "1.0.16"
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
 def ballerinaDependencyFile = new File("$project.projectDir/Dependencies.toml")
 def originalConfig = ballerinaConfigFile.text
@@ -88,16 +90,22 @@ task updateTomlFiles {
     }
 }
 
-task revertTomlFiles {
+task commitTomlFiles {
     doLast {
-        ballerinaConfigFile.text = originalConfig
-        ballerinaDependencyFile.text = originalDependencies
+        project.exec {
+            ignoreExitValue true
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                commandLine 'cmd', '/c', "git commit -m \"[Automated] Update the native jar versions\" Ballerina.toml Dependencies.toml"
+            } else {
+                commandLine 'sh', '-c', "git commit -m '[Automated] Update the native jar versions' Ballerina.toml Dependencies.toml"
+            }
+        }
     }
 }
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        maven(MavenPublication) {
             artifact source: createArtifactZip, extension: 'zip'
         }
     }
@@ -105,10 +113,10 @@ publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/ballerina-platform/module-ballerinai-transaction")
+            url = uri("https://maven.pkg.github.com/ballerina-platform/module-${packageOrg}-${packageName}")
             credentials {
-                username = System.getenv("packageUser")
-                password = System.getenv("packagePAT")
+                username = System.getenv("publishUser")
+                password = System.getenv("publishPAT")
             }
         }
     }
