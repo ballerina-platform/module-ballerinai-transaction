@@ -1,10 +1,10 @@
 [package]
 org = "ballerinai"
 name = "transaction"
-version = "0.0.0"
+version = "@toml.version@"
 
 [[platform.java11.dependency]]
 artifactId = "transaction"
-version = "1.0.16-SNAPSHOT"
-path = "../transaction-native/build/libs/transaction-native-1.0.16-SNAPSHOT.jar"
+version = "@project.version@"
+path = "../transaction-native/build/libs/transaction-native-@project.version@.jar"
 groupId = "ballerina"
