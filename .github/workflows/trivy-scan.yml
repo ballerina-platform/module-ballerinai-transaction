@@ -30,4 +30,5 @@ jobs:
                     scan-ref: '/github/workspace/transaction-ballerina'
                     skip-dirs: 'build'
                     format: 'table'
+                    timeout: '10m0s'
                     exit-code: '1'
