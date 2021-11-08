@@ -36,8 +36,6 @@ description = 'Ballerina - Transaction Ballerina Generator'
 def packageName = "transaction"
 def packageOrg = "ballerinai"
 def tomlVersion = "0.0.0"
-def ballerinaDependencyFile = new File("$project.projectDir/Dependencies.toml")
-def originalDependencies = ballerinaDependencyFile.text
 def ballerinaTomlFilePlaceHolder = new File("${project.rootDir}/build-config/resources/Ballerina.toml")
 def ballerinaTomlFile = new File("$project.projectDir/Ballerina.toml")
 
@@ -67,26 +65,9 @@ ballerina {
 
 task updateTomlFiles {
     doLast {
-        def stdlibDependentIoVersion = stripBallerinaExtensionVersion(project.stdlibIoVersion)
-        def stdlibDependentUuidVersion = stripBallerinaExtensionVersion(project.stdlibUuidVersion)
-        def stdlibDependentCacheVersion = stripBallerinaExtensionVersion(project.stdlibCacheVersion)
-        def stdlibDependentTaskVersion = stripBallerinaExtensionVersion(project.stdlibTaskVersion)
-        def stdlibDependentTimeVersion = stripBallerinaExtensionVersion(project.stdlibTimeVersion)
-        def stdlibDependentHttpVersion = stripBallerinaExtensionVersion(project.stdlibHttpVersion)
-        def stdlibDependentLogVersion = stripBallerinaExtensionVersion(project.stdlibLogVersion)
-
         def newConfig = ballerinaTomlFilePlaceHolder.text.replace('@project.version@', project.version.toString())
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
         ballerinaTomlFile.text = newConfig
-
-        def newDependencyConfig = ballerinaDependencyFile.text.replace("@stdlib.io.version@", stdlibDependentIoVersion)
-        newDependencyConfig = newDependencyConfig.replace("@stdlib.cache.version@", stdlibDependentCacheVersion)
-        newDependencyConfig = newDependencyConfig.replace("@stdlib.task.version@", stdlibDependentTaskVersion)
-        newDependencyConfig = newDependencyConfig.replace("@stdlib.time.version@", stdlibDependentTimeVersion)
-        newDependencyConfig = newDependencyConfig.replace("@stdlib.http.version@", stdlibDependentHttpVersion)
-        newDependencyConfig = newDependencyConfig.replace("@stdlib.log.version@", stdlibDependentLogVersion)
-        newDependencyConfig = newDependencyConfig.replace("@stdlib.uuid.version@", stdlibDependentUuidVersion)
-        ballerinaDependencyFile.text = newDependencyConfig
     }
 }
 
