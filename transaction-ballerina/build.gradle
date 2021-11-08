@@ -35,11 +35,11 @@ description = 'Ballerina - Transaction Ballerina Generator'
 
 def packageName = "transaction"
 def packageOrg = "ballerinai"
-def tomlVersion = "1.0.16"
-def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
+def tomlVersion = "0.0.0"
 def ballerinaDependencyFile = new File("$project.projectDir/Dependencies.toml")
-def originalConfig = ballerinaConfigFile.text
 def originalDependencies = ballerinaDependencyFile.text
+def ballerinaTomlFilePlaceHolder = new File("${project.rootDir}/build-config/resources/Ballerina.toml")
+def ballerinaTomlFile = new File("$project.projectDir/Ballerina.toml")
 
 def stripBallerinaExtensionVersion(String extVersion) {
     if (extVersion.matches(project.ext.timestampedVersionRegex)) {
@@ -75,9 +75,9 @@ task updateTomlFiles {
         def stdlibDependentHttpVersion = stripBallerinaExtensionVersion(project.stdlibHttpVersion)
         def stdlibDependentLogVersion = stripBallerinaExtensionVersion(project.stdlibLogVersion)
 
-        def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
+        def newConfig = ballerinaTomlFilePlaceHolder.text.replace('@project.version@', project.version.toString())
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
-        ballerinaConfigFile.text = newConfig
+        ballerinaTomlFile.text = newConfig
 
         def newDependencyConfig = ballerinaDependencyFile.text.replace("@stdlib.io.version@", stdlibDependentIoVersion)
         newDependencyConfig = newDependencyConfig.replace("@stdlib.cache.version@", stdlibDependentCacheVersion)

@@ -37,4 +37,9 @@ jobs:
         run: |
           ./gradlew publish -PpublishToCentral=false
       - name: Generate Codecov Report
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v2
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ballerinai-transaction
+          path: target/ballerinai-transaction/
