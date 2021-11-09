@@ -24,9 +24,7 @@ import ballerina/log;
 # + transactionBlockId - ID of the transaction block.
 function beginRemoteParticipant(string transactionBlockId) {
     TransactionContext? txnContext = registerRemoteParticipant(transactionBlockId);
-    if (txnContext is ()) {
-
-    } else {
+    if (txnContext is TransactionContext) {
         TransactionContext|error returnContext = beginTransaction(txnContext.transactionId, transactionBlockId,
             txnContext.registerAtURL, txnContext.coordinationType);
         if (returnContext is error) {
@@ -134,16 +132,12 @@ transactional function endTransaction(string transactionId, string transactionBl
 #
 # + transactionBlockId - ID of the transaction block. Each transaction block in a process has a unique ID.
 # + return - Transaction context.
-# # Deprecated
-@deprecated
 function registerRemoteParticipant(string transactionBlockId) returns  TransactionContext? = @java:Method {
     'class: "org.ballerinalang.stdlib.transaction.Utils",
     name: "registerRemoteParticipant"
 } external;
 
 # Notify the transaction resource manager on remote participant failture.
-# # Deprecated
-@deprecated
 function notifyRemoteParticipantOnFailure() = @java:Method {
     'class: "org.ballerinalang.stdlib.transaction.Utils",
     name: "notifyRemoteParticipantOnFailure"
