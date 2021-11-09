@@ -55,8 +55,6 @@ function beginRemoteParticipant(string transactionBlockId) {
 # + registerAtUrl - The URL of the initiator
 # + coordinationType - Coordination type of this transaction
 # + return - Newly created/existing TransactionContext for this transaction.
-# # Deprecated
-@deprecated
 public function beginTransaction(string? transactionId, string transactionBlockId, string registerAtUrl,
                           string coordinationType) returns TransactionContext|error {
     if (transactionId is string) {

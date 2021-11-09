@@ -77,7 +77,6 @@ class RemoteParticipant {
 
         // Let's set this to true and change it to false only if a participant aborted or an error occurred while trying
         // to prepare a participant
-        boolean successful = true;
         final string participantId = self.participantId;
         log:printDebug("Preparing remote participant: " + participantId);
         // If a participant voted NO or failed then abort

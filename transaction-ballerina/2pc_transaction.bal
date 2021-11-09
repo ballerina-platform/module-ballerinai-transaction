@@ -160,7 +160,6 @@ class TwoPhaseCommitTransaction {
             i += 1;
         //TODO: commenting due to a caching issue
         //foreach var participant in self.participants {
-            string participantId = participant.participantId;
             future<[(PrepareResult|error)?, Participant]> f = @strand{thread:"any"} start participant.prepare(protocol);
             results[results.length()] = f;
         }
