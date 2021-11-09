@@ -59,8 +59,8 @@ jobs:
           ./gradlew release -Prelease.useAutomaticVersion=true
           ./gradlew -Pversion=${VERSION} publish -x test -PpublishToCentral=false
       - name: GitHub Release and Release Sync PR
-          env:
-            GITHUB_TOKEN: ${{ secrets.BALLERINA_BOT_TOKEN }}
-          run: |
-            gh release create v$VERSION --title "module-ballerinai-transaction-v$VERSION"
-            gh pr create --title "[Automated] Sync master after $VERSION release" --body "Sync master after $VERSION release"
+        env:
+          GITHUB_TOKEN: ${{ secrets.BALLERINA_BOT_TOKEN }}
+        run: |
+          gh release create v$VERSION --title "module-ballerinai-transaction-v$VERSION"
+          gh pr create --title "[Automated] Sync master after $VERSION release" --body "Sync master after $VERSION release"
