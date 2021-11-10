@@ -41,7 +41,6 @@ function startTransaction(string transactionBlockId, lang_trx:Info? prevAttempt 
     if (txnContext is error) {
         panic txnContext;
     } else {
-
         transactionId = txnContext.transactionId;
         setTransactionContext(txnContext, prevAttempt);
     }
@@ -57,9 +56,9 @@ function checkIfTransactional() {
 function startTransactionCoordinator() returns error? {
     http:Listener coordinatorListener = checkpanic new(coordinatorPort, { host: coordinatorHost });
     //attach initiatorService to listener
-    error? attachInitiatorService = coordinatorListener.attach(initiatorService, "/balcoordinator/initiator");
+    check coordinatorListener.attach(initiatorService, "/balcoordinator/initiator");
     // attach participant2pcService to listener
-    error? attachParticipant2pcService = coordinatorListener.attach(participant2pcService, "/balcoordinator/participant/2pc");
+    check coordinatorListener.attach(participant2pcService, "/balcoordinator/participant/2pc");
     //start registered services
     return coordinatorListener.'start();
 }

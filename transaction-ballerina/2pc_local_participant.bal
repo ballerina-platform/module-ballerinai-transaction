@@ -121,9 +121,9 @@ class LocalParticipant {
                                                                          : NOTIFY_RESULT_ABORTED;
             int i = 0;
             while (i < self.participantProtocols.length()) {
-                var localProto = self.participantProtocols[i];
                 i += 1;
             //TODO: commenting due to caching issue
+            //var localProto = self.participantProtocols[i];
             //foreach var localProto in self.participantProtocols {
                 var result = self.notifyMe(action, self.participatedTxn.transactionBlockId);
                 if (result is error) {
