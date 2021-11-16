@@ -1,3 +1,3 @@
 ## Module Overview
 
-This module provides Ballerina transaction manager implementation.
+This module provides the Ballerina transaction manager implementation.
