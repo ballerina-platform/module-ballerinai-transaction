@@ -34,7 +34,7 @@ function getCoordinationTypeToProtocolsMap() returns map<string[]> {
 
 // Service on the initiator which is independent from the coordination type and handles registration of remote
 // participants.
-service object {} initiatorService = service object {
+http:Service initiatorService = service object {
 
     # register(in: Micro-Transaction-Registration,
     # out: Micro-Transaction-Coordination?,
