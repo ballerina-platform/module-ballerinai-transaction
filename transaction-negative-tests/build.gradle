@@ -50,40 +50,6 @@ jar {
     }
 }
 
-task unpackJballerinaTools(type: Copy) {
-    configurations.jbalTools.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-        from zipTree(artifact.getFile())
-        into new File("${buildDir}/target/extracted-distributions", "jballerina-tools-zip")
-    }
-}
-
-task unpackStdLibs() {
-    doLast {
-        configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-            copy {
-                from project.zipTree(artifact.getFile())
-                into new File("${buildDir}/target/extracted-distributions", artifact.name + "-zip")
-            }
-        }
-    }
-}
-
-task copyStdlibs(type: Copy) {
-    def ballerinaDist = "build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
-    into ballerinaDist
-
-    /* Standard Libraries */
-    configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-        def artifactExtractedPath = "${buildDir}/target/extracted-distributions/" + artifact.name + "-zip"
-        into("repo/bala") {
-            from "${artifactExtractedPath}/bala/"
-        }
-        into("repo/cache") {
-            from "${artifactExtractedPath}/cache"
-        }
-    }
-}
-
 task copyToLib(type: Copy) {
     into "$project.projectDir/lib"
     from configurations.externalJars
@@ -145,14 +111,13 @@ def setExecPath(configTOMLFile, distributionBinPath) {
 
 task ballerinaNegativeTests {
     inputs.dir file(project.projectDir)
-    dependsOn(copyStdlibs)
     dependsOn(copyToLib)
     dependsOn(":transaction-ballerina:build")
     dependsOn(":transaction-test-utils:build")
     dependsOn(updateTomlVerions)
     finalizedBy(revertTomlFile)
     doLast {
-        def distributionBinPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bin"
+        def distributionBinPath =  "$project.rootDir/target/ballerina-runtime/bin"
         def testParams = "--code-coverage --includes=ballerinai.*:org.ballerinalang.stdlib.transaction.*"
         
         setExecPath(configTOMLFile,distributionBinPath)
@@ -173,8 +138,5 @@ test {
 }
 
 ballerinaNegativeTests.dependsOn ":transaction-ballerina:build"
-unpackStdLibs.dependsOn unpackJballerinaTools
-copyStdlibs.dependsOn unpackStdLibs
-ballerinaNegativeTests.dependsOn copyStdlibs
 ballerinaNegativeTests.dependsOn updateTomlVerions
 build.dependsOn test
