@@ -5,6 +5,6 @@ version = "0.0.0"
 
 [[platform.java11.dependency]]
 artifactId = "transaction"
-version = "1.0.18"
-path = "../transaction-native/build/libs/transaction-native-1.0.18.jar"
+version = "1.0.19-SNAPSHOT"
+path = "../transaction-native/build/libs/transaction-native-1.0.19-SNAPSHOT.jar"
 groupId = "ballerina"
