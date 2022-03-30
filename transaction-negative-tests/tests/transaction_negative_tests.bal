@@ -93,7 +93,6 @@ public function testInvalidTrxHandlers() {
     Process|error execResult = exec(bal_exec_path, {}, (), "run", INVALID_TRX_HANDLER_FILE);
     string[] logLines = getLogLinesFromExecResult(execResult);
     test:assertEquals(logLines.length(), 5);
-    io:println(logLines);
     validateLog(logLines[2], "ERROR", "transaction_handlers_negative.bal:(31:33,31:47)", "incompatible types: expected " +
     "'ballerina/lang.transaction:0.0.0:RollbackHandler', found 'function (boolean) returns ()'");
     validateLog(logLines[3], "ERROR", "transaction_handlers_negative.bal:(32:31,32:43)", "incompatible types: expected " +
