@@ -126,8 +126,8 @@ public function testTransactionOnFail() {
 
 function getLogLinesFromExecResult(Process|error execResult) returns string[] {
     Process result = checkpanic execResult;
-    int waitForExit = checkpanic result.waitForExit();
-    int exitCode = checkpanic result.exitCode();
+    int _ = checkpanic result.waitForExit();
+    int _ = checkpanic result.exitCode();
     io:ReadableByteChannel readableResult = result.stderr();
     io:ReadableCharacterChannel sc = new (readableResult, UTF_8);
     string outText = checkpanic sc.read(100000);
