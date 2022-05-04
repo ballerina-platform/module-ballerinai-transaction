@@ -121,6 +121,9 @@ transactional function endTransaction(string transactionId, string transactionBl
         if (initiatedTxn.state == TXN_STATE_ABORTED) {
             return initiatedTxn.abortInitiatorTransaction();
         } else {
+            if (lang_trx:getRollbackOnly()) {
+                return initiatedTxn.abortInitiatorTransaction();
+            }
             string|lang_trx:Error ret = initiatedTxn.twoPhaseCommit();
             removeInitiatedTransaction(transactionId);
             return ret;
