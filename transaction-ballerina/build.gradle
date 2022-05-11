@@ -60,7 +60,6 @@ ballerina {
     module = packageName
     langVersion = ballerinaLangVersion
     testCoverageParam = "--code-coverage --coverage-format=xml --includes=ballerinai.transaction.*:org.ballerinalang.stdlib.transaction.*"
-    customTomlVersion = "1.1.0"
 }
 
 task updateTomlFiles {
