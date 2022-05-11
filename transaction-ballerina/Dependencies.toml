@@ -333,7 +333,7 @@ modules = [
 [[package]]
 org = "ballerinai"
 name = "transaction"
-version = "0.0.0"
+version = "@project.version@"
 dependencies = [
 	{org = "ballerina", name = "cache"},
 	{org = "ballerina", name = "http"},
