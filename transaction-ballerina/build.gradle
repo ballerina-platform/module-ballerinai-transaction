@@ -35,7 +35,7 @@ description = 'Ballerina - Transaction Ballerina Generator'
 
 def packageName = "transaction"
 def packageOrg = "ballerinai"
-def tomlVersion = "0.0.0"
+def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
 def ballerinaTomlFilePlaceHolder = new File("${project.rootDir}/build-config/resources/Ballerina.toml")
 def ballerinaTomlFile = new File("$project.projectDir/Ballerina.toml")
 
@@ -60,7 +60,7 @@ ballerina {
     module = packageName
     langVersion = ballerinaLangVersion
     testCoverageParam = "--code-coverage --coverage-format=xml --includes=ballerinai.transaction.*:org.ballerinalang.stdlib.transaction.*"
-    customTomlVersion = "0.0.0"
+    customTomlVersion = "1.1.0"
 }
 
 task updateTomlFiles {
