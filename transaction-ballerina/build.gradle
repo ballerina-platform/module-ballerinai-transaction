@@ -35,7 +35,7 @@ description = 'Ballerina - Transaction Ballerina Generator'
 
 def packageName = "transaction"
 def packageOrg = "ballerinai"
-def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
+def tomlVersion = "0.0.0"
 def ballerinaTomlFilePlaceHolder = new File("${project.rootDir}/build-config/resources/Ballerina.toml")
 def ballerinaTomlFile = new File("$project.projectDir/Ballerina.toml")
 
