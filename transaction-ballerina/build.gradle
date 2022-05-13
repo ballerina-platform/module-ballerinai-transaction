@@ -39,20 +39,6 @@ def tomlVersion = "0.0.0"
 def ballerinaTomlFilePlaceHolder = new File("${project.rootDir}/build-config/resources/Ballerina.toml")
 def ballerinaTomlFile = new File("$project.projectDir/Ballerina.toml")
 
-def stripBallerinaExtensionVersion(String extVersion) {
-    if (extVersion.matches(project.ext.timestampedVersionRegex)) {
-        def splitVersion = extVersion.split('-')
-        if (splitVersion.length > 3) {
-            def strippedValues = splitVersion[0..-4]
-            return strippedValues.join('-')
-        } else {
-            return extVersion
-        }
-    } else {
-        return extVersion.replace("${project.ext.snapshotVersion}", "")
-    }
-}
-
 apply plugin: 'io.ballerina.plugin'
 
 ballerina {
@@ -60,6 +46,7 @@ ballerina {
     module = packageName
     langVersion = ballerinaLangVersion
     testCoverageParam = "--code-coverage --coverage-format=xml --includes=ballerinai.transaction.*:org.ballerinalang.stdlib.transaction.*"
+    customTomlVersion = "0.0.0"
 }
 
 task updateTomlFiles {
