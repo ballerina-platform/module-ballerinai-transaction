@@ -51,3 +51,96 @@ transactional function setRollbackOnlyErrorInTrx() {
     error cause = error("setRollbackOnly");
     trx:setRollbackOnly(cause);
 }
+
+@test:Config {
+}
+function testSetRollbackOnlyWithinLoop() {
+    error? setRollbackOnlyRes = setRollbackOnlyWithinLoop();
+    if (setRollbackOnlyRes is error) {
+        test:assertEquals("setRollbackOnly", setRollbackOnlyRes.message());
+    } else {
+        panic error("Expected an error");
+    }
+}
+
+function setRollbackOnlyWithinLoop() returns error? {
+    string str = "";
+    foreach var i in 1...5 {
+        transaction {
+            str += i.toString();
+            setRollbackOnlyErrorInTrx();
+            check commit;
+            str += i.toString();
+        } on fail error e {
+            return e;
+        }
+    }
+    test:assertEquals("12345", str);
+    return;
+}
+
+@test:Config {
+}
+function testSetRollbackOnlyWithRetry() {
+    error? setRollbackOnlyRes = setRollbackOnlyWithRetry();
+    if (setRollbackOnlyRes is error) {
+        test:assertEquals("setRollbackOnly", setRollbackOnlyRes.message());
+    } else {
+        panic error("Expected an error");
+    }
+}
+
+
+function setRollbackOnlyWithRetry() returns error? {
+    string str = "";
+    int i = 0;
+    retry(5) transaction {
+        i = i + 1;
+        str += i.toString();
+        setRollbackOnlyErrorInTrx();
+        check commit;
+        str += i.toString();
+    }
+    test:assertEquals("123456", str);
+    return;
+}
+
+@test:Config {
+}
+function testSetRollbackOnlyWithRetryManager() {
+    error? setRollbackOnlyRes = setRollbackOnlyWithRetryManager();
+    if (setRollbackOnlyRes is error) {
+        test:assertEquals("setRollbackOnly", setRollbackOnlyRes.message());
+    } else {
+        panic error("Expected an error");
+    }
+}
+
+function setRollbackOnlyWithRetryManager() returns error? {
+    string str = "";
+    int i = 0;
+    retry<RetryManager> (5) transaction {
+        i = i + 1;
+        str += i.toString();
+        setRollbackOnlyErrorInTrx();
+        check commit;
+        str += i.toString();
+    }
+    test:assertEquals("123456", str);
+    return;
+}
+
+public class RetryManager {
+   private int count;
+   public function init(int count = 2) {
+       self.count = count;
+   }
+   public function shouldRetry(error? e) returns boolean {
+     if e is error && self.count >  0 {
+        self.count -= 1;
+        return true;
+     } else {
+        return false;
+     }
+   }
+}
