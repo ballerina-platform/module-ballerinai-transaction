@@ -105,7 +105,9 @@ function abortTransaction(string transactionId, string transactionBlockId) retur
 transactional function endTransaction(string transactionId, string transactionBlockId)
         returns @tainted string|lang_trx:Error? {
     if (lang_trx:getRollbackOnly()) {
-        return getRollbackOnlyError();
+        lang_trx:Error? e = getRollbackOnlyError();
+        rollbackTransaction(transactionBlockId, e);
+        return e;
     }
 
     string participatedTxnId = getParticipatedTransactionId(transactionId, transactionBlockId);
