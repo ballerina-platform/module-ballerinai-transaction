@@ -726,7 +726,6 @@ function testBreakWithinTransactionToOuterLoop() {
                 break;
             }
         }
-        str += "-> should not reach here!";
     }
     test:assertEquals(str, "Loop continued with digit: 1 ->Loop continued with digit: 2 " +
     "->Loop continued with digit: 3 ->Loop broke with digit: 4");
