@@ -88,27 +88,27 @@ public client class BarClient {
 
 BarClient barClient = new (9090);
 
-@test:Config {}
-function testHandlersWithinTransactionalClient() {
-    transaction {
-        lock {
-            handlerClientOutput += " -> within trx block";
-        }
-        var response = barClient->foo();
-        var x = checkpanic commit;
-        if (response is http:Response) {
-            test:assertEquals(response.statusCode, 200, msg = "Found expected output");
-        } else if (response is error) {
-            test:assertFail(msg = "Found unexpected output type: " + response.message());
-        }
-        lock {
-            handlerClientOutput += " -> trx ended";
-        }
-    }
-    lock {
-        test:assertEquals(handlerClientOutput, "start -> within trx block -> trxCommited inside client -> trx ended");
-    }
-}
+//@test:Config {}
+//function testHandlersWithinTransactionalClient() {
+//    transaction {
+//        lock {
+//            handlerClientOutput += " -> within trx block";
+//        }
+//        var response = barClient->foo();
+//        var x = checkpanic commit;
+//        if (response is http:Response) {
+//            test:assertEquals(response.statusCode, 200, msg = "Found expected output");
+//        } else if (response is error) {
+//            test:assertFail(msg = "Found unexpected output type: " + response.message());
+//        }
+//        lock {
+//            handlerClientOutput += " -> trx ended";
+//        }
+//    }
+//    lock {
+//        test:assertEquals(handlerClientOutput, "start -> within trx block -> trxCommited inside client -> trx ended");
+//    }
+//}
 
 isolated string handlerServiceOutput = "start";
 listener http:Listener serviceTestEPWithHandler = new (9091);
@@ -170,55 +170,55 @@ public client class ClientWithHandlers {
     }
 }
 
-@test:Config {}
-function testHandlersWithinTransactionalService() {
-    transaction {
-        lock {
-            handlerServiceOutput += " -> within trx block";
-        }
-        var response = handlerClient->foo();
-        var x = checkpanic commit;
-        if (response is http:Response) {
-            test:assertEquals(response.statusCode, 200, msg = "Found expected output");
-        } else if (response is error) {
-            test:assertFail(msg = "Found unexpected output type: " + response.message());
-        }
-        lock {
-            handlerServiceOutput += " -> trx ended";
-        }
-    }
-    lock {
-        test:assertEquals(handlerServiceOutput,
-        "start -> within trx block -> trxCommited inside service " + "-> trxCommited inside client -> trx ended");
-        handlerServiceOutput = "";
-    }
-}
+//@test:Config {}
+//function testHandlersWithinTransactionalService() {
+//    transaction {
+//        lock {
+//            handlerServiceOutput += " -> within trx block";
+//        }
+//        var response = handlerClient->foo();
+//        var x = checkpanic commit;
+//        if (response is http:Response) {
+//            test:assertEquals(response.statusCode, 200, msg = "Found expected output");
+//        } else if (response is error) {
+//            test:assertFail(msg = "Found unexpected output type: " + response.message());
+//        }
+//        lock {
+//            handlerServiceOutput += " -> trx ended";
+//        }
+//    }
+//    lock {
+//        test:assertEquals(handlerServiceOutput,
+//        "start -> within trx block -> trxCommited inside service " + "-> trxCommited inside client -> trx ended");
+//        handlerServiceOutput = "";
+//    }
+//}
 
-@test:Config {dependsOn: [testHandlersWithinTransactionalService]}
-function testRollbackWithinTransactionalService() {
-    transaction {
-        trx:onRollback(onRollbacFuncInsideTrxBlock);
-        lock {
-            handlerServiceOutput += "-> within trx block";
-        }
-        var response = handlerClient->foo();
-        int? a = 1;
-        if a is int {
-            rollback;
-        } else {
-            var x = checkpanic commit;
-        }
-        if (response is http:Response) {
-            test:assertEquals(response.statusCode, 200, msg = "Found expected output");
-        } else if (response is error) {
-            test:assertFail(msg = "Found unexpected output type: " + response.message());
-        }
-        lock {
-            handlerServiceOutput += " -> trx ended";
-        }
-    }
-    lock {
-        test:assertEquals(handlerServiceOutput, "-> within trx block -> trxAborted inside service"
-        + " -> trxAborted inside client -> trxAborted inside trx block -> trx ended");
-    }
-}
+//@test:Config {dependsOn: [testHandlersWithinTransactionalService]}
+//function testRollbackWithinTransactionalService() {
+//    transaction {
+//        trx:onRollback(onRollbacFuncInsideTrxBlock);
+//        lock {
+//            handlerServiceOutput += "-> within trx block";
+//        }
+//        var response = handlerClient->foo();
+//        int? a = 1;
+//        if a is int {
+//            rollback;
+//        } else {
+//            var x = checkpanic commit;
+//        }
+//        if (response is http:Response) {
+//            test:assertEquals(response.statusCode, 200, msg = "Found expected output");
+//        } else if (response is error) {
+//            test:assertFail(msg = "Found unexpected output type: " + response.message());
+//        }
+//        lock {
+//            handlerServiceOutput += " -> trx ended";
+//        }
+//    }
+//    lock {
+//        test:assertEquals(handlerServiceOutput, "-> within trx block -> trxAborted inside service"
+//        + " -> trxAborted inside client -> trxAborted inside trx block -> trx ended");
+//    }
+//}
