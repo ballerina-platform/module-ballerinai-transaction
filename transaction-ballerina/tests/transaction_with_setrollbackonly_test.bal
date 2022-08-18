@@ -71,8 +71,6 @@ function setRollbackOnlyWithinLoop() returns error? {
             setRollbackOnlyErrorInTrx();
             check commit;
             str += i.toString();
-        } on fail error e {
-            return e;
         }
     }
     return;

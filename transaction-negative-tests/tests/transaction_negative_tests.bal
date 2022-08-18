@@ -111,19 +111,6 @@ public function testTransactionWithSetRollbackOnly() {
     "invoking transactional function outside transactional scope is prohibited");
 }
 
-@test:Config {}
-public function testTransactionOnFail() {
-    Process|error execResult = exec(bal_exec_path, {}, (), "run", TRX_ON_FAIL_FILE);
-    string[] logLines = getLogLinesFromExecResult(execResult);
-    string[] errorLines = getErrorLogLines(logLines);
-    test:assertEquals(errorLines.length(), 4);
-    validateLog(errorLines[0], "ERROR", "transaction_on_fail_negative.bal:(32:6,32:35)", "unreachable code");
-    validateLog(errorLines[1], "ERROR", "transaction_on_fail_negative.bal:(48:4,50:5)", "incompatible error " +
-    "definition type: 'ErrorTypeA' will not be matched to 'ErrorTypeB'");
-    validateLog(errorLines[2], "ERROR", "transaction_on_fail_negative.bal:(80:7,80:42)", "unreachable code");
-    validateLog(errorLines[3], "ERROR", "transaction_on_fail_negative.bal:(96:7,96:76)", "unreachable code");
-}
-
 function getLogLinesFromExecResult(Process|error execResult) returns string[] {
     Process result = checkpanic execResult;
     int _ = checkpanic result.waitForExit();
