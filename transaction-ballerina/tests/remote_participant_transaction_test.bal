@@ -98,7 +98,7 @@ service / on new http:Listener(8889) {
         }
 
         // TODO: module-ballerinai-transaction#460
-         var b = trap blowUp2(2);
+         var b = check trap blowUp2(2);
          int c = check b;
 
         http:Response res = new;

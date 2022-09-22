@@ -20,13 +20,13 @@ import ballerina/log;
 string S2 = "";
 
 service /hello on new http:Listener(8890) {
-    transactional resource function post remoteResource(http:Caller caller, http:Request req) {
+    transactional resource function post remoteResource(http:Caller caller, http:Request req) returns error? {
         S2 = " in-remote";
         var payload = req.getTextPayload();
         if (payload is string) {
             if (payload == "blowUp") {
                 // TODO: module-ballerinai-transaction#460
-                 int blowNum = blowUp3();
+                 int|error blowNum = check trap blowUp3();
             }
         }
 
