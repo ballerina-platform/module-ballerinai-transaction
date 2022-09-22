@@ -26,7 +26,7 @@ service /hello on new http:Listener(8890) {
         if (payload is string) {
             if (payload == "blowUp") {
                 // TODO: module-ballerinai-transaction#460
-                 int|error blowNum = check trap blowUp3();
+                int blowNum = check trap blowUp3();
             }
         }
 
