@@ -98,8 +98,8 @@ service / on new http:Listener(8889) {
         }
 
         // TODO: module-ballerinai-transaction#460
-        // var b = trap blowUp2(2);
-        // int c = check b;
+         var b = trap blowUp2(2);
+         int c = check b;
 
         http:Response res = new;
         res.setPayload("payload-from-remote");
@@ -518,7 +518,7 @@ function testRemoteParticipantPanicInNestedTransaction() {
 }
 
 // TODO: module-ballerinai-transaction#460
-// @test:Config {}
+ @test:Config {}
 function testRemoteParticipantReturnsError() {
     http:Client participantEP = checkpanic new ("http://localhost:8888/remoteParticipantReturnsError");
     http:Request req = new;
@@ -543,7 +543,7 @@ function testRemoteParticipantSeperateResourceManagerSuccess() {
 }
 
 // TODO: module-ballerinai-transaction#460
-// @test:Config {}
+ @test:Config {}
 function testRemoteParticipantSeperateResourceManagerRemoteFail() {
     http:Client participantEP = checkpanic new ("http://localhost:8888/remoteParticipantSeperateResourceManager");
     http:Request req = new;
