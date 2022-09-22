@@ -25,7 +25,7 @@ service /hello on new http:Listener(8890) {
         var payload = req.getTextPayload();
         if (payload is string) {
             if (payload == "blowUp") {
-                int blowNum = blowUp3();
+              //  int blowNum = blowUp3();
             }
         }
 
