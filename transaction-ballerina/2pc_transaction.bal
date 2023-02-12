@@ -71,12 +71,12 @@ class TwoPhaseCommitTransaction {
                 var result = self.notifyParticipants(COMMAND_COMMIT, ());
                 if (result is error) {
                     // return Hazard outcome if a participant cannot successfully end its branch of the transaction
-                    ret = lang_trx:prepareError(OUTCOME_HAZARD);
+                    ret = prepareError(OUTCOME_HAZARD);
                 } else {
                     boolean localCommitSuccessful = commitResourceManagers(self.transactionId, self.transactionBlockId);
                     if (!localCommitSuccessful) {
                         // "Local commit failed"
-                        ret = lang_trx:prepareError(OUTCOME_HAZARD);
+                        ret = prepareError(OUTCOME_HAZARD);
                     } else {
                         ret = OUTCOME_COMMITTED;
                     }
@@ -87,11 +87,11 @@ class TwoPhaseCommitTransaction {
                 var result = self.notifyParticipants(COMMAND_ABORT, ());
                 if (result is error) {
                     // return Hazard outcome if a participant cannot successfully end its branch of the transaction
-                    ret = lang_trx:prepareError(OUTCOME_HAZARD);
+                    ret = prepareError(OUTCOME_HAZARD);
                 } else {
                     boolean localAbortSuccessful = abortResourceManagers(self.transactionId, self.transactionBlockId);
                     if (!localAbortSuccessful) {
-                        ret = lang_trx:prepareError(OUTCOME_HAZARD);
+                        ret = prepareError(OUTCOME_HAZARD);
                     } else {
                         if (self.possibleMixedOutcome) {
                             ret = OUTCOME_MIXED;
@@ -107,11 +107,11 @@ class TwoPhaseCommitTransaction {
             var result = self.notifyParticipants(COMMAND_ABORT, PROTOCOL_VOLATILE);
             if (result is error) {
                 // return Hazard outcome if a participant cannot successfully end its branch of the transaction
-                ret = lang_trx:prepareError(OUTCOME_HAZARD);
+                ret = prepareError(OUTCOME_HAZARD);
             } else {
                 boolean localAbortSuccessful = abortResourceManagers(self.transactionId, self.transactionBlockId);
                 if (!localAbortSuccessful) {
-                    ret = lang_trx:prepareError(OUTCOME_HAZARD);
+                    ret = prepareError(OUTCOME_HAZARD);
                 } else {
                     if (self.possibleMixedOutcome) {
                         ret = OUTCOME_MIXED;
@@ -260,11 +260,11 @@ class TwoPhaseCommitTransaction {
         var result = self.notifyParticipants(COMMAND_ABORT, ());
         if (result is error) {
             // return Hazard outcome if a participant cannot successfully end its branch of the transaction
-            ret = lang_trx:prepareError(OUTCOME_HAZARD);
+            ret = prepareError(OUTCOME_HAZARD);
         } else {
             boolean localAbortSuccessful = abortResourceManagers(self.transactionId, self.transactionBlockId);
             if (!localAbortSuccessful) {
-                ret = lang_trx:prepareError(OUTCOME_HAZARD);
+                ret = prepareError(OUTCOME_HAZARD);
             } else {
                 if (self.possibleMixedOutcome) {
                     ret = OUTCOME_MIXED;
