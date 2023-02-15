@@ -407,3 +407,15 @@ function getParticipantId(string transactionBlockId) returns string {
     string participantId = localParticipantId + ":" + transactionBlockId;
     return participantId;
 }
+
+# Log and prepare `error` as a `Error`.
+#
+# + message - Error message
+# + err - `error` instance
+# + return - Prepared `lang_trx:Error` instance
+isolated function prepareError(string message, error? err = ()) returns lang_trx:Error {
+    if (err is error) {
+        return error lang_trx:Error(message, err);
+    }
+    return error lang_trx:Error(message);
+}
