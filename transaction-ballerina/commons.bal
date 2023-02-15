@@ -412,9 +412,8 @@ function getParticipantId(string transactionBlockId) returns string {
 #
 # + message - Error message
 # + err - `error` instance
-# + return - Prepared `Error` instance
+# + return - Prepared `lang_trx:Error` instance
 isolated function prepareError(string message, error? err = ()) returns lang_trx:Error {
-    lang_trx:Error trxError;
     if (err is error) {
         return error lang_trx:Error(message, err);
     }
