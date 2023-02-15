@@ -416,9 +416,7 @@ function getParticipantId(string transactionBlockId) returns string {
 isolated function prepareError(string message, error? err = ()) returns lang_trx:Error {
     lang_trx:Error trxError;
     if (err is error) {
-        trxError = error lang_trx:Error(message, err);
-    } else {
-        trxError = error lang_trx:Error(message);
+        return error lang_trx:Error(message, err);
     }
-    return trxError;
+    return error lang_trx:Error(message);
 }
