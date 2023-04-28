@@ -1,9 +1,9 @@
 [[dependency]]
 org = "ballerina"
 name = "io"
-version = "1.4.0"
+version = "@stdlib.io.version@"
 
 [[dependency]]
 org = "ballerina"
 name = "os"
-version = "1.6.0"
+version = "@stdlib.os.version@"
