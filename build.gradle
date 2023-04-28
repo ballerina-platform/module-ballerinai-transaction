@@ -27,7 +27,6 @@ ext.puppycrawlCheckstyleVersion = project.puppycrawlCheckstyleVersion
 ext.testngVersion = "6.14.3"
 ext.slf4jVersion = "1.7.30"
 ext.stdlibIoVersion = project.stdlibIoVersion
-ext.stdlibRegexVersion = project.stdlibRegexVersion
 ext.stdlibOsVersion = project.stdlibOsVersion
 ext.stdlibUuidVersion = project.stdlibUuidVersion
 ext.stdlibHttpVersion = project.stdlibHttpVersion
@@ -86,7 +85,6 @@ subprojects {
         /* Standard libraries */
         ballerinaStdLibs "io.ballerina.stdlib:io-ballerina:${stdlibIoVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:constraint-ballerina:${stdlibConstraintVersion}"
-        ballerinaStdLibs "io.ballerina.stdlib:regex-ballerina:${stdlibRegexVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:os-ballerina:${stdlibOsVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:uuid-ballerina:${stdlibUuidVersion}"
 

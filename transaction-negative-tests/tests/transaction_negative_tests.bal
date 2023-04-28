@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/io;
-import ballerina/regex;
 import ballerina/test;
 import ballerina/jballerina.java;
 
@@ -131,7 +130,7 @@ function getLogLinesFromExecResult(Process|error execResult) returns string[] {
     io:ReadableByteChannel readableResult = result.stderr();
     io:ReadableCharacterChannel sc = new (readableResult, UTF_8);
     string outText = checkpanic sc.read(100000);
-    string[] logLines = regex:split(outText, "\n");
+    string[] logLines = re `\n`.split(outText);
     return logLines;
 }
 
