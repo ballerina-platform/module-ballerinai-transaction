@@ -62,6 +62,15 @@ def configTOMLFile = new File("$project.projectDir/tests/Config.toml")
 def originalConfig = ballerinaConfigFile.text
 def originalDependencies = ballerinaDependencyFile.text
 def initialTOMLcontent = configTOMLFile.text
+def graalvmFlag = ""
+def testParams = "--code-coverage --includes=ballerinai.*:org.ballerinalang.stdlib.transaction.*"
+
+task initializeVariables {
+    if (project.hasProperty('balGraalVMTest')) {
+        graalvmFlag = "--graalvm"
+        testParams = "--includes=ballerinai.*:org.ballerinalang.stdlib.transaction.*"
+    }
+}
 
 def stripBallerinaExtensionVersion(String extVersion) {
     if (extVersion.matches(project.ext.timestampedVersionRegex)) {
@@ -110,22 +119,22 @@ def setExecPath(configTOMLFile, distributionBinPath) {
 task ballerinaNegativeTests {
     inputs.dir file(project.projectDir)
     dependsOn(copyToLib)
+    dependsOn(initializeVariables)
     dependsOn(":transaction-ballerina:build")
     dependsOn(":transaction-test-utils:build")
     dependsOn(updateTomlVerions)
     finalizedBy(revertTomlFile)
     doLast {
         def distributionBinPath =  "$project.rootDir/target/ballerina-runtime/bin"
-        def testParams = "--code-coverage --includes=ballerinai.*:org.ballerinalang.stdlib.transaction.*"
         
         setExecPath(configTOMLFile,distributionBinPath)
         exec {
             workingDir project.projectDir
             environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "$distributionBinPath/bal.bat test ${testParams}"
+                commandLine 'cmd', '/c', "$distributionBinPath/bal.bat test ${graalvmFlag} ${testParams}"
             } else {
-                commandLine 'sh', '-c', "$distributionBinPath/bal test ${testParams}"
+                commandLine 'sh', '-c', "$distributionBinPath/bal test ${graalvmFlag} ${testParams}"
             }
         }
     }
