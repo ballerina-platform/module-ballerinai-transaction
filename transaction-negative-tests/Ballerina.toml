@@ -3,6 +3,9 @@ org = "ballerinai"
 name = "transaction_negative_tests"
 version = "@toml.version@"
 
+[platform.java11]
+graalvmCompatible = true
+
 [[platform.java11.dependency]]
 path = "../transaction-native/build/libs/transaction-native-@project.version@.jar"
 groupId = "ballerina"
