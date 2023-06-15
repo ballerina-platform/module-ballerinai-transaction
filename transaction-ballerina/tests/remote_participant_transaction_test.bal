@@ -248,9 +248,9 @@ function remoteErrorReturnInitiator() returns @tainted string {
         if (resp is http:Response) {
             if (resp.statusCode == 500) {
                 S1 += " remote1-excepted";
-                var payload = resp.getTextPayload();
-                if (payload is string) {
-                    S1 += ":[" + <@untainted>payload + "]";
+                var payload = resp.getJsonPayload();
+                if (payload is map<json>) {
+                    S1 += ":[" + <@untainted>payload["message"].toString() + "]";
                 }
             } else {
                 var text = resp.getTextPayload();
@@ -408,11 +408,18 @@ service / on new http:Listener(8888) {
             http:Response|error result = separateRMParticipant01->post("/hello/remoteResource", <@untainted>req);
             if (result is http:Response) {
                 s += " [remote-status:" + result.statusCode.toString() + "] ";
-                var p = result.getTextPayload();
-                if (p is string) {
-                    s += p;
+                if (result.statusCode == 500) {
+                    var p = result.getJsonPayload();
+                    if (p is map<json>) {
+                        s += p["message"].toString();
+                    }
                 } else {
-                    s += " error-getTextPayload";
+                    var p = result.getTextPayload();
+                    if (p is string) {
+                        s += p;
+                    } else {
+                        s += " error-getTextPayload";
+                    }
                 }
             } else {
                 s += " error-from-remote: " + result.message() + "desc: " + result.message();
