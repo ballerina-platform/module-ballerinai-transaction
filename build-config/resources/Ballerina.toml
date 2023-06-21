@@ -2,6 +2,10 @@
 org = "ballerinai"
 name = "transaction"
 version = "@toml.version@"
+distribution = "2201.7.0"
+
+[platform.java11]
+graalvmCompatible = true
 
 [[platform.java11.dependency]]
 artifactId = "transaction"
