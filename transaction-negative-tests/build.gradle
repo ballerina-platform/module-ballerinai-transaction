@@ -122,6 +122,9 @@ task ballerinaNegativeTests {
     dependsOn(initializeVariables)
     dependsOn(":transaction-ballerina:build")
     dependsOn(":transaction-test-utils:build")
+    dependsOn(":transaction-negative-tests:compileJava")
+    dependsOn(":transaction-negative-tests:jar")
+    dependsOn(":transaction-negative-tests:processResources")
     dependsOn(updateTomlVerions)
     finalizedBy(revertTomlFile)
     doLast {
