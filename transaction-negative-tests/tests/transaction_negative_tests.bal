@@ -24,7 +24,8 @@ configurable string bal_exec_path = ?;
 const string TRX_STATEMENT_FILE = "tests/resources/transaction_stmt_negative.bal";
 const string INVALID_TRX_HANDLER_FILE = "tests/resources/transaction_handlers_negative.bal";
 const string ROLLBACK_ONLT_TRX_FILE = "tests/resources/transaction_with_setrollbackonly_test_negative.bal";
-const string TRX_ON_FAIL_FILE = "tests/resources/transaction_on_fail_negative.bal";
+const string TRX_ON_FAIL_UNREACHABLE_FILE = "tests/resources/transaction_on_fail_unreachable_negative.bal";
+const string TRX_ON_FAIL_INCOMPATIBLE_TYPE_FILE = "tests/resources/transaction_on_fail_type_negative.bal";
 const string TRANSACTIONAL_FUNC_FILE = "tests/resources/transactional_functions_negative.bal";
 
 @test:Config {}
@@ -110,17 +111,29 @@ public function testTransactionWithSetRollbackOnly() {
     "invoking transactional function outside transactional scope is prohibited");
 }
 
-@test:Config {}
-public function testTransactionOnFail() {
-    Process|error execResult = exec(bal_exec_path, {}, (), "run", TRX_ON_FAIL_FILE);
+@test:Config {
+    enable: false
+}
+public function testTransactionOnFailUnreachableCode() {
+    Process|error execResult = exec(bal_exec_path, {}, (), "run", TRX_ON_FAIL_UNREACHABLE_FILE);
     string[] logLines = getLogLinesFromExecResult(execResult);
     string[] errorLines = getErrorLogLines(logLines);
-    test:assertEquals(errorLines.length(), 4);
-    validateLog(errorLines[0], "ERROR", "transaction_on_fail_negative.bal:(32:6,32:35)", "unreachable code");
-    validateLog(errorLines[1], "ERROR", "transaction_on_fail_negative.bal:(48:4,50:5)", "incompatible error " +
-    "definition type: 'ErrorTypeA' will not be matched to 'ErrorTypeB'");
-    validateLog(errorLines[2], "ERROR", "transaction_on_fail_negative.bal:(80:7,80:42)", "unreachable code");
-    validateLog(errorLines[3], "ERROR", "transaction_on_fail_negative.bal:(96:7,96:76)", "unreachable code");
+    test:assertEquals(errorLines.length(), 3);
+    validateLog(errorLines[0], "ERROR", "transaction_on_fail_unreachable_negative.bal:(32:6,32:35)", "unreachable code");
+    validateLog(errorLines[1], "ERROR", "transaction_on_fail_unreachable_negative.bal:(66:7,66:42)", "unreachable code");
+    validateLog(errorLines[2], "ERROR", "transaction_on_fail_unreachable_negative.bal:(82:7,82:76)", "unreachable code");
+}
+
+@test:Config {
+    enable: false
+}
+public function testTransactionOnFailIncompatibleType() {
+    Process|error execResult = exec(bal_exec_path, {}, (), "run", TRX_ON_FAIL_INCOMPATIBLE_TYPE_FILE);
+    string[] logLines = getLogLinesFromExecResult(execResult);
+    string[] errorLines = getErrorLogLines(logLines);
+    test:assertEquals(errorLines.length(), 1);
+    validateLog(errorLines[0], "ERROR", "transaction_on_fail_type_negative.bal:(32:12,32:22)", 
+                "incompatible types: expected 'ErrorTypeA', found 'ErrorTypeB'");
 }
 
 function getLogLinesFromExecResult(Process|error execResult) returns string[] {

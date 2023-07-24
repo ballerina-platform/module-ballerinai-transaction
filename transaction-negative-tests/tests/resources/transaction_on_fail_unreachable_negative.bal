@@ -38,20 +38,6 @@ function testUnreachableAfterFail() returns string {
    return str;
 }
 
-function testIncompatibleErrorTypeOnFail() returns string {
-   string str = "";
-   transaction {
-     str += "Before failure throw";
-     var res = checkpanic commit;
-     fail error ErrorTypeA(TYPE_A_ERROR_REASON, message = "Error Type A");
-   }
-   on fail ErrorTypeB e {
-      str += "-> Error caught ! ";
-   }
-   str += "-> Execution continues...";
-   return str;
-}
-
 function testIgnoreReturnInOnFail() returns string {
    string str = "";
    transaction {
