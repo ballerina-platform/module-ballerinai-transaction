@@ -123,6 +123,7 @@ task ballerinaNegativeTests {
     dependsOn(":transaction-ballerina:build")
     dependsOn(":transaction-test-utils:build")
     dependsOn(":transaction-negative-tests:compileJava")
+    dependsOn(":transaction-negative-tests:compileTestJava")
     dependsOn(":transaction-negative-tests:jar")
     dependsOn(":transaction-negative-tests:processResources")
     dependsOn(":transaction-negative-tests:processTestResources")
