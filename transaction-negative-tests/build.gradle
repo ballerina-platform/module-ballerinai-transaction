@@ -125,6 +125,7 @@ task ballerinaNegativeTests {
     dependsOn(":transaction-negative-tests:compileJava")
     dependsOn(":transaction-negative-tests:jar")
     dependsOn(":transaction-negative-tests:processResources")
+    dependsOn(":transaction-negative-tests:processTestResources")
     dependsOn(updateTomlVerions)
     finalizedBy(revertTomlFile)
     doLast {
