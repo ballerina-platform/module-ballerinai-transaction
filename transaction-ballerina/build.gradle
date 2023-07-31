@@ -92,6 +92,7 @@ publishing {
 updateTomlFiles.dependsOn copyStdlibs
 
 build.dependsOn ":transaction-native:build"
+build.dependsOn ":transaction-ballerina:generatePomFileForMavenPublication"
 test.dependsOn ":transaction-native:build"
 
 publishToMavenLocal.dependsOn build

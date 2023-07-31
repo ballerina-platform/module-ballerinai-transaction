@@ -4,10 +4,10 @@ name = "transaction"
 version = "0.0.0"
 distribution = "2201.7.0"
 
-[platform.java11]
+[platform.java17]
 graalvmCompatible = true
 
-[[platform.java11.dependency]]
+[[platform.java17.dependency]]
 artifactId = "transaction"
 version = "1.7.0-SNAPSHOT"
 path = "../transaction-native/build/libs/transaction-native-1.7.0-SNAPSHOT.jar"
