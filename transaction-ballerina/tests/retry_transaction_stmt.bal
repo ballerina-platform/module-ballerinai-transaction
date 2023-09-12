@@ -161,14 +161,15 @@ function multipleTrxSequenceWithRetry(boolean abort1, boolean abort2, boolean fa
         if ((fail1 && !failed1) || abort1) {
             if(abort1) {
               rollback;
-            }
-            if(fail1 && !failed1) {
+            } else if(fail1 && !failed1) {
               failed1 = true;
               error err = error errors:Retriable("TransactionError");
               panic err;
+            } else {
+              checkpanic commit;
             }
         } else {
-            var commitRes = checkpanic commit;
+             checkpanic commit;
         }
     }
     a += " end-1";
@@ -187,11 +188,12 @@ function multipleTrxSequenceWithRetry(boolean abort1, boolean abort2, boolean fa
         if ((fail2 && !failed2) || abort2) {
            if(abort2) {
              rollback;
-           }
-           if(fail2 && !failed2) {
+           } else if(fail2 && !failed2) {
              failed2 = true;
              error err = error errors:Retriable("TransactionError");
              panic err;
+           } else {
+              checkpanic commit;
            }
         } else {
             var commitRes = checkpanic commit;
@@ -236,10 +238,11 @@ function customRetryTrxManager() returns string|error {
         count = count+1;
         if(count < 3) {
             str += (" attempt " + count.toString() + ":error,");
-            int bV = check trxErrorInRetry();
+            _ = check trxErrorInRetry();
+            checkpanic commit;
         } else {
             str += (" attempt "+ count.toString() + ":result returned end.");
-            var commitRes = checkpanic commit;
+            checkpanic commit;
             return str;
         }
     }
@@ -277,10 +280,11 @@ function getPrevInfo() returns string|error {
         count = count+1;
         if(count < 3) {
             str += (" attempt " + count.toString() + ":error,");
-            int bV = check trxErrorInRetry();
+            _ = check trxErrorInRetry();
+            checkpanic commit;
         } else {
             str += (" attempt "+ count.toString() + ":result returned end.");
-            var commitRes = checkpanic commit;
+            checkpanic commit;
         }
     }
     return str;
@@ -302,13 +306,14 @@ function getPrevInfoInNested() returns string|error {
                 count = count+1;
                 if(count < 3) {
                     str += (" attempt " + count.toString() + ":error,");
-                    int bV = check trxErrorInRetry();
+                    _ = check trxErrorInRetry();
+                    checkpanic commit;
                 } else {
                     str += (" attempt "+ count.toString() + ":result returned end.");
-                    var commitRes = checkpanic commit;
+                    checkpanic commit;
                 }
         }
-        var ign = checkpanic commit;
+        checkpanic commit;
     }
     return str;
 }
