@@ -31,10 +31,11 @@ function testCommitSuccessWithSuccessOutcome() returns error? {
         if (getErr) {
             getErr = false;
             str += "-> ";
-            var c = check incrementCount(2);
+            _ = check incrementCount(2);
+            checkpanic commit;
         } else {
             transactions:onCommit(onCommitFunc);
-            var e = checkpanic commit;
+            checkpanic commit;
         }
     }
     str += "-> exit trx block";
@@ -100,6 +101,7 @@ function testCommitFailWithUnusualSuccessOutcome() returns error? {
             getErr = false;
             str += " -> ";
             var c = check incrementCount(2);
+            checkpanic commit;
         } else {
             setRollbackOnlyErrorForTrx();
             var e = commit;
@@ -135,6 +137,7 @@ function commitFailWithFailOutcome() returns string|error {
         if (getErr) {
             getErr = false;
             var c = check incrementCount(2);
+            checkpanic commit;
         } else {
             setRollbackOnlyErrorForTrx();
             check commit;
@@ -161,7 +164,9 @@ function commitFailWithPanicOutcome() returns error? {
         str += "trx started ";
         if (getErr) {
             getErr = false;
-            var c = check incrementCount(2);
+            _ = check incrementCount(2);
+            str += "reached #pcn";
+            checkpanic commit;
         } else {
             setRollbackOnlyErrorForTrx();
             var e =  commit;
@@ -195,15 +200,13 @@ function testRollbackWithSuccessOutcome() returns error? {
             getErr = false;
             str += "-> ";
             var c = check incrementCount(2);
+            checkpanic commit;
         } else if (x < 0) {
             transactions:onRollback(onRollbackFunc);
             rollback;
         } else {
             str += "-> commit ";
-            var o = commit;
-            if (o is error) {
-
-            }
+            checkpanic commit;
         }
         str += "-> end of trx block ";
     }
@@ -240,15 +243,13 @@ function rollbackWithFailOutcome() returns string|error {
         if (getErr) {
             getErr = false;
             var c = check incrementCount(2);
+            checkpanic commit;
         } else if (x < 0) {
             transactions:onRollback(onRollbackFunc);
             rollback error("Invalid number");
         } else {
             str += "-> commit ";
-            var o = commit;
-            if (o is error) {
-
-            }
+            checkpanic commit;
         }
 
     }
@@ -286,10 +287,7 @@ function rollbackWithPanicOutcome() {
             panic error("Invalid number");
         }
         out += "-> commited ";
-        var o = commit;
-        if (o is error) {
-
-        }
+        checkpanic commit;
     }
     out += "-> exit transaction block.";
 }
@@ -302,10 +300,7 @@ function testPanicFromRollbackWithUnusualSuccessOutcome() returns error? {
     boolean getErr = true;
     var onRollbackFunc = isolated function(transactions:Info? info, error? cause, boolean willTry) {
         if (cause is error) {
-            var err = trap panicWithError(cause);
-            if err is error {
-
-            }
+            error? ign = trap panicWithError(cause);
             io:println("-> panic from rollback ");
         }
     };
@@ -317,15 +312,13 @@ function testPanicFromRollbackWithUnusualSuccessOutcome() returns error? {
             getErr = false;
             str += "-> ";
             var c = check incrementCount(2);
+            checkpanic commit;
         } else if (x < 0) {
             transactions:onRollback(onRollbackFunc);
             rollback error("Invalid number");
         } else {
             str += "-> commit ";
-            var o = commit;
-            if o is error {
-
-            }
+            checkpanic commit;
         }
     }
     str += "-> exit transaction block.";
@@ -346,6 +339,7 @@ function testPanicFromCommitWithUnusualSuccessOutcome() returns error? {
             getErr = false;
             str += "-> ";
             var c = check incrementCount(2);
+            checkpanic commit;
         } else {
             setRollbackOnlyErrorForTrx();
             var e = commit;
@@ -381,7 +375,8 @@ function panicFromCommitWithUnusualFailOutcome() returns string|error {
         str += "trx started ";
         if (getErr) {
             getErr = false;
-            var c = check incrementCount(2);
+            _ = check incrementCount(2);
+            checkpanic commit;
         } else {
             setRollbackOnlyErrorForTrx();
             check commit;
@@ -419,15 +414,13 @@ function panicFromRollbackWithPanicOutcome() returns error? {
         if (getErr) {
             getErr = false;
             var c = check incrementCount(2);
+            checkpanic commit;
         } else if (x < 0) {
             transactions:onRollback(onRollbackFunc);
             rollback error("Invalid number");
         } else {
             str += "-> commit ";
-            var o = commit;
-            if (o is error) {
-
-            }
+            checkpanic commit;
         }
     }
     str += "-> exit transaction block.";
@@ -451,10 +444,11 @@ function panicFromCommitWithPanicOutcome() returns error? {
         str += "trx started ";
         if (getErr) {
             getErr = false;
-            var c = check incrementCount(2);
+            _ = check incrementCount(2);
+            checkpanic commit;
         } else {
             setRollbackOnlyErrorForTrx();
-            var e = checkpanic commit;
+            checkpanic commit;
         }
         str += "-> end of trx block ";
     }
@@ -490,7 +484,8 @@ function noCommitOrRollbackPerformedWithRollbackAndFailOutcome() returns string|
         transactions:onCommit(onCommitFunc);
         transactions:onRollback(onRollbackFunc);
         if (getErr) {
-            var e = check incrementCount(2);
+            _ = check incrementCount(2);
+            checkpanic commit;
         } else {
             check commit;
         }
@@ -530,7 +525,8 @@ function noCommitOrRollbackPerformedWithRollbackAndPanicOutcome() returns error?
         transactions:onRollback(onRollbackFunc);
         if (getErr) {
             getErr = false;
-            var c = check incrementCount(2);
+            _ = check incrementCount(2);
+            checkpanic commit;
         } else {
             check commit;
         }
@@ -600,7 +596,8 @@ function nestedRetryFunc(boolean needPanic, boolean failCommit) returns string|e
         count = count + 1;
         if (count <= 2) {
             str += "-> ";
-            var c = check incrementCount(2);
+            _ = check incrementCount(2);
+            checkpanic commit;
         } else {
             if (failCommit) {
                setRollbackOnlyErrorForTrx();
@@ -616,7 +613,8 @@ function nestedRetryFunc(boolean needPanic, boolean failCommit) returns string|e
             str += "-> nested retry ";
             count2 = count2 + 1;
             if (count2 <= 2) {
-                var c = check incrementCount(2);
+                _ = check incrementCount(2);
+                checkpanic commit;
             } else {
                 if (failCommit) {
                     setRollbackOnlyErrorForTrx();

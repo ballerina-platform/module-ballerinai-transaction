@@ -182,13 +182,14 @@ function multipleTrxSequence(boolean abort1, boolean abort2, boolean fail1, bool
                 transactions:onRollback(onRollbackFunc);
                 transactions:onCommit(onCommitFunc);
                 if ((fail1 && !failed1) || abort1) {
-                    if(abort1) {
+                    if abort1 {
                       rollback;
-                    }
-                    if(fail1 && !failed1) {
+                    } else if fail1 && !failed1 {
                       failed1 = true;
                       error err = error("TransactionError");
                       panic err;
+                    } else {
+                      checkpanic commit;
                     }
                 } else {
                     var commitRes = checkpanic commit;
@@ -207,11 +208,12 @@ function multipleTrxSequence(boolean abort1, boolean abort2, boolean fail1, bool
         if ((fail1 && !failed1) || abort1) {
             if(abort1) {
               rollback;
-            }
-            if(fail1 && !failed1) {
+            } else if(fail1 && !failed1) {
               failed1 = true;
               error err = error("TransactionError");
               panic err;
+            } else {
+              checkpanic commit;
             }
         } else {
             var commitRes = checkpanic commit;
@@ -234,11 +236,12 @@ function multipleTrxSequence(boolean abort1, boolean abort2, boolean fail1, bool
                 if ((fail2 && !failed2) || abort2) {
                    if(abort2) {
                      rollback;
-                   }
-                   if(fail2 && !failed2) {
+                   } else if(fail2 && !failed2) {
                      failed2 = true;
                      error err = error("TransactionError");
                      panic err;
+                   } else {
+                     checkpanic commit;
                    }
                 } else {
                     var commitRes = checkpanic commit;
@@ -257,11 +260,12 @@ function multipleTrxSequence(boolean abort1, boolean abort2, boolean fail1, bool
         if ((fail2 && !failed2) || abort2) {
            if(abort2) {
              rollback;
-           }
-           if(fail2 && !failed2) {
+           } else if(fail2 && !failed2) {
              failed2 = true;
              error err = error("TransactionError");
              panic err;
+           } else {
+             checkpanic commit;
            }
         } else {
             var commitRes = checkpanic commit;
@@ -296,10 +300,11 @@ function testCustomRetryManager() returns error? {
         count1 = count1 + 1;
         if(count1 < 3) {
             str += (" -> attempt " + count1.toString() + ":error,");
-            int bV = check trxError();
+            _ = check trxError();
+            check commit;
         } else {
             str += (" -> attempt "+ count1.toString());
-            var commitRes = checkpanic commit;
+            check commit;
             str += " -> result commited -> trx1 end.";
         }
         int count2 = 0;
@@ -308,7 +313,8 @@ function testCustomRetryManager() returns error? {
                 count2 = count2 + 1;
                 if(count2 < 3) {
                     str += (" -> attempt " + count2.toString() + ":error,");
-                    int bV = check trxError();
+                    _ = check trxError();
+                    check commit;
                 } else {
                     str += (" -> attempt "+ count2.toString());
                     var commitRes = checkpanic commit;
@@ -333,15 +339,16 @@ function testNestedTrxWithinRetryTrx() returns error? {
         count = count + 1;
         if(count < 3) {
             str += (" -> attempt " + count.toString() + ":error,");
-            int bV = check trxError();
+            _ = check trxError();
+            check commit;
         } else {
             str += (" -> attempt "+ count.toString());
-            var commitRes = checkpanic commit;
+            checkpanic commit;
             str += " -> result commited -> trx1 end.";
         }
         transaction {
             str += " -> inside trx2 ";
-            var commitRes = checkpanic commit;
+            checkpanic commit;
             str += " -> result commited -> trx2 end.";
         }
     }
@@ -363,14 +370,15 @@ function testNestedRetryTrxWithinTrx() returns error? {
                 count = count + 1;
                 if(count < 3) {
                     str += (" -> attempt " + count.toString() + ":error,");
-                    int bV = check trxError();
+                    _ = check trxError();
+                    checkpanic commit;
                 } else {
                     str += (" -> attempt "+ count.toString());
-                    var commitRes = checkpanic commit;
+                    checkpanic commit;
                     str += " -> result commited -> trx2 end.";
                 }
             }
-        var commitRes = checkpanic commit;
+        checkpanic commit;
         str += " -> result commited -> trx1 end.";
     }
     test:assertEquals(str, "start -> inside trx1  -> inside trx2  "
@@ -392,12 +400,12 @@ function testNestedInnerReturn() returns string {
     string str = "start";
     retry transaction {
         str += " -> within trx 1";
-        var res1 = checkpanic commit;
+        checkpanic commit;
         retry transaction {
-            var res2 = checkpanic commit;
+            checkpanic commit;
             str += " -> within trx 2";
             retry transaction {
-                var res3 = checkpanic commit;
+                checkpanic commit;
                 str += " -> within trx 3";
                 return str;
             }
@@ -409,16 +417,16 @@ function testNestedMiddleReturn() returns string {
     string str = "start";
     retry transaction {
         str += " -> within trx 1";
-        var res1 = checkpanic commit;
+        checkpanic commit;
         retry transaction {
             int count = 1;
-            var res2 = checkpanic commit;
+            checkpanic commit;
             str += " -> within trx 2";
             if (count == 1) {
                 return str;
             }
             retry transaction {
-                var res3 = checkpanic commit;
+                checkpanic commit;
                 str += " -> within trx 3 -> should not reach here";
                 return str;
             }
