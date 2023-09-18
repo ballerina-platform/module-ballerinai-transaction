@@ -9,6 +9,6 @@ graalvmCompatible = true
 
 [[platform.java17.dependency]]
 artifactId = "transaction"
-version = "1.8.0-SNAPSHOT"
-path = "../transaction-native/build/libs/transaction-native-1.8.0-SNAPSHOT.jar"
+version = "1.8.0"
+path = "../transaction-native/build/libs/transaction-native-1.8.0.jar"
 groupId = "ballerina"
