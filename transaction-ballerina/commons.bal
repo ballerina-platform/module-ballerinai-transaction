@@ -92,7 +92,10 @@ function cleanupTransactions() returns error? {
         }
     }
     worker w2 returns () {
-        TwoPhaseCommitTransaction[] initiatedTransactionsArr = initiatedTransactions.toArray();
+        TwoPhaseCommitTransaction[] initiatedTransactionsArr;
+        lock {
+            initiatedTransactionsArr = initiatedTransactions.toArray();
+        }
         int i = 0;
         while (i < initiatedTransactionsArr.length()) {
             var twopcTxn = initiatedTransactionsArr[i];
