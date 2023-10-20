@@ -25,7 +25,7 @@ public isolated function performTransaction() returns error? {
     }
 }
 
-public isolated class TaskExecuter {
+public isolated class ExecuteTask {
 
     *task:Job;
     private int counter = 0;
@@ -39,7 +39,7 @@ public isolated class TaskExecuter {
         int count = 0;
         lock {
             count = self.counter.cloneReadOnly();
-            if (count >= 100) {
+            if count >= 100 {
                 return;
             }
             self.counter += 1;
@@ -48,7 +48,7 @@ public isolated class TaskExecuter {
         var err = trap performTransaction();
 
         if !(err is ()) {
-            test:assertFail("Error in task " + self.name + " : " + err.toString());
+            test:assertFail(string`Error in task " ${self.name} : ${err.toString()}`);
         }
 
         lock {
@@ -59,27 +59,27 @@ public isolated class TaskExecuter {
 
     public isolated function scheduleTaskExecution(decimal interval) {
         do {
-            var _ = check task:scheduleJobRecurByFrequency(self, interval);
+            _ = check task:scheduleJobRecurByFrequency(self, interval);
         } on fail error err {
-            test:assertFail("Error in scheduling task " + self.name + " : " + err.toString());
+            test:assertFail(string`Error in scheduling task ${self.name}: ${err.toString()}`);
         }
     }
 }
 
 public function scheduleTasks() returns error? {
-    var taskA = new TaskExecuter("A");
-    var taskB = new TaskExecuter("B");
-    var taskC = new TaskExecuter("C");
-    var taskD = new TaskExecuter("D");
-    var taskE = new TaskExecuter("E");
+    ExecuteTask[] tasks = [];
+    string[] taskNames = ["A", "B", "C", "D", "E"];
+    decimal interval = 0.1; // 100 milliseconds
 
-    decimal interval = 0.1;
+    from string taskName in taskNames
+        do {
+            tasks.push(new ExecuteTask(taskName));
+        };
 
-    taskA.scheduleTaskExecution(interval);
-    taskB.scheduleTaskExecution(interval);
-    taskC.scheduleTaskExecution(interval);
-    taskD.scheduleTaskExecution(interval);
-    taskE.scheduleTaskExecution(interval);
+    from ExecuteTask task in tasks
+        do {
+            task.scheduleTaskExecution(interval);
+        };
 
     runtime:sleep(10); // Sleep to allow tasks to run
 }
@@ -93,5 +93,5 @@ public function testTransactionConcurrency() {
     lock {
         actualCountsMap = taskCounterMap.cloneReadOnly();
     }
-    test:assertEquals(actualCountsMap, expectedCountsMap, "Transaction concurrency test failed");
+    test:assertEquals(actualCountsMap, expectedCountsMap, "Transaction concurrency test failed.");
 }
