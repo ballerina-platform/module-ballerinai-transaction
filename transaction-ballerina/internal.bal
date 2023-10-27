@@ -64,6 +64,8 @@ function startTransactionCoordinator() returns error? {
 }
 
 function commitResourceManagers(string transactionId, string transactionBlockId) returns boolean {
+    string committedLog = string `${transactionId}:${transactionBlockId}|committed`;
+    writeToLogFile(committedLog);
     if transactional {
         CommitHandlerType commitFunc = getCommitHandlerList();
         if (commitFunc is lang_trx:CommitHandler[]) {
@@ -214,4 +216,9 @@ function externToString(TimestampImpl timestamp) returns string = @java:Method {
     'class: "org.ballerinalang.stdlib.transaction.ToString",
     name: "toString",
     paramTypes: ["io.ballerina.runtime.api.values.BObject"]
+} external;
+
+function writeToLogFile(string logMessage) = @java:Method {
+    'class: "org.ballerinalang.stdlib.transaction.WriteToLogFile",
+    name: "writeToLogFile"
 } external;
