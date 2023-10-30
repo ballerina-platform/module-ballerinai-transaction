@@ -64,8 +64,7 @@ function startTransactionCoordinator() returns error? {
 }
 
 function commitResourceManagers(string transactionId, string transactionBlockId) returns boolean {
-    string committedLog = string `${transactionId}:${transactionBlockId}|committed`;
-    writeToLogFile(committedLog);
+    writeToLog(transactionId, transactionBlockId, "COMMITTING");
     if transactional {
         CommitHandlerType commitFunc = getCommitHandlerList();
         if (commitFunc is lang_trx:CommitHandler[]) {
@@ -218,7 +217,17 @@ function externToString(TimestampImpl timestamp) returns string = @java:Method {
     paramTypes: ["io.ballerina.runtime.api.values.BObject"]
 } external;
 
-function writeToLogFile(string logMessage) = @java:Method {
-    'class: "org.ballerinalang.stdlib.transaction.WriteToLogFile",
-    name: "writeToLogFile"
+// function writeToLogFile(string trxId, string logMessage) = @java:Method {
+//     'class: "org.ballerinalang.stdlib.transaction.TransactionRecoveryLog",
+//     name: "writeToLogFile"
+// } external;
+
+// function writeToMemoryLog(string trxId, string logMessage) = @java:Method {
+//     'class: "org.ballerinalang.stdlib.transaction.TransactionRecoveryLog",
+//     name: "writeToMemoryLog"
+// } external;
+
+function writeToLog(string trxId, string transactionBlockId, string transactionStatus) = @java:Method {
+    'class: "org.ballerinalang.stdlib.transaction.TransactionRecoveryLog",
+    name: "writeToLog"
 } external;
