@@ -13,7 +13,6 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
 import ballerina/jballerina.java;
 import ballerina/lang.'transaction as lang_trx;
 import ballerina/log;
@@ -47,24 +46,27 @@ function beginRemoteParticipant(string transactionBlockId) {
 # initiator via a network call.
 #
 # + transactionId - Globally unique transaction ID. If this is a new transaction which is initiated, then this
-#                   will be null.
-#                   If this is a participant in an existing transaction, then it will have a value.
+# will be null.
+# If this is a participant in an existing transaction, then it will have a value.
 # + transactionBlockId - ID of the transaction block. Each transaction block in a process has a unique ID.
 # + registerAtUrl - The URL of the initiator
 # + coordinationType - Coordination type of this transaction
 # + return - Newly created/existing TransactionContext for this transaction.
 public function beginTransaction(string? transactionId, string transactionBlockId, string registerAtUrl,
-                          string coordinationType) returns TransactionContext|error {
+        string coordinationType) returns TransactionContext|error {
     if (transactionId is string) {
-        if (initiatedTransactions.hasKey(transactionId)) { // if participant & initiator are in the same process
+        if (hasInitiatedTransaction(transactionId)) { // if participant & initiator are in the same process
             // we don't need to do a network call and can simply do a local function call
             return registerLocalParticipantWithInitiator(transactionId, transactionBlockId, registerAtUrl);
         } else {
             //TODO: set the proper protocol
             string protocolName = PROTOCOL_DURABLE;
-            RemoteProtocol[] protocols = [{
-            name:protocolName, url:getParticipantProtocolAt(protocolName, <@untainted> transactionBlockId)
-            }];
+            RemoteProtocol[] protocols = [
+                {
+                    name: protocolName,
+                    url: getParticipantProtocolAt(protocolName, <@untainted>transactionBlockId)
+                }
+            ];
             return registerParticipantWithRemoteInitiator(transactionId, transactionBlockId, registerAtUrl, protocols);
         }
     } else {
@@ -111,12 +113,13 @@ transactional function endTransaction(string transactionId, string transactionBl
     }
 
     string participatedTxnId = getParticipatedTransactionId(transactionId, transactionBlockId);
-    if (!initiatedTransactions.hasKey(transactionId) && !participatedTransactions.hasKey(participatedTxnId)) {
+
+    if (!hasInitiatedTransaction(transactionId) && !participatedTransactions.hasKey(participatedTxnId)) {
         error err = error("Transaction: " + participatedTxnId + " not found");
         panic err;
     }
 
-    var initiatedTxn = initiatedTransactions[transactionId];
+    TwoPhaseCommitTransaction? initiatedTxn = initiatedTransactions[transactionId];
     if (initiatedTxn is ()) {
         return "";
     } else {
@@ -134,7 +137,7 @@ transactional function endTransaction(string transactionId, string transactionBl
 #
 # + transactionBlockId - ID of the transaction block. Each transaction block in a process has a unique ID.
 # + return - Transaction context.
-function registerRemoteParticipant(string transactionBlockId) returns  TransactionContext? = @java:Method {
+function registerRemoteParticipant(string transactionBlockId) returns TransactionContext? = @java:Method {
     'class: "org.ballerinalang.stdlib.transaction.Utils",
     name: "registerRemoteParticipant"
 } external;
