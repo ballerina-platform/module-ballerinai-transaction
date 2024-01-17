@@ -730,3 +730,23 @@ function testBreakWithinTransactionToOuterLoop() {
     test:assertEquals(str, "Loop continued with digit: 1 ->Loop continued with digit: 2 " +
     "->Loop continued with digit: 3 ->Loop broke with digit: 4");
 }
+
+@test:Config
+function testTypeNarrowingQueryWithTransaction() {
+    int? i = 3;
+    int|int[] result;
+
+    transaction {
+        if i is () {
+            result = 2;
+            any|error out = commit;
+        } else {
+            result = i is int ?
+                from var _ in [1, 2]
+                where i + 2 == 5
+                select 2 : 2;
+        }
+    }
+
+    test:assertEquals([2, 2], result);
+}
