@@ -312,3 +312,26 @@ function getPrevInfoInNested() returns string|error {
     }
     return str;
 }
+
+@test:Config
+function testTypeNarrowingQueryWithRetry() {
+    int? i = 3;
+    int|int[] result;
+
+    transaction {
+        if i is () {
+            any|error out = commit;
+        } else {
+            rollback;
+        }
+    }
+
+    retry {
+        result = i is int ?
+            from var _ in [1, 2]
+            where i + 2 == 5
+            select 2 : 2;
+    }
+
+    test:assertEquals([2, 2], result);
+}
