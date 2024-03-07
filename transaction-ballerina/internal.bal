@@ -64,7 +64,6 @@ function startTransactionCoordinator() returns error? {
 }
 
 function commitResourceManagers(string transactionId, string transactionBlockId) returns boolean {
-    writeToLog(transactionId, transactionBlockId, "COMMITTING");
     if transactional {
         CommitHandlerType commitFunc = getCommitHandlerList();
         if (commitFunc is lang_trx:CommitHandler[]) {
