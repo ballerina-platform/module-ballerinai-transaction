@@ -221,3 +221,8 @@ function writeToLog(string trxId, string transactionBlockId, string transactionS
     'class: "org.ballerinalang.stdlib.transaction.TransactionRecovery",
     name: "writeToLog"
 } external;
+
+function startupCrashRecovery() = @java:Method {
+    'class: "org.ballerinalang.stdlib.transaction.TransactionRecovery",
+    name: "startupCrashRecovery"
+} external;

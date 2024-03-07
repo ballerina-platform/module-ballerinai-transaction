@@ -36,4 +36,12 @@ public class TransactionRecovery {
         return new TransactionLogRecord(trxId.getValue(), transactionBlockId.getValue(),
                 RecoveryState.valueOf(transactionStatus.getValue()));
     }
+
+    public static void startupCrashRecovery() {
+        if (TransactionResourceManager.getInstance().getTransactionManagerEnabled()) {
+            // if atomikos tm is used, we skip startup crash recovery.
+            return;
+        }
+        TransactionResourceManager.getInstance().startupCrashRecovery();
+    }
 }
