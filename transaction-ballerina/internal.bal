@@ -217,17 +217,7 @@ function externToString(TimestampImpl timestamp) returns string = @java:Method {
     paramTypes: ["io.ballerina.runtime.api.values.BObject"]
 } external;
 
-// function writeToLogFile(string trxId, string logMessage) = @java:Method {
-//     'class: "org.ballerinalang.stdlib.transaction.TransactionRecoveryLog",
-//     name: "writeToLogFile"
-// } external;
-
-// function writeToMemoryLog(string trxId, string logMessage) = @java:Method {
-//     'class: "org.ballerinalang.stdlib.transaction.TransactionRecoveryLog",
-//     name: "writeToMemoryLog"
-// } external;
-
 function writeToLog(string trxId, string transactionBlockId, string transactionStatus) = @java:Method {
-    'class: "org.ballerinalang.stdlib.transaction.TransactionRecoveryLog",
+    'class: "org.ballerinalang.stdlib.transaction.TransactionRecovery",
     name: "writeToLog"
 } external;
