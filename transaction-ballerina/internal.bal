@@ -215,3 +215,13 @@ function externToString(TimestampImpl timestamp) returns string = @java:Method {
     name: "toString",
     paramTypes: ["io.ballerina.runtime.api.values.BObject"]
 } external;
+
+function getTransactionAutoCommitTimeout() returns int = @java:Method {
+    'class: "org.ballerinalang.stdlib.transaction.Utils",
+    name: "getTransactionAutoCommitTimeout"
+} external;
+
+function getTransactionCleanupTimeout() returns int = @java:Method {
+    'class: "org.ballerinalang.stdlib.transaction.Utils",
+    name: "getTransactionCleanupTimeout"
+} external;
