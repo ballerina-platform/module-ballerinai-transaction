@@ -368,4 +368,12 @@ public class Utils {
             throw new RuntimeException("Failed to determine LAN address: " + e, e);
         }
     }
+
+    public static int getTransactionAutoCommitTimeout() {
+        return TransactionResourceManager.getInstance().getTransactionAutoCommitTimeout();
+    }
+
+    public static int getTransactionCleanupTimeout() {
+        return TransactionResourceManager.getInstance().getTransactionCleanupTimeout();
+    }
 }
