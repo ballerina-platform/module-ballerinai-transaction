@@ -216,6 +216,16 @@ function externToString(TimestampImpl timestamp) returns string = @java:Method {
     paramTypes: ["io.ballerina.runtime.api.values.BObject"]
 } external;
 
+function getTransactionAutoCommitTimeout() returns int = @java:Method {
+    'class: "org.ballerinalang.stdlib.transaction.Utils",
+    name: "getTransactionAutoCommitTimeout"
+} external;
+
+function getTransactionCleanupTimeout() returns int = @java:Method {
+    'class: "org.ballerinalang.stdlib.transaction.Utils",
+    name: "getTransactionCleanupTimeout"
+} external;
+
 function writeToLog(string trxId, string transactionBlockId, string transactionStatus) = @java:Method {
     'class: "org.ballerinalang.stdlib.transaction.TransactionRecovery",
     name: "writeToLog"
