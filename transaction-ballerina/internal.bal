@@ -225,3 +225,13 @@ function getTransactionCleanupTimeout() returns int = @java:Method {
     'class: "org.ballerinalang.stdlib.transaction.Utils",
     name: "getTransactionCleanupTimeout"
 } external;
+
+function writeToLog(string trxId, string transactionBlockId, string transactionStatus) = @java:Method {
+    'class: "org.ballerinalang.stdlib.transaction.TransactionRecovery",
+    name: "writeToLog"
+} external;
+
+function startupCrashRecovery() = @java:Method {
+    'class: "org.ballerinalang.stdlib.transaction.TransactionRecovery",
+    name: "startupCrashRecovery"
+} external;
