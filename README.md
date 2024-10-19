@@ -15,7 +15,7 @@ The transaction internal module is a dependency module which required for Baller
 
 ### Setting Up the Prerequisites
 
-1. Download and install Java SE Development Kit (JDK) version 17 (from one of the following locations).
+1. Download and install Java SE Development Kit (JDK) version 21 (from one of the following locations).
    * [Oracle](https://www.oracle.com/java/technologies/downloads/)
    * [OpenJDK](http://openjdk.java.net/install/index.html)
 
