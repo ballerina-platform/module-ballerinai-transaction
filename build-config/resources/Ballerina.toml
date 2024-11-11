@@ -2,7 +2,7 @@
 org = "ballerinai"
 name = "transaction"
 version = "@toml.version@"
-distribution = "2201.10.0-20241019-091600-89e54c08"
+distribution = "2201.10.0-20241025-103700-5c9e6a27"
 
 [platform.java21]
 graalvmCompatible = true
