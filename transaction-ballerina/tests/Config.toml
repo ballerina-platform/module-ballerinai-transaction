@@ -1,4 +1,0 @@
-[ballerina.lang.transaction]
-recoveryLogDir="./target/transactionLogs"
-recoveryLogName="testLogs"
-checkpointInterval=-1

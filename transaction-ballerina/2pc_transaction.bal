@@ -44,28 +44,18 @@ class TwoPhaseCommitTransaction {
         string|lang_trx:Error ret = "";
 
         // Prepare local resource managers
-        writeToLog(transactionId, transactionBlockId, STATE_PREPARING);
         boolean localPrepareSuccessful = prepareResourceManagers(self.transactionId, self.transactionBlockId);
         if (!localPrepareSuccessful) {
             log:printInfo("Local prepare failed, aborting..");
-            writeToLog(transactionId, transactionBlockId, STATE_ABORTING);
             var result = self.notifyParticipants(COMMAND_ABORT, ());
             if (result is error) {
-                writeToLog(transactionId, transactionBlockId, STATE_HAZARD);
                 return "hazard";
             } else {
                 match result {
-                    "committed" => { 
-                        writeToLog(transactionId, transactionBlockId, STATE_COMMITTED);
-                        return "committed"; 
-                        }
-                    "aborted" => { 
-                        writeToLog(transactionId, transactionBlockId, STATE_ABORTED);
-                        return "aborted"; 
-                        }
+                    "committed" => { return "committed"; }
+                    "aborted" => { return "aborted"; }
                 }
             }
-            writeToLog(transactionId, transactionBlockId, STATE_ABORTED);
             return "aborted";
         }
 
@@ -78,7 +68,6 @@ class TwoPhaseCommitTransaction {
             if (prepareDurablesDecision == PREPARE_DECISION_COMMIT) {
                 // If all durable participants voted YES (PREPARED or READONLY), next call notify(commit) on all
                 // (durable & volatile) participants and return committed to the initiator
-                writeToLog(transactionId, transactionBlockId, STATE_COMMITTING);
                 var result = self.notifyParticipants(COMMAND_COMMIT, ());
                 if (result is error) {
                     // return Hazard outcome if a participant cannot successfully end its branch of the transaction
@@ -87,33 +76,26 @@ class TwoPhaseCommitTransaction {
                     boolean localCommitSuccessful = commitResourceManagers(self.transactionId, self.transactionBlockId);
                     if (!localCommitSuccessful) {
                         // "Local commit failed"
-                        writeToLog(transactionId, transactionBlockId, STATE_HAZARD);
                         ret = prepareError(OUTCOME_HAZARD);
                     } else {
-                        writeToLog(transactionId, transactionBlockId, STATE_COMMITTED);
                         ret = OUTCOME_COMMITTED;
                     }
                 }
             } else {
                 // If some durable participants voted NO, next call notify(abort) on all participants
                 // and return aborted to the initiator
-                writeToLog(transactionId, transactionBlockId, STATE_ABORTING);
                 var result = self.notifyParticipants(COMMAND_ABORT, ());
                 if (result is error) {
                     // return Hazard outcome if a participant cannot successfully end its branch of the transaction
-                    writeToLog(transactionId, transactionBlockId, STATE_HAZARD);
                     ret = prepareError(OUTCOME_HAZARD);
                 } else {
                     boolean localAbortSuccessful = abortResourceManagers(self.transactionId, self.transactionBlockId);
                     if (!localAbortSuccessful) {
-                        writeToLog(transactionId, transactionBlockId, STATE_HAZARD);
                         ret = prepareError(OUTCOME_HAZARD);
                     } else {
                         if (self.possibleMixedOutcome) {
-                            writeToLog(transactionId, transactionBlockId, STATE_MIXED);
                             ret = OUTCOME_MIXED;
                         } else {
-                            writeToLog(transactionId, transactionBlockId, STATE_ABORTED);
                             ret = OUTCOME_ABORTED;
                         }
                     }
@@ -122,23 +104,18 @@ class TwoPhaseCommitTransaction {
         } else {
             // If some volatile participants voted NO, next call notify(abort) on all volatile articipants
             // and return aborted to the initiator
-            writeToLog(transactionId, transactionBlockId, STATE_ABORTING);
             var result = self.notifyParticipants(COMMAND_ABORT, PROTOCOL_VOLATILE);
             if (result is error) {
                 // return Hazard outcome if a participant cannot successfully end its branch of the transaction
-                writeToLog(transactionId, transactionBlockId, STATE_HAZARD);
                 ret = prepareError(OUTCOME_HAZARD);
             } else {
                 boolean localAbortSuccessful = abortResourceManagers(self.transactionId, self.transactionBlockId);
                 if (!localAbortSuccessful) {
-                    writeToLog(transactionId, transactionBlockId, STATE_HAZARD);
                     ret = prepareError(OUTCOME_HAZARD);
                 } else {
                     if (self.possibleMixedOutcome) {
-                        writeToLog(transactionId, transactionBlockId, STATE_MIXED);
                         ret = OUTCOME_MIXED;
                     } else {
-                        writeToLog(transactionId, transactionBlockId, STATE_ABORTED);
                         ret = OUTCOME_ABORTED;
                     }
                 }
@@ -181,8 +158,8 @@ class TwoPhaseCommitTransaction {
         while (i < participantArr.length()) {
             var participant = participantArr[i];
             i += 1;
-            //TODO: commenting due to a caching issue
-            //foreach var participant in self.participants {
+        //TODO: commenting due to a caching issue
+        //foreach var participant in self.participants {
             future<[(PrepareResult|error)?, Participant]> f = @strand{thread:"any"} start participant.prepare(protocol);
             results[results.length()] = f;
         }
@@ -205,7 +182,7 @@ class TwoPhaseCommitTransaction {
             string participantId = participant.participantId;
             if (result is PrepareResult) {
                 if (result == PREPARE_RESULT_PREPARED) {
-                    // All set for a PREPARE_DECISION_COMMIT so we can proceed without doing anything
+                // All set for a PREPARE_DECISION_COMMIT so we can proceed without doing anything
                 } else if (result == PREPARE_RESULT_COMMITTED) {
                     // If one or more participants returns "committed" and the overall prepare fails, we have to
                     // report a mixed-outcome to the initiator
@@ -215,14 +192,14 @@ class TwoPhaseCommitTransaction {
                     self.removeParticipant(participantId,
                     "Could not remove committed participant: " + participantId + " from transaction: " +
                     self.transactionId);
-                    // All set for a PREPARE_DECISION_COMMIT so we can proceed without doing anything
+                // All set for a PREPARE_DECISION_COMMIT so we can proceed without doing anything
                 } else if (result == PREPARE_RESULT_READ_ONLY) {
                     // Don't send notify to this participant because it is read-only.
                     // We can forget about this participant.
                     self.removeParticipant(participantId,
                     "Could not remove read-only participant: " + participantId + " from transaction: " +
                     self.transactionId);
-                    // All set for a PREPARE_DECISION_COMMIT so we can proceed without doing anything
+                // All set for a PREPARE_DECISION_COMMIT so we can proceed without doing anything
                 } else if (result == PREPARE_RESULT_ABORTED) {
                     // Remove the participant who sent the abort since we don't want to do a notify(Abort) to that
                     // participant
@@ -249,8 +226,8 @@ class TwoPhaseCommitTransaction {
         while (i < participantArr.length()) {
             var participant = participantArr[i];
             i += 1;
-            //TODO: commenting due to a caching issue
-            //foreach var participant in self.participants {
+        //TODO: commenting due to a caching issue
+        //foreach var participant in self.participants {
             future<(NotifyResult|error)?> f = @strand{thread:"any"} start participant.notify(action, protocolName);
             results[results.length()] = f;
         }
@@ -258,8 +235,8 @@ class TwoPhaseCommitTransaction {
         while (j < results.length()) {
             var r = results[j];
             j += 1;
-            //TODO: commenting due to a caching issue
-            //foreach var r in results {
+        //TODO: commenting due to a caching issue
+        //foreach var r in results {
             future<(NotifyResult|error)?> f;
             if (r is future<(NotifyResult|error)?>) {
                 f = r;
@@ -279,24 +256,19 @@ class TwoPhaseCommitTransaction {
     function abortInitiatorTransaction() returns string|lang_trx:Error {
         log:printInfo("Aborting initiated transaction: " + self.transactionId + ":" + self.transactionBlockId);
         string|lang_trx:Error ret = "";
-        writeToLog(self.transactionId, self.transactionBlockId, STATE_ABORTING);
         // return response to the initiator. ( Aborted | Mixed )
         var result = self.notifyParticipants(COMMAND_ABORT, ());
         if (result is error) {
             // return Hazard outcome if a participant cannot successfully end its branch of the transaction
-            writeToLog(self.transactionId, self.transactionBlockId, STATE_HAZARD);
             ret = prepareError(OUTCOME_HAZARD);
         } else {
             boolean localAbortSuccessful = abortResourceManagers(self.transactionId, self.transactionBlockId);
             if (!localAbortSuccessful) {
-                writeToLog(self.transactionId, self.transactionBlockId, STATE_HAZARD);
                 ret = prepareError(OUTCOME_HAZARD);
             } else {
                 if (self.possibleMixedOutcome) {
-                    writeToLog(self.transactionId, self.transactionBlockId, STATE_MIXED);
                     ret = OUTCOME_MIXED;
                 } else {
-                    writeToLog(self.transactionId, self.transactionBlockId, STATE_ABORTED);
                     ret = OUTCOME_ABORTED;
                 }
             }
