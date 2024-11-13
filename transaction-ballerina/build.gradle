@@ -89,16 +89,11 @@ publishing {
     }
 }
 
-task cleanUpLogsBeforeTest {
-    delete "$project.projectDir/target/transactionLogs"
-}
-
 updateTomlFiles.dependsOn copyStdlibs
 
 build.dependsOn ":transaction-native:build"
 build.dependsOn ":transaction-ballerina:generatePomFileForMavenPublication"
 test.dependsOn ":transaction-native:build"
-test.dependsOn ":transaction-ballerina:cleanUpLogsBeforeTest"
 
 publishToMavenLocal.dependsOn build
 publish.dependsOn build

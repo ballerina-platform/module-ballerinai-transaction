@@ -46,15 +46,5 @@ const string OUTCOME_HAZARD = "hazard";
 
 const string TRANSACTION_UNKNOWN = "Transaction-Unknown";
 
-// Recovery Log States (Write-Ahead Logging)
-const string STATE_PREPARING = "PREPARING";
-const string STATE_COMMITTING = "COMMITTING";
-const string STATE_ABORTING = "ABORTING";
-const string STATE_COMMITTED = "COMMITTED";
-const string STATE_ABORTED = "ABORTED";
-const string STATE_HAZARD = "HAZARD";
-const string STATE_MIXED = "MIXED";
-const string STATE_TERMINATED = "TERMINATED";
-
 configurable string coordinatorHost = getHostAddress();
 configurable int coordinatorPort =  getAvailablePort();
