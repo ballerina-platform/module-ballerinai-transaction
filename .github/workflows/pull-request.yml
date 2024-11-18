@@ -7,7 +7,6 @@ on:
       - master
       - "automated/dependency_version_update"
       - "automated/dependency_version_update_tmp"
-      - java21
 
 jobs:
   ubuntu-build:
