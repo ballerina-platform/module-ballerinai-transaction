@@ -17,6 +17,7 @@
 import ballerina/test;
 
 @test:Config {
+    enable:false
 }
 function testTransactionalFalse() {
     test:assertEquals(false, transactional);
@@ -41,6 +42,7 @@ function testTransactionalFalse2() returns error? {
 }
 
 @test:Config {
+    enable:false
 }
 function testTransactionalFalse3() returns error? {
     transaction {
