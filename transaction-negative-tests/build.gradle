@@ -86,7 +86,7 @@ def stripBallerinaExtensionVersion(String extVersion) {
     }
 }
 
-task updateTomlVerions {
+task updateTomlVersions {
     doLast {
         def stdlibNativeIoVersion = project.stdlibIoVersion
 
@@ -127,7 +127,7 @@ task ballerinaNegativeTests {
     dependsOn(":transaction-negative-tests:jar")
     dependsOn(":transaction-negative-tests:processResources")
     dependsOn(":transaction-negative-tests:processTestResources")
-    dependsOn(updateTomlVerions)
+    dependsOn(updateTomlVersions)
     finalizedBy(revertTomlFile)
     doLast {
         def distributionBinPath =  "$project.rootDir/target/ballerina-runtime/bin"
@@ -150,5 +150,6 @@ test {
 }
 
 ballerinaNegativeTests.dependsOn ":transaction-ballerina:build"
-ballerinaNegativeTests.dependsOn updateTomlVerions
+ballerinaNegativeTests.dependsOn updateTomlVersions
 build.dependsOn test
+build.dependsOn updateTomlVersions
