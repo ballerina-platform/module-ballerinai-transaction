@@ -23,7 +23,7 @@ plugins {
 }
 
 ext.ballerinaLangVersion = project.ballerinaLangVersion
-ext.puppycrawlCheckstyleVersion = project.puppycrawlCheckstyleVersion
+ext.checkStylePluginVersion = project.checkStylePluginVersion
 ext.testngVersion = "7.6.1"
 ext.slf4jVersion = "1.7.30"
 ext.stdlibIoVersion = project.stdlibIoVersion
