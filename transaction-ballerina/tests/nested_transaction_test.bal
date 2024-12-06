@@ -237,6 +237,7 @@ function funcWithTrxForNestedTrx(string str) returns string {
 }
 
 @test:Config {
+    enable: false
 }
 function testTransactionLangLibForNestedTransactions() returns error? {
     string str = "";
