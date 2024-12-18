@@ -16,30 +16,11 @@
  */
 
 plugins {
-    id "com.github.spotbugs" version "${spotbugsPluginVersion}"
-    id "com.github.johnrengelman.shadow" version "${shadowJarPluginVersion}"
-    id "de.undercouch.download" version "${downloadPluginVersion}"
-    id "net.researchgate.release" version "${releasePluginVersion}"
+    id "com.github.spotbugs"
+    id "com.github.johnrengelman.shadow"
+    id "de.undercouch.download"
+    id "net.researchgate.release"
 }
-
-ext.ballerinaLangVersion = project.ballerinaLangVersion
-ext.checkStylePluginVersion = project.checkStylePluginVersion
-ext.testngVersion = "7.6.1"
-ext.slf4jVersion = "1.7.30"
-ext.stdlibIoVersion = project.stdlibIoVersion
-ext.stdlibOsVersion = project.stdlibOsVersion
-ext.stdlibUuidVersion = project.stdlibUuidVersion
-ext.stdlibHttpVersion = project.stdlibHttpVersion
-
-ext.stdlibMimeVersion = project.stdlibMimeVersion
-ext.stdlibLogVersion = project.stdlibLogVersion
-ext.stdlibAuthVersion = project.stdlibAuthVersion
-ext.stdlibCacheVersion = project.stdlibCacheVersion
-ext.stdlibTimeVersion = project.stdlibTimeVersion
-ext.stdlibFileVersion = project.stdlibFileVersion
-ext.stdlibTaskVersion = project.stdlibTaskVersion
-ext.stdlibJwtVersion = project.stdlibJwtVersion
-ext.stdlibOAuth2Version = project.stdlibOAuth2Version
 
 allprojects {
     group = 'org.ballerinalang'
