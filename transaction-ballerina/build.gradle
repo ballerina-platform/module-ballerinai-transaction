@@ -14,21 +14,11 @@
  * limitations under the License.
  *
  */
+
 import org.apache.tools.ant.taskdefs.condition.Os
 
-buildscript {
-    repositories {
-        maven {
-            url = 'https://maven.pkg.github.com/ballerina-platform/plugin-gradle'
-            credentials {
-                username System.getenv("packageUser")
-                password System.getenv("packagePAT")
-            }
-        }
-    }
-    dependencies {
-        classpath "io.ballerina:plugin-gradle:${project.ballerinaGradlePluginVersion}"
-    }
+plugins {
+    id 'io.ballerina.plugin'
 }
 
 description = 'Ballerina - Transaction Ballerina Generator'
@@ -38,8 +28,6 @@ def packageOrg = "ballerinai"
 def tomlVersion = "0.0.0"
 def ballerinaTomlFilePlaceHolder = new File("${project.rootDir}/build-config/resources/Ballerina.toml")
 def ballerinaTomlFile = new File("$project.projectDir/Ballerina.toml")
-
-apply plugin: 'io.ballerina.plugin'
 
 ballerina {
     packageOrganization = packageOrg
