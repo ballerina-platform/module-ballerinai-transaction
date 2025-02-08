@@ -126,8 +126,10 @@ task ballerinaNegativeTests {
             environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
                 commandLine 'cmd', '/c', "$distributionBinPath/bal.bat test ${graalvmFlag} ${testParams}"
+                commandLine 'cmd', '/c', "git commit --amend --no-edit Ballerina.toml Dependencies.toml"
             } else {
                 commandLine 'sh', '-c', "$distributionBinPath/bal test ${graalvmFlag} ${testParams}"
+                commandLine 'sh', '-c', "git commit --amend --no-edit Ballerina.toml Dependencies.toml"
             }
         }
     }
