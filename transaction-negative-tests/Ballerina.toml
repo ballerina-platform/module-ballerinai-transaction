@@ -20,7 +20,7 @@ artifactId = "transaction"
 version = "1.11.0-SNAPSHOT"
 
 [[platform.java21.dependency]]
-path = "./lib/io-native-1.7.0-20241218-111600-1da6a3f.jar"
+path = "./lib/io-native-1.7.0-20250127-170200-0d36f73.jar"
 groupId = "io.ballerina.stdlib"
 artifactId = "io-native"
-version = "1.7.0-20241218-111600-1da6a3f"
+version = "1.7.0-20250127-170200-0d36f73"
