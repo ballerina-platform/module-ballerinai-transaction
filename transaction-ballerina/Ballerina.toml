@@ -2,13 +2,13 @@
 org = "ballerinai"
 name = "transaction"
 version = "0.0.0"
-distribution = "2201.11.0"
+distribution = "2201.12.0"
 
 [platform.java21]
 graalvmCompatible = true
 
 [[platform.java21.dependency]]
 artifactId = "transaction"
-version = "1.11.0-SNAPSHOT"
-path = "../transaction-native/build/libs/transaction-native-1.11.0-SNAPSHOT.jar"
+version = "1.12.0-SNAPSHOT"
+path = "../transaction-native/build/libs/transaction-native-1.12.0-SNAPSHOT.jar"
 groupId = "ballerina"
