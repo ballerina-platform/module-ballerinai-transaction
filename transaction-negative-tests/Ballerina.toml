@@ -3,10 +3,10 @@ org = "ballerinai"
 name = "transaction_negative_tests"
 version = "1.11.0"
 
-[platform.java21]
+[platform.java25]
 graalvmCompatible = true
 
-[[platform.java21.dependency]]
+[[platform.java25.dependency]]
 path = "../transaction-native/build/libs/transaction-native-1.12.1-SNAPSHOT.jar"
 groupId = "ballerina"
 artifactId = "transaction"
