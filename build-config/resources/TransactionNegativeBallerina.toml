@@ -3,23 +3,23 @@ org = "ballerinai"
 name = "transaction_negative_tests"
 version = "1.11.0"
 
-[platform.java21]
+[platform.java25]
 graalvmCompatible = true
 
-[[platform.java21.dependency]]
+[[platform.java25.dependency]]
 path = "../transaction-native/build/libs/transaction-native-@project.version@.jar"
 groupId = "ballerina"
 artifactId = "transaction"
 version = "@project.version@"
 
-[[platform.java21.dependency]]
+[[platform.java25.dependency]]
 path = "../transaction-test-utils/build/libs/transaction-test-utils-@project.version@.jar"
 groupId = "org.ballerinalang.stdlib.transaction"
 scope = "testOnly"
 artifactId = "transaction"
 version = "@project.version@"
 
-[[platform.java21.dependency]]
+[[platform.java25.dependency]]
 path = "./lib/io-native-@stdlib.io.version@.jar"
 groupId = "io.ballerina.stdlib"
 artifactId = "io-native"

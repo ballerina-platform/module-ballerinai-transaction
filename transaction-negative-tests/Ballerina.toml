@@ -12,14 +12,14 @@ groupId = "ballerina"
 artifactId = "transaction"
 version = "1.12.1-SNAPSHOT"
 
-[[platform.java21.dependency]]
+[[platform.java25.dependency]]
 path = "../transaction-test-utils/build/libs/transaction-test-utils-1.12.1-SNAPSHOT.jar"
 groupId = "org.ballerinalang.stdlib.transaction"
 scope = "testOnly"
 artifactId = "transaction"
 version = "1.12.1-SNAPSHOT"
 
-[[platform.java21.dependency]]
+[[platform.java25.dependency]]
 path = "./lib/io-native-1.8.0.jar"
 groupId = "io.ballerina.stdlib"
 artifactId = "io-native"

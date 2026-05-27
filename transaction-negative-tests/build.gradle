@@ -16,6 +16,12 @@
  */
 
 import org.apache.tools.ant.taskdefs.condition.Os
+import org.gradle.process.ExecOperations
+import javax.inject.Inject
+
+abstract class NegativeTestsExecHelper {
+    @Inject abstract ExecOperations getExecOperations()
+}
 
 apply plugin: 'java'
 
@@ -105,6 +111,7 @@ def setExecPath(configTomlFile, originalConfigFileText, distributionBinPath) {
 }
 
 task ballerinaNegativeTests {
+    def execHelper = project.objects.newInstance(NegativeTestsExecHelper)
     inputs.dir file(project.projectDir)
     dependsOn(copyToLib)
     dependsOn(initializeVariables)
@@ -119,9 +126,9 @@ task ballerinaNegativeTests {
     finalizedBy(revertTomlFile)
     doLast {
         def distributionBinPath =  "$project.rootDir/target/ballerina-runtime/bin"
-        
+
         setExecPath(configTomlFile, originalConfigFileText, distributionBinPath)
-        exec {
+        execHelper.execOperations.exec {
             workingDir project.projectDir
             environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
