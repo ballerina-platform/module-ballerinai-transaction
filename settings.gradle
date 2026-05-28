@@ -16,6 +16,7 @@ pluginManagement {
         id "io.ballerina.plugin" version "${ballerinaGradlePluginVersion}"
     }
     repositories {
+        mavenLocal()
         gradlePluginPortal()
         maven {
             url = 'https://maven.pkg.github.com/ballerina-platform/*'
@@ -28,16 +29,16 @@ pluginManagement {
 }
 
 plugins {
-    id "com.gradle.enterprise" version "3.13.2"
+    id "com.gradle.develocity" version "3.19.2"
 }
 
 rootProject.name = 'transaction'
 include(':build-config:checkstyle')
 include ':transaction-native', ':transaction-ballerina', ':transaction-test-utils', ':transaction-negative-tests'
 
-gradleEnterprise {
+develocity {
     buildScan {
-        termsOfServiceUrl = 'https://gradle.com/terms-of-service'
-        termsOfServiceAgree = 'yes'
+        termsOfUseUrl = 'https://gradle.com/terms-of-service'
+        termsOfUseAgree = 'yes'
     }
 }
