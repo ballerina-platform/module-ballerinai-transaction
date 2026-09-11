@@ -116,6 +116,14 @@ release {
     }
 }
 
-tasks.named('build') {
-    dependsOn('transaction-ballerina:build')
+if (tasks.names.contains('build')) {
+    tasks.named('build') {
+        dependsOn('transaction-ballerina:build')
+
+    }
+} else {
+    tasks.register('build') {
+        dependsOn('transaction-ballerina:build')
+
+    }
 }
