@@ -326,7 +326,7 @@ public class Utils {
         return StringUtils.fromString(getLocalHostLANAddress().getHostAddress());
     }
 
-    private static InetAddress getLocalHostLANAddress() throws RuntimeException {
+    private static InetAddress getLocalHostLANAddress() {
         try {
             InetAddress candidateAddress = null;
             // Iterate all NICs (network interface cards)...
@@ -365,7 +365,7 @@ public class Utils {
             }
             return jdkSuppliedAddress;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to determine LAN address: " + e, e);
+            throw new IllegalStateException("Failed to determine LAN address: " + e, e);
         }
     }
 
