@@ -21,13 +21,4 @@
         <Method name="reorderInfoRecord" />
         <Bug pattern="DLS_DEAD_LOCAL_STORE" />
     </Match>
-    <!-- gradle9-rollout: temporary suppression pending review: surfaced by the SpotBugs plugin version bump needed for Gradle 9 / Java 25 support (see PR body) — pre-existing code, not introduced by this PR -->
-    <Match>
-        <Class name="org.ballerinalang.stdlib.transaction.GetHostAddress"/>
-        <Bug pattern="THROWS_METHOD_THROWS_RUNTIMEEXCEPTION"/>
-    </Match>
-    <Match>
-        <Class name="org.ballerinalang.stdlib.transaction.Utils"/>
-        <Bug pattern="THROWS_METHOD_THROWS_RUNTIMEEXCEPTION"/>
-    </Match>
 </FindBugsFilter>
